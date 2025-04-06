@@ -1,0 +1,29 @@
+@startuml Question_Bank_Management
+title Evalify - Use Case Diagram: Question Bank Management
+
+left to right direction
+
+actor Manager
+actor Professor
+
+rectangle "Question Bank Management" {
+  usecase "Manage Question Banks (CRUD)" as UC_ManageBank
+  usecase "Manage Questions in Bank (CRUD)" as UC_ManageQuestions
+  usecase "Share Bank" as UC_ShareBank
+  usecase "Import Questions" as UC_ImportQ
+  usecase "Export Questions" as UC_ExportQ
+  usecase "Use Shared Bank Questions" as UC_UseSharedQ  
+}
+
+Manager -- UC_ManageBank
+Manager -- UC_ManageQuestions
+Manager -- UC_ShareBank
+Manager -- UC_ImportQ
+Manager -- UC_ExportQ
+
+UC_ShareBank --> Professor : (Shares with)
+Professor -- UC_UseSharedQ 
+note right of UC_ShareBank : \n' Professor uses questions from banks shared with them
+note bottom of UC_ManageQuestions : Includes defining various question types \n(MCQ, Coding, etc.) and associating files.
+
+@enduml

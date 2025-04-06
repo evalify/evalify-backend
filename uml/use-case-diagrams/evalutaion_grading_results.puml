@@ -1,0 +1,36 @@
+@startuml Evaluation_Grading_Results
+title Evalify - Use Case Diagram: Evaluation, Grading & Results
+
+left to right direction
+
+actor Professor
+actor Student
+actor System
+
+rectangle "Evaluation, Grading & Results" {
+  usecase "Auto-Grade Objective Questions" as UC_AutoGrade
+  usecase "Manually Grade Subjective Questions" as UC_ManualGrade
+  usecase "Evaluate Coding Submissions" as UC_EvalCode
+  usecase "Override/Adjust Grades" as UC_OverrideGrade
+  usecase "Publish Results" as UC_PublishResults
+  usecase "View Published Results & Feedback" as UC_ViewResults
+}
+
+System -- UC_AutoGrade
+
+Professor -- UC_ManualGrade
+Professor -- UC_EvalCode
+Professor -- UC_OverrideGrade
+Professor -- UC_PublishResults
+
+Student -- UC_ViewResults
+
+UC_AutoGrade .> (Take Quiz) : <<triggered by>> ' Grading after submission
+UC_ManualGrade ..> (Take Quiz) : <<triggered by>>
+UC_EvalCode .> (Take Coding Exam w/ IDE) : <<triggered by>>
+UC_ViewResults .> UC_PublishResults : <<depends on>> ' Results viewable after publish
+
+note right of System : Auto-grades MCQ, Fill-in-Blanks, \nBasic Coding, etc.
+note right of UC_EvalCode: Involves viewing code, test case results.
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml Academic_Structure_Management
+title Evalify - Use Case Diagram: Course & Academic Structure Management
+
+left to right direction
+
+actor Admin
+actor Manager
+actor Professor
+actor Staff
+
+rectangle "Course & Academic Structure" {
+  usecase "Manage Semesters (CRUD)" as UC_ManageSemester
+  usecase "Manage Courses (CRUD)" as UC_ManageCourse
+  usecase "Manage Classes/Labs (CRUD)" as UC_ManageClass
+  usecase "Assign Manager to Class" as UC_AssignManager
+  usecase "Assign Professor/Staff to Course" as UC_AssignProf
+  usecase "Enroll Students" as UC_EnrollStudent
+  usecase "Archive Course" as UC_ArchiveCourse
+  usecase "Retrieve Archived Course" as UC_RetrieveCourse
+}
+
+Manager -- UC_ManageSemester
+Manager -- UC_ManageCourse
+Manager -- UC_AssignProf
+Manager -- UC_EnrollStudent
+
+Admin -- UC_ManageClass
+Admin -- UC_AssignManager
+Admin -- UC_ArchiveCourse
+Admin -- UC_RetrieveCourse
+
+Professor -- UC_AssignProf : (Assigned To)
+Staff -- UC_AssignProf : (Assigned To)
+
+note bottom of UC_ManageCourse : Includes setting Course Type \n(Core, Elective, Micro-Credential).
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml User Management_Authentication
+title Evalify - Use Case Diagram: User Management & Authentication
+
+left to right direction
+
+actor Admin
+actor "All Users" as User
+actor System
+
+rectangle "User Management & Authentication" {
+  usecase "Manage Users (CRUD)" as UC_ManageUser
+  usecase "Assign Roles" as UC_AssignRole
+  usecase "Define User Types" as UC_DefineUserType
+  usecase "Authenticate" as UC_Authenticate
+  usecase "Reset Password" as UC_ResetPassword
+  usecase "Authenticate via LDAP/SSO" as UC_AuthExternal
+}
+
+Admin -- UC_ManageUser
+Admin -- UC_AssignRole
+Admin -- UC_DefineUserType
+
+User -- UC_Authenticate
+User -- UC_ResetPassword
+
+UC_Authenticate <|-- UC_AuthExternal
+UC_AuthExternal .> System : Uses external system
+
+note right of Admin : Includes Create, View, \nUpdate, Deactivate users.
+note bottom of UC_Authenticate : Can be via Username/Password, \nLDAP, or SSO.
+
+@enduml

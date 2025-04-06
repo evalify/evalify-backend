@@ -1,0 +1,47 @@
+@startuml Quiz_Creation_Configuration
+title Evalify - Use Case Diagram: Quiz Creation & Configuration
+
+left to right direction
+
+actor Professor
+actor Manager
+actor System
+
+rectangle "Quiz Creation & Configuration" {
+  usecase "Manage Quizzes (CRUD)" as UC_ManageQuiz
+  usecase "Configure Quiz Settings" as UC_ConfigQuiz
+  usecase "Manage Quiz Tags" as UC_ManageTags
+  usecase "Add Questions to Quiz" as UC_AddQuestions
+  usecase "Add Questions 'Smartly'" as UC_AddSmart
+  usecase "Edit Live Quiz" as UC_EditLive
+  usecase "Grant Extra Time" as UC_GrantTime
+  usecase "Import Quiz" as UC_ImportQuiz
+  usecase "Export Quiz" as UC_ExportQuiz
+  usecase "View Quizzes" as UC_ViewQuiz 
+}
+
+Professor -- UC_ManageQuiz
+Professor -- UC_ConfigQuiz
+Professor -- UC_AddQuestions
+Professor -- UC_EditLive  
+Professor -- UC_GrantTime
+
+Manager -- UC_ManageTags
+Manager -- UC_ImportQuiz
+Manager -- UC_ExportQuiz
+' Manager explicitly mentioned viewing quizzes for their class
+Manager -- UC_ViewQuiz   
+' Manager may also perform UC_EditLive, UC_GrantTime - Needs BRD Clarification
+' Manager -- UC_EditLive
+' Manager -- UC_GrantTime
+
+UC_AddQuestions <|-- UC_AddSmart
+UC_AddSmart .> System : (Uses algorithm/bias)
+
+UC_ManageQuiz ..> UC_ConfigQuiz : <<include>>
+UC_ManageQuiz ..> UC_AddQuestions : <<include>>
+
+note right of UC_AddQuestions : Can add questions directly \nor from Question Banks.
+note bottom of UC_ConfigQuiz : Includes setting time, password, \nshuffling, calculator, etc.
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml Reporting_Analytics
+title Evalify - Use Case Diagram: Reporting & Analytics
+
+left to right direction
+
+actor Student
+actor Professor
+actor Manager
+actor Admin
+
+rectangle "Reporting & Analytics" {
+  usecase "View Performance Dashboard" as UC_ViewStudentDash
+  usecase "View Quiz Reports" as UC_ViewProfReport
+  usecase "Export Quiz Reports" as UC_ExportProfReport
+  usecase "View Aggregated Reports" as UC_ViewMgrReport
+  usecase "Export Aggregated Reports" as UC_ExportMgrReport
+  usecase "View Violation Reports" as UC_ViewViolationReport
+  usecase "Access System Logs" as UC_AccessLogs
+}
+
+Student -- UC_ViewStudentDash
+
+Professor -- UC_ViewProfReport
+Professor -- UC_ExportProfReport
+
+Manager -- UC_ViewMgrReport
+Manager -- UC_ExportMgrReport
+Manager -- UC_ViewViolationReport
+
+Admin -- UC_AccessLogs
+
+note bottom of UC_ViewStudentDash : Shows trends, anonymized ranks.
+note bottom of UC_ViewProfReport : Class/Course wise details.
+note bottom of UC_ViewMgrReport : Class/Course wise summaries.
+
+@enduml

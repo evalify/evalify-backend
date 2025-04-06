@@ -1,0 +1,29 @@
+@startuml Coding_Exam_Features
+title Evalify - Use Case Diagram: Coding Exam Features
+
+left to right direction
+
+actor Professor
+actor Student
+
+rectangle "Coding Exam Features" {
+  usecase "Define Advanced Coding Question" as UC_DefineAdvCodingQ
+  usecase "Configure Coding Exam Settings" as UC_ConfigCodingExam
+  usecase "Take Coding Exam with IDE" as UC_TakeCodingExam
+}
+
+Professor -- UC_DefineAdvCodingQ
+Professor -- UC_ConfigCodingExam
+Student -- UC_TakeCodingExam
+
+' Specialization of managing questions
+(Manage Questions in Bank) <|-- UC_DefineAdvCodingQ
+' Specialization of configuring quizzes
+(Configure Quiz Settings) <|-- UC_ConfigCodingExam
+' Specialization of taking a quiz
+(Take Quiz) <|-- UC_TakeCodingExam
+
+note right of UC_DefineAdvCodingQ : Involves multiple files, \ncomplex structures, test cases.
+note right of UC_TakeCodingExam : Uses integrated IDE.
+
+@enduml

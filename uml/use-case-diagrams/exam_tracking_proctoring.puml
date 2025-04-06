@@ -1,0 +1,34 @@
+@startuml Exam_Tracking_Proctoring
+title Evalify - Use Case Diagram: Exam Taking & Proctoring
+
+left to right direction
+
+actor Student
+actor Manager
+actor System
+
+rectangle "Exam Taking & Proctoring" {
+  usecase "View Available Quizzes" as UC_ViewAvailable
+  usecase "Take Quiz" as UC_TakeQuiz
+  usecase "Resume Quiz on Different Device" as UC_ResumeQuiz
+  usecase "Review Answers Before Submit" as UC_ReviewAnswers
+  usecase "System Monitors Violations" as UC_MonitorViolations
+  usecase "View Violation Reports" as UC_ViewViolations
+}
+
+Student -- UC_ViewAvailable
+Student -- UC_TakeQuiz
+Student -- UC_ResumeQuiz
+Student -- UC_ReviewAnswers
+
+System -- UC_MonitorViolations
+UC_MonitorViolations .> UC_TakeQuiz : <<extend>> ' Monitoring happens during quiz
+
+Manager -- UC_ViewViolations
+
+UC_TakeQuiz ..> UC_ResumeQuiz : <<uses>> ' Requires server-side state
+UC_TakeQuiz ..> UC_ReviewAnswers : <<include>> ' Usually included, unless linear quiz
+
+note right of UC_MonitorViolations : Logs events like tab switching, \nfullscreen exit, etc.
+
+@enduml

@@ -1,0 +1,25 @@
+@startuml System_Administration_Configuration
+title Evalify - Use Case Diagram: System Administration & Configuration
+
+left to right direction
+
+actor Admin
+actor System
+
+rectangle "System Administration & Configuration" {
+  usecase "Configure Deletion/Archiving Behavior" as UC_ConfigDelete
+  usecase "Configure Backup Policy" as UC_ConfigBackup
+  usecase "Manage System Settings" as UC_ManageSettings
+  usecase "System Performs Automated Backups" as UC_DoBackup
+}
+
+Admin -- UC_ConfigDelete
+Admin -- UC_ConfigBackup
+Admin -- UC_ManageSettings
+
+System -- UC_DoBackup
+UC_DoBackup .> UC_ConfigBackup : <<uses>> 
+note right of UC_ManageSettings: Includes Auth config (LDAP/SSO), etc.
+note right of System : Backups run on a schedule.
+
+@enduml
