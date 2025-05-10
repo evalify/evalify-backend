@@ -1,0 +1,76 @@
+services:
+  # traefik:
+  #   image: traefik:latest
+  #   container_name: traefik-e2
+  #   command:
+  #     - "--api.insecure=true" # Enable Traefik dashboard (for debugging, access at http://<server_ip>:8080/dashboard/) - Consider securing this in production!
+  #     - "--providers.docker=true" # Enable Docker provider
+  #     - "--providers.docker.exposedbydefault=false" # Only expose containers with labels
+  #     - "--entrypoints.web.address=:80" # Define HTTP entrypoint
+  #     - "--entrypoints.websecure.address=:443" # Define HTTPS entrypoint
+  #     - "--entrypoints.web.http.redirections.entrypoint.to=websecure" # Redirect HTTP to HTTPS
+  #     - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+  #     - "--certificatesresolvers.myresolver.acme.email=${TRAEFIK_LETSENCRYPT_EMAIL}" # Your Let's Encrypt email
+  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json" # Path to store certs
+  #     - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web" # Use HTTP challenge on port 80
+  #   ports:
+  #     - "80:80"   # Expose HTTP port for redirection and LE challenge
+  #     - "443:443" # Expose HTTPS port for secure traffic
+  #     - "8080:8080" # Expose Traefik dashboard (Optional, remove or secure for production)
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro" # Mount Docker socket (read-only)
+  #     - "traefik_letsencrypt:/letsencrypt" # Persist Let's Encrypt certificates
+  #   networks:
+  #     - keycloak_network
+  #   restart: unless-stopped
+  postgres:
+    image: postgres:latest
+    container_name: postgres-e2
+    env_file:
+      - .env
+    ports:
+      - "54320:5432"
+    networks:
+      - keycloak_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Attach named volume
+      - ./init-evalify.sql:/docker-entrypoint-initdb.d/init-evalify.sql:ro # Mount init script
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keycloak-e2
+    env_file:
+      - .env
+    ports:
+      - "9443:8443"
+    networks:
+      - keycloak_network
+    depends_on:
+      - postgres
+    command: start --optimized --db-url="${KC_DB_URL}" --spi-connections-http-client-default-connection-ttl-millis=300000
+
+    # command: start --optimized --hostname 172.17.9.74 --db-url="${KC_DB_URL}"
+    # command: start-dev --db=postgres --db-url="${KC_DB_URL}"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-e2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "50500:80"
+    networks:
+      - keycloak_network
+    depends_on:
+      - postgres
+
+networks:
+  keycloak_network:
+    driver: bridge
+
+volumes:
+  postgres_data: # Define the named volume
+  # traefik_letsencrypt: # Define the named volume for Let's Encrypt certs
