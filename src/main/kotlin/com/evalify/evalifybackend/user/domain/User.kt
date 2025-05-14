@@ -13,11 +13,11 @@ enum class Role {
 }
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 class User (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID? = null,
     val name: String,
     val email: String,
     val profileId: String,

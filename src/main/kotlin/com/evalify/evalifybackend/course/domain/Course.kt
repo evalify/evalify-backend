@@ -14,22 +14,22 @@ enum class CourseType {
 
 @Entity
 @Table(name = "course")
-class Course (
+ class Course (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID? = null,
     val name: String,
     val description: String,
     val image: String? = null,
     val type: CourseType,
 
-    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val semester: Semester,
     @OneToMany(fetch = FetchType.LAZY)
-    val student: List<User>,
+    val student: MutableList<User> = mutableListOf(),
     @OneToMany(fetch = FetchType.LAZY)
-    val instructors: List<User>,
+    val instructors: MutableList<User> = mutableListOf(),
     @OneToMany(fetch = FetchType.LAZY)
-    val batches: List<Batch>,
+    val batches: MutableList<Batch> = mutableListOf()
 )
 

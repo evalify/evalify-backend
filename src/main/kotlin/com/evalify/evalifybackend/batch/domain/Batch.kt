@@ -19,9 +19,9 @@ class Batch (
     val isActive: Boolean,
     @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val semester: List<Semester>,
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     val students: List<User>,
-    @OneToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     val managers: List<User>
 
 )
