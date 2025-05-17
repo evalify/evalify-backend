@@ -1,5 +1,5 @@
 package com.evalify.evalifybackend.lab.domain
-
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.*
 import java.util.UUID
@@ -15,5 +15,8 @@ class Lab (
     val ipSubnet: String,
 
     @OneToMany(fetch = FetchType.LAZY)
-    val labAssistant: List<User>
+    val labAssistant: List<User>,
+
+    @ManyToMany(mappedBy = "lab")
+    val quiz:List<Quiz> = listOf()
 )

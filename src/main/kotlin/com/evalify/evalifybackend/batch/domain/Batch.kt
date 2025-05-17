@@ -1,5 +1,7 @@
 package com.evalify.evalifybackend.batch.domain
 
+import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.semester.domain.Semester
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.*
@@ -22,6 +24,17 @@ class Batch (
     @OneToMany(fetch = FetchType.LAZY)
     val students: List<User>,
     @ManyToMany(fetch = FetchType.LAZY)
-    val managers: List<User>
+    val managers: List<User>,
+
+    @ManyToMany(mappedBy = "batch")
+    val quiz:List<Quiz>  = listOf(),
+
+    @ManyToMany
+    @JoinTable(
+        name = "batch_bank",
+        joinColumns = [JoinColumn(name="batch_id")],
+        inverseJoinColumns = [JoinColumn(name="bank_id")]
+    )
+    val bank:MutableList<Bank> = mutableListOf()
 
 )
