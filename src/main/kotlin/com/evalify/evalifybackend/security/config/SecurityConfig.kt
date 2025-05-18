@@ -76,6 +76,11 @@ class SecurityConfig(@Autowired private val jwtAuthenticationEntryPoint: JwtAuth
             .authorizeHttpRequests { authorizeRequests ->
                 authorizeRequests
                     .requestMatchers("/api/users/**").permitAll()
+//                    .requestMatchers(
+//                        "/v3/api-docs/**",
+//                        "/swagger-ui/**",
+//                        "/swagger-ui.html"
+//                    ).permitAll()
                     // .requestMatchers("/api/**").permitAll() // Per                    // .requestMatchers("/api/**").permitAll() // Permit all API endpoints during debuggingmit all API endpoints during debugging
                     .requestMatchers("/error", "/actuator/**").permitAll()
                  .anyRequest().authenticated()
