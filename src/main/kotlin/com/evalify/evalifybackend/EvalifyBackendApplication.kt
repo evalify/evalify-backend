@@ -7,5 +7,9 @@ import org.springframework.boot.runApplication
 class EvalifyBackendApplication
 
 fun main(args: Array<String>) {
+
+	// Loading Environment Variables
+	com.evalify.evalifybackend.core.config.DotenvLoader.load()
+
 	runApplication<EvalifyBackendApplication>(*args)
 }

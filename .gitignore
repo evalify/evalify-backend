@@ -39,5 +39,9 @@ out/
 ### Kotlin ###
 .kotlin
 
-.env
 .DS_Store
+
+### Env ###
+.env.dev
+.env.stagging
+.env.prod

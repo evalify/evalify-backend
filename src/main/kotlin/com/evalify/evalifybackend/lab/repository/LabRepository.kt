@@ -7,5 +7,4 @@ import java.util.UUID
 
 @RepositoryRestResource(path = "lab")
 interface LabRepository : JpaRepository<Lab,UUID> {
-
 }
