@@ -31,5 +31,8 @@ enum class CourseType {
     val instructors: MutableList<User> = mutableListOf(),
     @OneToMany(fetch = FetchType.LAZY)
     val batches: MutableList<Batch> = mutableListOf()
+
+
+
 )
 

@@ -6,3 +6,4 @@ data class UpdateCourseBatchDTO (
     val batchId:List<UUID>
 ){
 }
+

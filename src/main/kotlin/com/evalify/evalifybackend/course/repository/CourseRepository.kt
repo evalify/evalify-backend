@@ -10,3 +10,4 @@ import java.util.UUID
 interface CourseRepository : JpaRepository<Course,UUID>{
 
 }
+

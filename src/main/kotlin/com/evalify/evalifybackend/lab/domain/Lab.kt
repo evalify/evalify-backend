@@ -17,3 +17,8 @@ class Lab (
     @OneToMany(fetch = FetchType.LAZY)
     val labAssistant: List<User>
 )
+
+
+
+
+

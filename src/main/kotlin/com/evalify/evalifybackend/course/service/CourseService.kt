@@ -13,7 +13,7 @@ class CourseService (private val courseRepository:CourseRepository,val userRepos
             NotFoundException("course with id $courseId not found")
         }
         val users = userRepository.findAllById(studentId);
-        course.student.addAll(users);
+        course.student.addAll(users)
         courseRepository.save(course)
     }
 

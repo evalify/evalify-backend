@@ -13,7 +13,7 @@ enum class Role {
 }
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "users")
 class User (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
