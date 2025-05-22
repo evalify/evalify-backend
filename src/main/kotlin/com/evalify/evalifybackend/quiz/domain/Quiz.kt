@@ -3,7 +3,9 @@ package com.evalify.evalifybackend.quiz.domain
 import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.lab.domain.Lab
+import com.evalify.evalifybackend.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.user.domain.User
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -13,6 +15,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
@@ -40,6 +43,9 @@ class Quiz(
     val autoSubmit: Boolean = false,
     val publishResult: Boolean = false,
     val publishQuiz: Boolean = false,
+
+    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
+    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
 
 //    TODO: Add Relations btw Courses, Student, Lab, Class
     @ManyToMany
