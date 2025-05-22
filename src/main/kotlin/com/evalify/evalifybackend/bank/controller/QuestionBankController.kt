@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.AddBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.AddBankQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.AddInstructorsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.UpdateBankQuestionDTO
+import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,6 +25,9 @@ import java.util.UUID
 @RestController
 @RequestMapping("/bank")
 class QuestionBankController(val qbService: QuestionBankService) {
+
+    @Autowired
+    val userRepo : UserRepository? = null
 
     @PostMapping("/bank")
     fun createBank(@RequestBody bank: Bank  ){
@@ -58,7 +62,7 @@ class QuestionBankController(val qbService: QuestionBankService) {
 
     @PutMapping("/bank/add-instructor/{bankId}")
     fun addInstructor(@RequestBody addInstructorsDTO: AddInstructorsDTO, @PathVariable bankId: UUID){
-        //Cascade update
+        qbService.addInstructorBank(instructorID = addInstructorsDTO, bankId = bankID)
     }
 
     @PutMapping("/bank/remove-instructor/{bankId}")

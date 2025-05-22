@@ -1,10 +1,10 @@
 package com.evalify.evalifybackend.bank.domain.DTO
 
 import com.evalify.evalifybackend.answer.QuestionAnswer
-import com.evalify.evalifybackend.bank.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.Difficulty
 import java.util.UUID
-import com.evalify.evalifybackend.bank.domain.QuestionTypes
-import com.evalify.evalifybackend.bank.domain.Taxonomy
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.questions.domain.Taxonomy
 
 
 data class UpdateBankQuestionDTO(

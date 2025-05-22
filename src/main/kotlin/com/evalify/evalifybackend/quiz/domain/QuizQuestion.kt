@@ -9,9 +9,9 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import org.hibernate.annotations.Type
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.Difficulty
-import com.evalify.evalifybackend.bank.domain.QuestionTypes
-import com.evalify.evalifybackend.bank.domain.Taxonomy
+import com.evalify.evalifybackend.questions.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.questions.domain.Taxonomy
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType

@@ -3,11 +3,13 @@ package com.evalify.evalifybackend.bank.service
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.BankQuestion
 import com.evalify.evalifybackend.bank.domain.DTO.AddBankQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.AddInstructorsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.UpdateBankQuestionDTO
 import com.evalify.evalifybackend.bank.repository.BankQuestionRepo
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepository
+import com.evalify.evalifybackend.user.domain.User
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,7 +20,6 @@ class QuestionBankService(
     val userRepo: BankQuestionRepo,
     val courseRepo: CourseRepository,
     val topicRepo: TopicRepository,
-    private val topicRepository: TopicRepository
 ) {
     fun createQuestionBank(bank: Bank) {
         bankRepo.save(bank)
@@ -97,7 +98,13 @@ class QuestionBankService(
 
     }
 
+    fun addInstructorBank(instructorID:List<UUID>, bankId: UUID) {
+        val banks = bankRepo.findById(bankId).
+        orElseThrow { IllegalArgumentException("Bank not found") }
 
+        val users = userRepo.findAllById(instructorID)
+
+    }
 
 
 }
