@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.bank.domain
 
 import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.course.domain.Course
+import com.evalify.evalifybackend.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -37,4 +38,7 @@ class Bank(
     val createdAt: Instant,
     @ManyToOne(fetch = FetchType.LAZY)
     val createdBy: User? = null,
+
+    @ManyToMany
+    val bankQuestion: MutableList<BankQuestion> = mutableListOf()
 )
