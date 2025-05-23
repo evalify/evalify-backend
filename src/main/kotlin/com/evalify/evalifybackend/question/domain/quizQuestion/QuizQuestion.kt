@@ -12,6 +12,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
@@ -21,10 +22,10 @@ import java.util.UUID
 class QuizQuestion (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID?=null,
 
-    @ManyToMany
-    val question: MutableList<BaseQuestion> = mutableListOf(),
+    @OneToOne
+    val question: BaseQuestion,
 
     @ManyToOne
     val quiz: Quiz,

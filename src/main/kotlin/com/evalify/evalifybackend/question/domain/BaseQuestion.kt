@@ -59,7 +59,7 @@ enum class QuestionTypes{
 abstract class BaseQuestion(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID? = null,
+    var id: UUID? = null,
     val question: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -75,6 +75,7 @@ abstract class BaseQuestion(
     val co: Int,
     val negativeMark: Int? = null,
     val difficulty: Difficulty,
+
 
 //
 //    @Type(JsonBinaryType::class)
