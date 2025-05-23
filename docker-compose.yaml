@@ -1,0 +1,56 @@
+services:
+  evalify-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_URL=jdbc:postgresql://evalify-db:5432/${DB_NAME}
+    container_name: evalify-spring-api
+    depends_on:
+      evalify-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - evalify-network
+
+  evalify-db:
+    image: postgres:16
+    env_file:
+      - .env
+    environment:
+        - POSTGRES_DB=${DB_NAME}
+        - POSTGRES_USER=${DB_USERNAME}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evalify -d evalify"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - evalify-network
+
+volumes:
+  evalify_postgres_data:
+
+networks:
+  evalify-network:
+    driver: bridge
+
+name: evalify-backend
