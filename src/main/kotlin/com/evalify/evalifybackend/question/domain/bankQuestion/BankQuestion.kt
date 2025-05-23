@@ -10,6 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
@@ -21,11 +22,8 @@ class BankQuestion (
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID,
 
-    @ManyToMany(cascade = [CascadeType.ALL])
-    @JoinTable(
-        name = "bankQuestion_question",
-    )
-    val question: MutableList<BaseQuestion> = mutableListOf(),
+    @OneToOne
+    val question: BaseQuestion,
 
     val updatedAt: Instant = Instant.now(),
 
