@@ -1,7 +1,7 @@
 package com.evalify.evalifybackend.question.domain.FillUp
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.question.domain.Topic
+import com.evalify.evalifybackend.topic.domain.Topic
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -13,7 +13,7 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
-@DiscriminatorValue(value = "fillup")
+@DiscriminatorValue(value = "FILL_UP")
 class FillUp(
     question: String = "",
     bank: Bank,

@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.topic.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -12,7 +13,7 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
-@DiscriminatorValue(value = "coding_question")
+@DiscriminatorValue(value = "CODING")
 class CodingQuestion(
     question: String = "",
     bank: Bank,

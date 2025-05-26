@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.topic.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -14,7 +15,7 @@ import org.hibernate.annotations.Type
 class MatchPair(val id: String, val leftPair: String,val rightPair:String)
 
 @Entity
-@DiscriminatorValue(value = "matchTheFollowing")
+@DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
 
 class MatchTheFollowing (
     question: String = "",

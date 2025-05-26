@@ -5,12 +5,13 @@ import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.topic.domain.Topic
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 
 
 @Entity
-@DiscriminatorValue(value = "descriptive_question")
+@DiscriminatorValue(value = "DESCRIPTIVE")
 class DescriptiveQuestion(
     question: String = "",
     bank: Bank,

@@ -1,7 +1,7 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.question.domain.Topic
+import com.evalify.evalifybackend.topic.domain.Topic
 
 import org.hibernate.annotations.Type
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
