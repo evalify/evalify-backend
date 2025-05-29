@@ -10,29 +10,27 @@ import jakarta.persistence.Entity
 
 
 @Entity
-@DiscriminatorValue(value = "descriptive_question")
+@DiscriminatorValue(value = "DESCRIPTIVE")
 class DescriptiveQuestion(
     question: String = "",
     bank: Bank,
     topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
-    type: QuestionTypes,
     marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
-    val expectedAnswer:String,
-    val strictness:Float,
-    val guidelines:String
+    val expectedAnswer:String?,
+    val strictness:Float?,
+    val guidelines:String?
 ) : BaseQuestion(
     question = question,
     bank = bank,
     topic = topic,
     explanation = explanation,
     hint = hint,
-    type = type,
     marks = marks,
     bloomsTaxonomy = bloomsTaxonomy,
     co = co,

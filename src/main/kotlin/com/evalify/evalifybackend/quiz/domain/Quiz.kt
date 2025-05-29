@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.lab.domain.Lab
 import com.evalify.evalifybackend.question.domain.quizQuestion.QuizQuestion
+import com.evalify.evalifybackend.section.domain.Section
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
@@ -44,8 +45,15 @@ class Quiz(
     val publishResult: Boolean = false,
     val publishQuiz: Boolean = false,
 
-    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
-    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
+//    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
+//    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
+    @ManyToMany()
+    @JoinTable(
+        name = "quiz_section",
+        joinColumns = [JoinColumn(name="quiz_id")],
+        inverseJoinColumns = [JoinColumn(name="section_id")]
+    )
+    val section:MutableList<Section> = mutableListOf(),
 
 //    TODO: Add Relations btw Courses, Student, Lab, Class
     @ManyToMany

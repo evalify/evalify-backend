@@ -22,6 +22,7 @@ class User (
     val email: String,
     val profileId: String,
     val image: String? = null,
+    @Enumerated(EnumType.STRING)
     val role: Role,
     val phoneNumber: String,
     val isActive: Boolean = true,

@@ -13,14 +13,13 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
-@DiscriminatorValue(value = "mcq")
+@DiscriminatorValue(value = "MCQ")
 class MCQ(
     question: String = "",
     bank: Bank,
     topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
-    type: QuestionTypes,
     marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
@@ -35,7 +34,6 @@ class MCQ(
     topic = topic,
     explanation = explanation,
     hint = hint,
-    type = type,
     marks = marks,
     bloomsTaxonomy = bloomsTaxonomy,
     co = co,

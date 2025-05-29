@@ -1,10 +1,12 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizStudentDTO
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
+import com.evalify.evalifybackend.quiz.service.QuizQuestionService
 import com.evalify.evalifybackend.quiz.service.QuizService
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -15,7 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("quiz")
-class QuizController(val quizService:QuizService,val quizCourseService: QuizCourseService,val quizLabService: QuizLabService) {
+class QuizController(val quizService:QuizService,val quizCourseService: QuizCourseService,val quizLabService: QuizLabService,val quizQuestionService: QuizQuestionService) {
 @PutMapping("{quizId}/add-student")
 fun addStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
     quizService.addStudentToQuiz(studentId = studentDTO.studentId, quizId = quizId)
@@ -40,6 +42,11 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
     @PutMapping("{quizId}/remove-lab")
     fun removeLabFromQuiz(@RequestBody labDTO:UpdateQuizLabDTO,@PathVariable quizId:UUID){
         quizLabService.removeLabToQuiz(labId = labDTO.lab, quizId = quizId)
+    }
+
+    @PutMapping("addBankQuestion")
+    fun addBankQuestion(@RequestBody bankQuestionDTO: AddBankQuestionDTO){
+        quizQuestionService.addQuestionsFromBank(bankIds = bankQuestionDTO.bank_id, sectionId = bankQuestionDTO.section_id, userId = bankQuestionDTO.user_id)
     }
 
 

@@ -14,6 +14,8 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Table
 import jakarta.persistence.Id
@@ -69,12 +71,14 @@ abstract class BaseQuestion(
 
     val explanation: String? = "",
     val hint: String? = "",
-    val type: QuestionTypes,
+//    val type: QuestionTypes,
     val marks: Int,
+    @Enumerated(EnumType.STRING)
     val bloomsTaxonomy: Taxonomy,
     val co: Int,
     val negativeMark: Int? = null,
-    val difficulty: Difficulty,
+    @Enumerated(EnumType.STRING)
+    val difficulty: Difficulty
 
 
 //

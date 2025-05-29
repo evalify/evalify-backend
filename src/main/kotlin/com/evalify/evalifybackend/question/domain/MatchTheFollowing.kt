@@ -14,16 +14,14 @@ import org.hibernate.annotations.Type
 class MatchPair(val id: String, val leftPair: String,val rightPair:String)
 
 @Entity
-@DiscriminatorValue(value = "matchTheFollowing")
+@DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
 
 class MatchTheFollowing (
     question: String = "",
     bank: Bank,
     topic: MutableList<Topic>,
     explanation: String? = "",
-    hint: String? = "",
-    type: QuestionTypes,
-    marks: Int,
+    hint: String? = "", marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
     negativeMark: Int? = null,
@@ -38,7 +36,6 @@ class MatchTheFollowing (
     topic = topic,
     explanation = explanation,
     hint = hint,
-    type = type,
     marks = marks,
     bloomsTaxonomy = bloomsTaxonomy,
     co = co,

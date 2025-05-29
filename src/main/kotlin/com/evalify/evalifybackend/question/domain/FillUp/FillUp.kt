@@ -13,22 +13,21 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
-@DiscriminatorValue(value = "fillup")
+@DiscriminatorValue(value = "FILL_UP")
 class FillUp(
     question: String = "",
     bank: Bank,
     topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
-    type: QuestionTypes,
     marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
-    val strictMatch: Boolean,
-    val llmEval: Boolean,
-    val template: String,
+    val strictMatch: Boolean?,
+    val llmEval: Boolean?,
+    val template: String?,
 
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
@@ -39,7 +38,6 @@ class FillUp(
     topic = topic,
     explanation = explanation,
     hint = hint,
-    type = type,
     marks = marks,
     bloomsTaxonomy = bloomsTaxonomy,
     co = co,
