@@ -43,14 +43,10 @@ open class QuizQuestionService(
         System.out.println(bankQuestions)
         for (bankQuestion in bankQuestions) {
             //Creating a quiz question
-            var dupQuestion = bankQuestion.question
-            dupQuestion.id = null
-            System.out.println(dupQuestion.question)
-
+            val dupQuestion = bankQuestion.question.copyQuestion()
 
             //duplicating a question
             val duplicatedQuestion = questionRepository.save(dupQuestion)
-            System.out.println(duplicatedQuestion.question)
 
             //creating a quiz question object
             val quizQuestion = QuizQuestion(

@@ -10,13 +10,15 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
+import java.util.UUID
 
 @Entity
 @DiscriminatorValue(value = "CODING")
 class CodingQuestion(
+    id: UUID?,
     question: String = "",
-    bank: Bank,
-    topic: MutableList<Topic>,
+    bank: Bank?,
+//    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -37,9 +39,10 @@ class CodingQuestion(
     val language: List<String>?,
     val answer: String?
 ): BaseQuestion(
+    id=id,
     question = question,
     bank = bank,
-    topic = topic,
+//    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -47,7 +50,32 @@ class CodingQuestion(
     co = co,
     negativeMark = negativeMark,
     difficulty = difficulty
-)
+){
+    override fun copyQuestion(): CodingQuestion {
+        val copiedQuestion = CodingQuestion(
+            id = null,
+            question = question,
+            bank = bank,
+//            topic = topic,
+            explanation = explanation,
+            hint = hint,
+            marks = marks,
+            bloomsTaxonomy = bloomsTaxonomy,
+            co = co,
+            negativeMark = negativeMark,
+            difficulty = difficulty,
+            driverCode = driverCode,
+            boilerCode = boilerCode,
+            functionName = functionName,
+            returnType = returnType,
+            params = params,
+            testcases = testcases,
+            language = language,
+            answer = answer
+        )
+        return copiedQuestion
+    }
+}
 
  class FunctionParam(val param: String, val type: String)
 

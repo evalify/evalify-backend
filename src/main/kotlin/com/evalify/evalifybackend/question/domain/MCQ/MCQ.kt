@@ -11,13 +11,15 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
+import java.util.UUID
 
 @Entity
 @DiscriminatorValue(value = "MCQ")
 class MCQ(
+    id: UUID?,
     question: String = "",
-    bank: Bank,
-    topic: MutableList<Topic>,
+    bank: Bank?,
+//    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -29,9 +31,10 @@ class MCQ(
     @Column(columnDefinition = "jsonb")
     val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
 ) : BaseQuestion(
+    id=id,
     question = question,
     bank = bank,
-    topic = topic,
+//    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -40,4 +43,21 @@ class MCQ(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
+    override fun copyQuestion(): MCQ {
+        val copiedQuestion = MCQ(
+            id = null,
+            question = question,
+            bank = bank,
+//            topic = topic,
+            explanation = explanation,
+            hint = hint,
+            marks = marks,
+            bloomsTaxonomy = bloomsTaxonomy,
+            co = co,
+            negativeMark = negativeMark,
+            difficulty = difficulty,
+            options = options
+        )
+        return copiedQuestion
+    }
 }

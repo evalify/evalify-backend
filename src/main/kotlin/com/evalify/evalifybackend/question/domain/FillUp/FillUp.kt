@@ -11,13 +11,15 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
+import java.util.UUID
 
 @Entity
 @DiscriminatorValue(value = "FILL_UP")
 class FillUp(
+    id: UUID?,
     question: String = "",
-    bank: Bank,
-    topic: MutableList<Topic>,
+    bank: Bank?,
+//    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -33,9 +35,10 @@ class FillUp(
     @Column(columnDefinition = "jsonb")
     val blanks: List<List<String>>
 ) : BaseQuestion(
+    id = id,
     question = question,
     bank = bank,
-    topic = topic,
+//    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -44,4 +47,24 @@ class FillUp(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
+    override fun copyQuestion(): FillUp {
+        val copiedQuestion = FillUp(
+            id = null,
+            question = question,
+            bank = bank,
+//            topic = topic,
+            explanation = explanation,
+            hint = hint,
+            marks = marks,
+            bloomsTaxonomy = bloomsTaxonomy,
+            co = co,
+            negativeMark = negativeMark,
+            difficulty = difficulty,
+            strictMatch = strictMatch,
+            llmEval = llmEval,
+            template = template,
+            blanks = blanks
+        )
+        return copiedQuestion
+    }
 }

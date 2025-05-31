@@ -21,6 +21,9 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import java.util.UUID
 
@@ -65,9 +68,10 @@ abstract class BaseQuestion(
     val question: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)
-    val bank: Bank,
-    @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val topic: MutableList<Topic> = mutableListOf(),
+    val bank: Bank?,
+
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    val topic: MutableList<Topic> = mutableListOf(),
 
     val explanation: String? = "",
     val hint: String? = "",
@@ -85,7 +89,9 @@ abstract class BaseQuestion(
 //    @Type(JsonBinaryType::class)
 //    @Column(columnDefinition = "jsonb")
 //    var answer: QuestionAnswer
-)
+){
+    abstract fun copyQuestion(): BaseQuestion
+}
 //TODO() change this to a kotlin class rather than file ?
 
 
