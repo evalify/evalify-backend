@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.question.domain.MCQ
+package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import java.util.UUID
 

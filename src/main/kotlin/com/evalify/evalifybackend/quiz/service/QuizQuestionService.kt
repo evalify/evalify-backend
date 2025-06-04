@@ -2,9 +2,9 @@ package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
-import com.evalify.evalifybackend.question.domain.quizQuestion.QuizQuestion
-import com.evalify.evalifybackend.question.repository.QuestionRepository
-import com.evalify.evalifybackend.question.repository.QuizQuestionRepository
+import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
+import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
+import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.usewr.repository.UserRepository

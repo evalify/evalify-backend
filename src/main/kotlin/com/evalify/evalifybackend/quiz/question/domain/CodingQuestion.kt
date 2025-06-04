@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.question.domain
+package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
@@ -12,26 +12,32 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 import java.util.UUID
 
-class MatchPair(val id: String, val leftPair: String,val rightPair:String)
-
 @Entity
-@DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
-
-class MatchTheFollowing (
+@DiscriminatorValue(value = "CODING")
+class CodingQuestion(
     id: UUID?,
     question: String = "",
     bank: Bank?,
 //    topic: MutableList<Topic>,
     explanation: String? = "",
-    hint: String? = "", marks: Int,
+    hint: String? = "",
+    marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
+    val driverCode: String?,
+    val boilerCode: String?,
+    val functionName: String?,
+    val returnType: String?,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val keys:MutableList<MatchPair> = mutableListOf<MatchPair>()
-
+    val params: List<FunctionParam>?,
+    @Type(JsonBinaryType::class)
+    @Column(columnDefinition = "jsonb")
+    val testcases: List<TestCase>?,
+    val language: List<String>?,
+    val answer: String?
 ): BaseQuestion(
     id=id,
     question = question,
@@ -44,9 +50,9 @@ class MatchTheFollowing (
     co = co,
     negativeMark = negativeMark,
     difficulty = difficulty
-) {
-    override fun copyQuestion(): MatchTheFollowing {
-        val copiedQuestion = MatchTheFollowing(
+){
+    override fun copyQuestion(): CodingQuestion {
+        val copiedQuestion = CodingQuestion(
             id = null,
             question = question,
             bank = bank,
@@ -58,8 +64,19 @@ class MatchTheFollowing (
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            keys = keys
+            driverCode = driverCode,
+            boilerCode = boilerCode,
+            functionName = functionName,
+            returnType = returnType,
+            params = params,
+            testcases = testcases,
+            language = language,
+            answer = answer
         )
         return copiedQuestion
     }
 }
+
+ class FunctionParam(val param: String, val type: String)
+
+ class TestCase(val input: List<Any>, val expected: Any)

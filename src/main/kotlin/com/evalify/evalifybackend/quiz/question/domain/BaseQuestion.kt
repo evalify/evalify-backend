@@ -1,13 +1,7 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.question.domain.Topic
 
-import org.hibernate.annotations.Type
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
 import jakarta.persistence.GeneratedValue
@@ -21,9 +15,6 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import java.util.UUID
 

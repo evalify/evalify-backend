@@ -1,10 +1,8 @@
-package com.evalify.evalifybackend.question.domain.FillUp
+package com.evalify.evalifybackend.quiz.question.domain.FillUp
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.question.domain.Topic
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
-import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
