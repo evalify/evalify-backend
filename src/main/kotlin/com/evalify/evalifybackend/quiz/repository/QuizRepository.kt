@@ -7,4 +7,5 @@ import java.util.UUID
 
 @RepositoryRestResource(path = "quiz")
 interface QuizRepository: JpaRepository<Quiz, UUID> {
+
 }
