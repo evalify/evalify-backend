@@ -17,8 +17,8 @@ import org.hibernate.annotations.Type
 import java.util.UUID
 
 @Entity
-@DiscriminatorValue(value = "MCQ")
-class MCQ(
+@DiscriminatorValue(value = "MMCQ")
+class MMCQ(
     id: UUID?,
     question: String = "",
     bank: Bank?,
@@ -33,7 +33,6 @@ class MCQ(
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
     val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
-
 ) : BaseQuestion(
     id=id,
     question = question,
@@ -47,8 +46,8 @@ class MCQ(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
-    override fun copyQuestion(): MCQ {
-        val copiedQuestion = MCQ(
+    override fun copyQuestion(): MMCQ {
+        val copiedQuestion = MMCQ(
             id = null,
             question = question,
             bank = bank,
@@ -65,7 +64,7 @@ class MCQ(
         return copiedQuestion
     }
 
-    override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
+    override fun mapToType(shuffleOptions: Boolean ): QuestionsReturnDTO {
         return McqReturnDTO(
             question = this.question,
             options = if (shuffleOptions) options.shuffled().map { MCQOptionDTO(it.id, it.text) }
@@ -79,6 +78,6 @@ class MCQ(
     }
 
     override fun getQuestionType(): QuestionTypes {
-        return QuestionTypes.MCQ
+        return QuestionTypes.MMCQ
     }
 }

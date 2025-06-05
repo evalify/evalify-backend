@@ -8,6 +8,7 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.TrueFalseDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
@@ -17,8 +18,8 @@ import org.hibernate.annotations.Type
 import java.util.UUID
 
 @Entity
-@DiscriminatorValue(value = "MCQ")
-class MCQ(
+@DiscriminatorValue(value = "TRUE_FALSE")
+class TrueFalse(
     id: UUID?,
     question: String = "",
     bank: Bank?,
@@ -32,8 +33,7 @@ class MCQ(
     difficulty: Difficulty,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
-
+    val answer : Boolean,
 ) : BaseQuestion(
     id=id,
     question = question,
@@ -47,8 +47,8 @@ class MCQ(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
-    override fun copyQuestion(): MCQ {
-        val copiedQuestion = MCQ(
+    override fun copyQuestion(): TrueFalse {
+        val copiedQuestion = TrueFalse(
             id = null,
             question = question,
             bank = bank,
@@ -60,16 +60,15 @@ class MCQ(
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            options = options
+            answer = answer,
         )
         return copiedQuestion
     }
 
     override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
-        return McqReturnDTO(
+        return TrueFalseDTO(
             question = this.question,
-            options = if (shuffleOptions) options.shuffled().map { MCQOptionDTO(it.id, it.text) }
-            else options.map { MCQOptionDTO(it.id, it.text) },
+            answers = this.answer,
             hintText = this.hint,
             markValue = this.marks,
             taxonomy = this.bloomsTaxonomy,
@@ -79,6 +78,6 @@ class MCQ(
     }
 
     override fun getQuestionType(): QuestionTypes {
-        return QuestionTypes.MCQ
+        return QuestionTypes.TRUEFALSE
     }
 }

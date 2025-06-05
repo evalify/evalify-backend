@@ -44,10 +44,7 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
         quizLabService.removeLabToQuiz(labId = labDTO.lab, quizId = quizId)
     }
 
-    @PutMapping("addBankQuestion")
-    fun addBankQuestion(@RequestBody bankQuestionDTO: AddBankQuestionDTO){
-        quizQuestionService.addQuestionsFromBank(bankIds = bankQuestionDTO.bank_id, sectionId = bankQuestionDTO.section_id, userId = bankQuestionDTO.user_id)
-    }
+
 
 
 }

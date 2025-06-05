@@ -1,24 +1,21 @@
-package com.evalify.evalifybackend.quiz.question.domain.MCQ
+package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.DescriptiveReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.FileUploadDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
-import com.evalify.evalifybackend.quiz.question.domain.Topic
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
-import org.hibernate.annotations.Type
 import java.util.UUID
 
+
 @Entity
-@DiscriminatorValue(value = "MCQ")
-class MCQ(
+@DiscriminatorValue(value = "FILE_UPLOAD")
+class FileUpload(
     id: UUID?,
     question: String = "",
     bank: Bank?,
@@ -30,10 +27,9 @@ class MCQ(
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
-    @Type(JsonBinaryType::class)
-    @Column(columnDefinition = "jsonb")
-    val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
-
+    val expectedAnswer:String?,
+    val strictness:Float?,
+    val guidelines:String?
 ) : BaseQuestion(
     id=id,
     question = question,
@@ -47,8 +43,8 @@ class MCQ(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
-    override fun copyQuestion(): MCQ {
-        val copiedQuestion = MCQ(
+    override fun copyQuestion(): FileUpload{
+        val copiedQuestion = FileUpload(
             id = null,
             question = question,
             bank = bank,
@@ -60,16 +56,17 @@ class MCQ(
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            options = options
-        )
+            expectedAnswer = expectedAnswer,
+            strictness = strictness,
+            guidelines = guidelines,
+
+            )
         return copiedQuestion
     }
 
     override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
-        return McqReturnDTO(
+        return FileUploadDTO(
             question = this.question,
-            options = if (shuffleOptions) options.shuffled().map { MCQOptionDTO(it.id, it.text) }
-            else options.map { MCQOptionDTO(it.id, it.text) },
             hintText = this.hint,
             markValue = this.marks,
             taxonomy = this.bloomsTaxonomy,
@@ -77,8 +74,7 @@ class MCQ(
             difficultyLevel = this.difficulty
         )
     }
-
     override fun getQuestionType(): QuestionTypes {
-        return QuestionTypes.MCQ
+        return QuestionTypes.FILE_UPLOAD
     }
 }

@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
@@ -15,9 +16,10 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import java.util.UUID
-
+import com.evalify.evalifybackend.quiz.question.domain.Topic
 
 
 
@@ -61,8 +63,8 @@ abstract class BaseQuestion(
     @ManyToOne(fetch = FetchType.LAZY)
     val bank: Bank?,
 
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    val topic: MutableList<Topic> = mutableListOf(),
+    @ManyToMany(fetch = FetchType.LAZY)
+    val topic: MutableList<Topic> = mutableListOf(),
 
     val explanation: String? = "",
     val hint: String? = "",
@@ -82,8 +84,11 @@ abstract class BaseQuestion(
 //    var answer: QuestionAnswer
 ){
     abstract fun copyQuestion(): BaseQuestion
+
+    abstract fun mapToType(shuffleOptions: Boolean = false): QuestionsReturnDTO
+
+    abstract fun getQuestionType(): QuestionTypes
 }
-//TODO() change this to a kotlin class rather than file ?
 
 
 

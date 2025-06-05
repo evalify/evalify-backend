@@ -5,6 +5,8 @@ import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.CodingReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -18,7 +20,7 @@ class CodingQuestion(
     id: UUID?,
     question: String = "",
     bank: Bank?,
-//    topic: MutableList<Topic>,
+    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -42,7 +44,7 @@ class CodingQuestion(
     id=id,
     question = question,
     bank = bank,
-//    topic = topic,
+    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -56,7 +58,7 @@ class CodingQuestion(
             id = null,
             question = question,
             bank = bank,
-//            topic = topic,
+            topic = topic,
             explanation = explanation,
             hint = hint,
             marks = marks,
@@ -75,8 +77,30 @@ class CodingQuestion(
         )
         return copiedQuestion
     }
+
+    override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
+        return CodingReturnDTO(
+                question =this.question,
+                functionName = this.functionName,
+                returnType = this.returnType,
+                params = this.params,
+                language = this.language,
+                hintText = this.hint,
+                markValue = this.marks,
+                taxonomy = this.bloomsTaxonomy,
+                coValue = this.co,
+                difficultyLevel = this.difficulty
+            )
+
+    }
+
+    override fun getQuestionType(): QuestionTypes {
+        return QuestionTypes.CODING
+    }
 }
 
  class FunctionParam(val param: String, val type: String)
 
  class TestCase(val input: List<Any>, val expected: Any)
+
+
