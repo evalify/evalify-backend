@@ -1,7 +1,10 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
 import jakarta.servlet.http.HttpServletRequest
+import org.aspectj.weaver.patterns.TypePatternQuestions
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,7 +18,8 @@ class QuizStudentController(
 ) {
 
     @GetMapping
-    fun getQuiz(@PathVariable studentId: UUID,@PathVariable id: UUID, request: HttpServletRequest){
-        quizStudentService.getQuizQuestions(studentId = studentId, quizId = id, ipAddress = request.remoteAddr)
+    fun getQuiz(@PathVariable studentId: UUID,@PathVariable id: UUID, request: HttpServletRequest)
+    : ResponseEntity<List<QuestionsReturnDTO>>{
+        return quizStudentService.getQuizQuestions(studentId = studentId, quizId = id, ipAddress = request.remoteAddr)
     }
 }

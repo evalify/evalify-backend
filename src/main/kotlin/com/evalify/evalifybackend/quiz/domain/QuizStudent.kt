@@ -28,7 +28,7 @@ class QuizStudent(
 
     val isSubmitted: Boolean,
 
-    val voilations: MutableList<String>? = mutableListOf(),
+    val violations: MutableList<String>? = mutableListOf(),
 
     val ipAddress: MutableList<String>,
 

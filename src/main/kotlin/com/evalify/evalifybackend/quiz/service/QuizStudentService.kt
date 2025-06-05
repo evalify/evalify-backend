@@ -1,10 +1,14 @@
 package com.evalify.evalifybackend.quiz.service
 
 
+import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
+import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
 import com.evalify.evalifybackend.usewr.repository.UserRepository
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
@@ -16,8 +20,8 @@ class QuizStudentService(
     val quizStudentRepository: QuizStudentRepository
 ) {
 
-    fun getQuizQuestions(quizId: UUID,studentId: UUID,ipAddress:String){
-        val quiz = quizRepository.findById(quizId).orElseThrow()
+    fun getQuizQuestions(quizId: UUID,studentId: UUID,ipAddress:String): List<QuestionsReturnDTO> {
+        val quiz = quizRepository.findById(quizId).orElseThrow{NotFoundException("quiz with id $quizId not found")}
         val user = userRepository.findById(studentId)
 
         //First time entering into a quiz
@@ -33,11 +37,22 @@ class QuizStudentService(
             )
         )
 
-        //Adding new ip address
+       //Add ip address to the list
         if(!quizStudent.ipAddress.contains(ipAddress)){
             quizStudent.ipAddress.add(ipAddress)
             quizStudentRepository.save(quizStudent);
         }
+
+
+        val returnQuestions : List<QuizQuestion> = quizStudent.quiz.section.flatMap { section -> section.quizQuestions }
+        val finalReturnQuestions : ResponseEntity<List<QuestionsReturnDTO>>
+
+
+        return finalReturnQuestions
+
+
+
+
 
 
 

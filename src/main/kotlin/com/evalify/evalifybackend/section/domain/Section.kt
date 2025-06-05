@@ -17,8 +17,8 @@ class Section(
     @OneToMany(fetch = FetchType.LAZY)
     val quizQuestions: MutableList<QuizQuestion> = mutableListOf(),
 
-    @ManyToMany(mappedBy = "section")
-    val quiz: List<Quiz> = listOf()
+    @ManyToOne(fetch = FetchType.LAZY)
+    val quiz: Quiz
 
 ) {
 
