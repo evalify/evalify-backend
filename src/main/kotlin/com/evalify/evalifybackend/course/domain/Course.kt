@@ -23,6 +23,7 @@ enum class CourseType {
     val name: String,
     val description: String,
     val image: String? = null,
+    @Enumerated(EnumType.STRING)
     val type: CourseType,
 
     @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)

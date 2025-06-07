@@ -1,8 +1,8 @@
-package com.evalify.evalifybackend.question.domain.quizQuestion
+package com.evalify.evalifybackend.quiz.question.domain.quizQuestion
 
-import com.evalify.evalifybackend.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.section.domain.Section
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.Column

@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.question.domain
+package com.evalify.evalifybackend.quiz.question.domain
 
 import jakarta.persistence.*
 import java.util.UUID

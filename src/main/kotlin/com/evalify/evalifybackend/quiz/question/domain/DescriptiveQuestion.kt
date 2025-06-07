@@ -1,24 +1,24 @@
-package com.evalify.evalifybackend.question.domain
+package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import jakarta.persistence.Column
+import com.evalify.evalifybackend.quiz.domain.DTO.DescriptiveReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
-import org.hibernate.annotations.Type
 import java.util.UUID
 
+
 @Entity
-@DiscriminatorValue(value = "CODING")
-class CodingQuestion(
+@DiscriminatorValue(value = "DESCRIPTIVE")
+class DescriptiveQuestion(
     id: UUID?,
     question: String = "",
     bank: Bank?,
-//    topic: MutableList<Topic>,
+    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -26,23 +26,14 @@ class CodingQuestion(
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
-    val driverCode: String?,
-    val boilerCode: String?,
-    val functionName: String?,
-    val returnType: String?,
-    @Type(JsonBinaryType::class)
-    @Column(columnDefinition = "jsonb")
-    val params: List<FunctionParam>?,
-    @Type(JsonBinaryType::class)
-    @Column(columnDefinition = "jsonb")
-    val testcases: List<TestCase>?,
-    val language: List<String>?,
-    val answer: String?
-): BaseQuestion(
+    val expectedAnswer:String?,
+    val strictness:Float?,
+    val guidelines:String?
+) : BaseQuestion(
     id=id,
     question = question,
     bank = bank,
-//    topic = topic,
+    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -51,12 +42,12 @@ class CodingQuestion(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
-    override fun copyQuestion(): CodingQuestion {
-        val copiedQuestion = CodingQuestion(
+    override fun copyQuestion(): DescriptiveQuestion {
+        val copiedQuestion = DescriptiveQuestion(
             id = null,
             question = question,
             bank = bank,
-//            topic = topic,
+            topic = topic,
             explanation = explanation,
             hint = hint,
             marks = marks,
@@ -64,19 +55,25 @@ class CodingQuestion(
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            driverCode = driverCode,
-            boilerCode = boilerCode,
-            functionName = functionName,
-            returnType = returnType,
-            params = params,
-            testcases = testcases,
-            language = language,
-            answer = answer
+            expectedAnswer = expectedAnswer,
+            strictness = strictness,
+            guidelines = guidelines,
+
         )
         return copiedQuestion
     }
+
+    override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
+        return DescriptiveReturnDTO(
+            question = this.question,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty
+        )
+    }
+    override fun getQuestionType(): QuestionTypes {
+        return QuestionTypes.DESCRIPTIVE
+    }
 }
-
- class FunctionParam(val param: String, val type: String)
-
- class TestCase(val input: List<Any>, val expected: Any)

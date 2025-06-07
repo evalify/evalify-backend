@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.question.repository
+package com.evalify.evalifybackend.quiz.question.repository
 
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import org.springframework.data.jpa.repository.JpaRepository

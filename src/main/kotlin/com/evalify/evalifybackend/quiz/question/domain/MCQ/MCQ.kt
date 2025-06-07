@@ -1,11 +1,14 @@
-package com.evalify.evalifybackend.question.domain.FillUp
+package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.question.domain.Topic
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -14,12 +17,12 @@ import org.hibernate.annotations.Type
 import java.util.UUID
 
 @Entity
-@DiscriminatorValue(value = "FILL_UP")
-class FillUp(
+@DiscriminatorValue(value = "MCQ")
+class MCQ(
     id: UUID?,
     question: String = "",
     bank: Bank?,
-//    topic: MutableList<Topic>,
+    topic: MutableList<Topic>,
     explanation: String? = "",
     hint: String? = "",
     marks: Int,
@@ -27,18 +30,15 @@ class FillUp(
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
-    val strictMatch: Boolean?,
-    val llmEval: Boolean?,
-    val template: String?,
-
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val blanks: List<List<String>>
+    val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
+
 ) : BaseQuestion(
-    id = id,
+    id=id,
     question = question,
     bank = bank,
-//    topic = topic,
+    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -47,12 +47,12 @@ class FillUp(
     negativeMark = negativeMark,
     difficulty = difficulty
 ){
-    override fun copyQuestion(): FillUp {
-        val copiedQuestion = FillUp(
+    override fun copyQuestion(): MCQ {
+        val copiedQuestion = MCQ(
             id = null,
             question = question,
             bank = bank,
-//            topic = topic,
+            topic = topic,
             explanation = explanation,
             hint = hint,
             marks = marks,
@@ -60,11 +60,25 @@ class FillUp(
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            strictMatch = strictMatch,
-            llmEval = llmEval,
-            template = template,
-            blanks = blanks
+            options = options
         )
         return copiedQuestion
+    }
+
+    override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
+        return McqReturnDTO(
+            question = this.question,
+            options = if (shuffleOptions) options.shuffled().map { MCQOptionDTO(it.id, it.text) }
+            else options.map { MCQOptionDTO(it.id, it.text) },
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun getQuestionType(): QuestionTypes {
+        return QuestionTypes.MCQ
     }
 }

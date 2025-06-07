@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.question.domain.bankQuestion
+package com.evalify.evalifybackend.quiz.question.domain.bankQuestion
 
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.user.domain.User

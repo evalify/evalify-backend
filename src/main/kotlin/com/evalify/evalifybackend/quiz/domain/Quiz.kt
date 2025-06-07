@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
@@ -44,12 +45,7 @@ class Quiz(
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
 //    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
-    @ManyToMany()
-    @JoinTable(
-        name = "quiz_section",
-        joinColumns = [JoinColumn(name="quiz_id")],
-        inverseJoinColumns = [JoinColumn(name="section_id")]
-    )
+    @OneToMany(mappedBy = "quiz", cascade = [jakarta.persistence.CascadeType.ALL], fetch = FetchType.LAZY)
     val section:MutableList<Section> = mutableListOf(),
 
 //    TODO: Add Relations btw Courses, Student, Lab, Class
@@ -63,7 +59,7 @@ class Quiz(
 
     @ManyToMany
     @JoinTable(
-        name = "quiz_student",
+        name = "student_quiz",
         joinColumns = [JoinColumn(name="quiz_id")],
         inverseJoinColumns = [JoinColumn(name="student_id")]
     )

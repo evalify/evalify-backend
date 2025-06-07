@@ -1,10 +1,14 @@
-package com.evalify.evalifybackend.question.domain
+package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -12,31 +16,28 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 import java.util.UUID
 
-class MatchPair(val id: String, val leftPair: String,val rightPair:String)
-
 @Entity
-@DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
-
-class MatchTheFollowing (
+@DiscriminatorValue(value = "MMCQ")
+class MMCQ(
     id: UUID?,
     question: String = "",
     bank: Bank?,
-//    topic: MutableList<Topic>,
+    topic: MutableList<Topic>,
     explanation: String? = "",
-    hint: String? = "", marks: Int,
+    hint: String? = "",
+    marks: Int,
     bloomsTaxonomy: Taxonomy,
     co: Int,
     negativeMark: Int? = null,
     difficulty: Difficulty,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val keys:MutableList<MatchPair> = mutableListOf<MatchPair>()
-
-): BaseQuestion(
+    val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
+) : BaseQuestion(
     id=id,
     question = question,
     bank = bank,
-//    topic = topic,
+    topic = topic,
     explanation = explanation,
     hint = hint,
     marks = marks,
@@ -44,13 +45,13 @@ class MatchTheFollowing (
     co = co,
     negativeMark = negativeMark,
     difficulty = difficulty
-) {
-    override fun copyQuestion(): MatchTheFollowing {
-        val copiedQuestion = MatchTheFollowing(
+){
+    override fun copyQuestion(): MMCQ {
+        val copiedQuestion = MMCQ(
             id = null,
             question = question,
             bank = bank,
-//            topic = topic,
+            topic = topic,
             explanation = explanation,
             hint = hint,
             marks = marks,
@@ -58,8 +59,25 @@ class MatchTheFollowing (
             co = co,
             negativeMark = negativeMark,
             difficulty = difficulty,
-            keys = keys
+            options = options
         )
         return copiedQuestion
+    }
+
+    override fun mapToType(shuffleOptions: Boolean ): QuestionsReturnDTO {
+        return McqReturnDTO(
+            question = this.question,
+            options = if (shuffleOptions) options.shuffled().map { MCQOptionDTO(it.id, it.text) }
+            else options.map { MCQOptionDTO(it.id, it.text) },
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun getQuestionType(): QuestionTypes {
+        return QuestionTypes.MMCQ
     }
 }
