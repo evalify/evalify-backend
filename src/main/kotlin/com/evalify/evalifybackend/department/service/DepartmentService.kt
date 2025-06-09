@@ -106,8 +106,10 @@ class DepartmentService(
     // Legacy method - get all departments without pagination
     @Transactional(readOnly = true)
     fun getAllDepartments(): List<Department>{
-        return departmentRepository.findAllWithBatches()
-    }    fun createDepartment(request: CreateDepartmentRequest): Department {
+        return departmentRepository.findAll()
+    }
+
+    fun createDepartment(request: CreateDepartmentRequest): Department {
         val department = Department(name = request.name)
         val savedDepartment = departmentRepository.save(department)
         // Force initialization of batches collection (though it will be empty for new departments)
@@ -174,7 +176,7 @@ fun Department.toDepartmentResponse(): DepartmentResponse {
     }
     
     return DepartmentResponse(
-        id = this.id,
+        id = this.id as String?,
         name = this.name,
         batches = batchResponses
     )
