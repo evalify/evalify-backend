@@ -1,4 +1,5 @@
 package com.evalify.evalifybackend.semester.domain
+import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.*
@@ -29,6 +30,8 @@ import java.util.*
     )
     val managers: MutableList<User> = mutableListOf(),
 
-
+    @ManyToOne
+    @JoinColumn(name = "batch_id")
+    var batch: Batch? = null,
     // TODO: add Quiz Tags To a Semester
 )

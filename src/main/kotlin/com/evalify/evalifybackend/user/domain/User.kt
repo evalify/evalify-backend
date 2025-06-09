@@ -18,14 +18,15 @@ class User (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID? = null,
-    val name: String,
-    val email: String,
-    val profileId: String,
-    val image: String? = null,
+    var name: String,
+    var email: String,
+    var profileId: String? = null,
+    var password: String? = null,
+    var image: String? = null,
 //    @Enumerated(EnumType.STRING)
-    val role: Role,
-    val phoneNumber: String,
-    val isActive: Boolean = true,
-    val createdAt: Timestamp = Timestamp.from(Instant.now()),
-    val lastPasswordChange: Timestamp? = null
+    var role: Role,
+    var phoneNumber: String,
+    var isActive: Boolean = true,
+    var createdAt: Timestamp = Timestamp.from(Instant.now()),
+    var lastPasswordChange: Timestamp? = null
 )
