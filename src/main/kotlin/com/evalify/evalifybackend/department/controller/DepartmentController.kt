@@ -106,7 +106,7 @@ class DepartmentController(
 
 fun Department.toSimpleDepartmentResponse(): SimpleDepartmentResponse {
     return SimpleDepartmentResponse(
-        id = this.id ?: UUID.randomUUID(),
+        id = this.id as String?,
         name = this.name
     )
 }

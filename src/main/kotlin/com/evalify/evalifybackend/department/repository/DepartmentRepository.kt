@@ -21,7 +21,5 @@ interface DepartmentRepository: JpaRepository<Department, UUID> {    @Query("SEL
 
     @Query("SELECT d.id FROM Department d")
     fun findAllDepartmentIds(pageable: Pageable): Page<UUID>
-
-    override fun findAll(pageable: Pageable): Page<Department>
 }
 

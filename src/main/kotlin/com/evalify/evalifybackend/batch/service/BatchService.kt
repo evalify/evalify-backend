@@ -325,7 +325,7 @@ fun Batch.toBatchResponse(): BatchResponse {
         isActive = this.isActive,
         department = this.department?.let {
             DepartmentResponse(
-                id = it.id,
+                id = it.id as String?,
                 name = it.name
             )
         }
