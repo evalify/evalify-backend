@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.department.repository
 
+import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.department.domain.Department
 import com.evalify.evalifybackend.department.domain.dto.DepartmentBatchResponse
 import org.springframework.data.domain.Page
@@ -11,8 +12,12 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import java.util.*
 
 @RepositoryRestResource(path = "department")
-interface DepartmentRepository: JpaRepository<Department, UUID> {    @Query("SELECT new com.evalify.evalifybackend.department.domain.dto.DepartmentBatchResponse(b.id, b.name, b.graduationYear, b.section) FROM Batch b WHERE b.id = :deptId")
-    fun findBatchesByDepartmentId(@Param("deptId") deptId: UUID): List<DepartmentBatchResponse>    @Query("SELECT d FROM Department d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :query, '%'))")
+interface DepartmentRepository: JpaRepository<Department, UUID> {
+
+    @Query("SELECT b FROM Batch b WHERE b.department.id = :departmentId")
+    fun findBatchesByDepartmentId(@Param("departmentId") departmentId: UUID): List<Batch>
+
+    @Query("SELECT d FROM Department d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :query, '%'))")
     fun findByNameContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<Department>
     
     @Query("SELECT d.id FROM Department d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :query, '%'))")

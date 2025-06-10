@@ -17,8 +17,10 @@ interface BatchRepository : JpaRepository<Batch, UUID>{
     override fun <S : Batch> save(entity: S): S
 
     @RestResource(exported = false)
-    override fun <S : Batch> saveAll(entities: MutableIterable<S>): MutableList<S>    @Query("SELECT b FROM Batch b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) OR CAST(b.graduationYear AS string) LIKE CONCAT('%', :query, '%')")
-    fun findByNameOrYearContainingIgnoreCase(query: String): List<Batch>
+    override fun <S : Batch> saveAll(entities: MutableIterable<S>): MutableList<S>
+
+    @Query("SELECT b FROM Batch b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) OR CAST(b.graduationYear AS string) LIKE CONCAT('%', :query, '%')")
+    fun findByNameOrYearContainingIgnoreCase(@Param("query") query: String): List<Batch>
 
     @Query("SELECT b FROM Batch b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) OR CAST(b.graduationYear AS string) LIKE CONCAT('%', :query, '%')")
     fun searchByNameOrYearContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<Batch>

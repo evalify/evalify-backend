@@ -1,7 +1,6 @@
-package com.devlabs.devlabsbackend.department.controller
+package com.evalify.evalifybackend.department.controller
 
-import com.devlabs.devlabsbackend.department.service.DepartmentService
-import com.devlabs.devlabsbackend.department.service.toDepartmentResponse
+
 import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
@@ -11,6 +10,8 @@ import com.evalify.evalifybackend.department.domain.dto.DepartmentBatchResponse
 import com.evalify.evalifybackend.department.domain.dto.DepartmentResponse
 import com.evalify.evalifybackend.department.domain.dto.SimpleDepartmentResponse
 import com.evalify.evalifybackend.department.domain.dto.UpdateDepartmentRequest
+import com.evalify.evalifybackend.department.service.DepartmentService
+import com.evalify.evalifybackend.department.service.toDepartmentResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -21,7 +22,7 @@ import java.util.*
 @RequestMapping("/api/department")
 class DepartmentController(
     private val departmentService: DepartmentService,
-){
+) {
     // Get all departments with pagination and sorting
     @GetMapping
     fun getAllDepartments(
@@ -38,7 +39,7 @@ class DepartmentController(
                 .body(mapOf("message" to "Failed to fetch departments: ${e.message}"))
         }
     }
-    
+
     // Search departments with pagination
     @GetMapping("/search")
     fun searchDepartments(
@@ -53,10 +54,12 @@ class DepartmentController(
             ResponseEntity.ok(departments)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(PaginatedResponse(
-                    data = emptyList(),
-                    pagination = PaginationInfo(0, size, 0, 0)
-                ))
+                .body(
+                    PaginatedResponse(
+                        data = emptyList(),
+                        pagination = PaginationInfo(0, size, 0, 0)
+                    )
+                )
         }
     }
 
@@ -82,8 +85,8 @@ class DepartmentController(
     }
 
     @GetMapping("/all")
-    fun getAllDepartmentsLegacy(): List<SimpleDepartmentResponse>{
-        return departmentService.getAllDepartments().map{it.toSimpleDepartmentResponse()}
+    fun getAllDepartmentsLegacy(): List<SimpleDepartmentResponse> {
+        return departmentService.getAllDepartments().map { it.toSimpleDepartmentResponse() }
     }
 
     // Get a specific department by ID
@@ -100,24 +103,26 @@ class DepartmentController(
 
     @GetMapping("/{departmentId}/batches")
     fun getBatches(@PathVariable("departmentId") departmentId: UUID): List<DepartmentBatchResponse> {
-        return departmentService.getBatchesByDepartmentId(departmentId)
+        return departmentService.getBatchesByDepartmentId(departmentId).map { batch ->
+            batch.toDepartmentBatchResponse()
+        }
     }
-}
 
-fun Department.toSimpleDepartmentResponse(): SimpleDepartmentResponse {
-    return SimpleDepartmentResponse(
-        id = this.id as String?,
-        name = this.name
-    )
+    fun Department.toSimpleDepartmentResponse(): SimpleDepartmentResponse {
+        return SimpleDepartmentResponse(
+            id = this.id.toString(),
+            name = this.name
+        )
+    }
 }
 
 fun Batch.toDepartmentBatchResponse(): DepartmentBatchResponse {
     return DepartmentBatchResponse(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         graduationYear = this.graduationYear,
         section = this.section,
     )
-
-
 }
+
+

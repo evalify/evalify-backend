@@ -1,9 +1,9 @@
 package com.evalify.evalifybackend.batch.service
 
-import com.devlabs.devlabsbackend.batch.domain.dto.CreateBatchRequest
-import com.devlabs.devlabsbackend.batch.domain.dto.UpdateBatchRequest
 import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
+import com.evalify.evalifybackend.batch.domain.DTO.CreateBatchRequest
+import com.evalify.evalifybackend.batch.domain.DTO.UpdateBatchRequest
 import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
@@ -325,7 +325,7 @@ fun Batch.toBatchResponse(): BatchResponse {
         isActive = this.isActive,
         department = this.department?.let {
             DepartmentResponse(
-                id = it.id as String?,
+                id = it.id.toString(),
                 name = it.name
             )
         }

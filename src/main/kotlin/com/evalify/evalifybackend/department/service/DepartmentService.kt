@@ -1,4 +1,4 @@
-package com.devlabs.devlabsbackend.department.service
+package com.evalify.evalifybackend.department.service
 
 
 import com.evalify.evalifybackend.batch.domain.Batch
@@ -160,7 +160,7 @@ class DepartmentService(
         return department.batches
     }
 
-    fun getBatchesByDepartmentId(departmentId: UUID): List<DepartmentBatchResponse> {
+    fun getBatchesByDepartmentId(departmentId: UUID): List<Batch> {
         return departmentRepository.findBatchesByDepartmentId(departmentId)
     }
 }
@@ -168,7 +168,7 @@ class DepartmentService(
 fun Department.toDepartmentResponse(): DepartmentResponse {
     val batchResponses = this.batches.map { batch ->
         DepartmentBatchResponse(
-            id = batch.id,
+            id = batch.id.toString(),
             name = batch.name,
             graduationYear = batch.graduationYear,
             section = batch.section
@@ -176,7 +176,7 @@ fun Department.toDepartmentResponse(): DepartmentResponse {
     }
     
     return DepartmentResponse(
-        id = this.id as String?,
+        id = this.id.toString(),
         name = this.name,
         batches = batchResponses
     )
