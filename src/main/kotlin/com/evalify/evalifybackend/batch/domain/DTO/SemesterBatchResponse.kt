@@ -1,4 +1,4 @@
-package com.devlabs.devlabsbackend.batch.domain.dto
+package com.evalify.evalifybackend.batch.domain.DTO
 
 data class SemesterBatchResponse(
     val id: String,

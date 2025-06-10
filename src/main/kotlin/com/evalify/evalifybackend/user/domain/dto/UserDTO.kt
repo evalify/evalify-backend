@@ -9,7 +9,7 @@ data class UserResponse(
     val email: String,
     val profileId: String? = null,
     val image: String?,
-    val role: String,
+    val role: Role,
     val password: String? = null,
     val phoneNumber: String,
     val isActive: Boolean,
@@ -28,7 +28,7 @@ data class CreateUserRequest(
 data class UpdateUserRequest(
     val name: String,
     val email: String,
-    val role: String,
+    val role: Role,
     val phoneNumber: String,
     val isActive: Boolean
 )

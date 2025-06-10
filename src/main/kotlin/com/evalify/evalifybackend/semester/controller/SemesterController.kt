@@ -29,12 +29,14 @@ class SemesterController(val semesterService: SemesterService) {
     @PutMapping("/{semesterId}/add-course")
     fun addCourseToSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
         semesterService.addCourseToSemester(semesterId = semesterId, courseId = courseDto.courseId)
-    }    @PutMapping("/{semesterId}/remove-course")
+    }
+
+    @PutMapping("/{semesterId}/remove-course")
     fun removeCourseFromSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
         semesterService.removeCourseFromSemester(semesterId = semesterId, courseId = courseDto.courseId)
     }
 
-    @GetMapping("/all")
+    @GetMapping
     fun getAllSemesters(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
@@ -57,7 +59,9 @@ class SemesterController(val semesterService: SemesterService) {
         return ResponseEntity.ok(
             semesterService.searchSemesterPaginated(query, page, size, sort_by, sort_order)
         )
-    }    @GetMapping("/{id}")
+    }
+
+    @GetMapping("/{id}")
     fun getSemesterById(@PathVariable id: UUID): ResponseEntity<SemesterResponse> {
         return ResponseEntity(
             semesterService.getSemesterById(id),
@@ -78,10 +82,10 @@ class SemesterController(val semesterService: SemesterService) {
         @RequestBody courseRequest: CreateCourseRequest
     ): ResponseEntity<CourseResponse> {
         return try {
-            val course = semesterService.createCourseForSemester(id, courseRequest)
-            ResponseEntity(course, HttpStatus.CREATED)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                val course = semesterService.createCourseForSemester(id, courseRequest)
+                ResponseEntity(course, HttpStatus.CREATED)
+            } catch (e: Exception) {
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
         }
     }

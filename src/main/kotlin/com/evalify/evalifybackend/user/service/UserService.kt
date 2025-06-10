@@ -135,7 +135,7 @@ class UserService(
             user.name = request.name
             user.email = request.email
             user.phoneNumber = request.phoneNumber
-            user.role = Role.valueOf(request.role.uppercase())
+            user.role = request.role
             user.isActive = request.isActive
 
             val updatedUser = userRepository.save(user)
@@ -194,7 +194,7 @@ fun User.toUserResponse(): UserResponse {
         profileId = this.profileId,
         image = this.image,
         password = this.password,
-        role = this.role.name,
+        role = this.role,
         phoneNumber = this.phoneNumber,
         isActive = this.isActive,
         createdAt = this.createdAt.toString()
