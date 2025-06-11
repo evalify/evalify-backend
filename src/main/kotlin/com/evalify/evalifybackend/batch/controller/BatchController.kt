@@ -37,12 +37,12 @@ class BatchController(val batchBankService: BatchBankService, val batchService: 
     }
 
     @PutMapping("/{batchId}/add-students")
-    fun addStudents(@RequestBody userIds: List<UUID>, @PathVariable batchId: UUID) {
+    fun addStudents(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.addStudentsToBatch(batchId, userIds)
     }
 
     @PutMapping("/{batchId}/delete-students")
-    fun deleteStudents(@RequestBody userIds: List<UUID>, @PathVariable batchId: UUID) {
+    fun deleteStudents(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.removeStudentsFromBatch(batchId, userIds)
     }
 
@@ -57,12 +57,12 @@ class BatchController(val batchBankService: BatchBankService, val batchService: 
     }
 
     @PutMapping("/{batchId}/assign-managers")
-    fun assignManagers(@RequestBody userIds: List<UUID>, @PathVariable batchId: UUID) {
+    fun assignManagers(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.addManagersToBatch(batchId, userIds)
     }
 
     @PutMapping("/{batchId}/remove-managers")
-    fun removeManagers(@RequestBody userIds: List<UUID>, @PathVariable batchId: UUID) {
+    fun removeManagers(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.removeManagersFromBatch(batchId, userIds)
     }
 

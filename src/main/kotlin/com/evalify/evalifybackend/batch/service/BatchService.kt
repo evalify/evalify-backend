@@ -31,7 +31,7 @@ class BatchService(
     private val semesterRepository: SemesterRepository,
     private val departmentRepository: DepartmentRepository
 ) {    @Transactional
-fun addStudentsToBatch(batchId: UUID, studentId: List<UUID>) {
+fun addStudentsToBatch(batchId: UUID, studentId: List<String>) {
     val batch = batchRepository.findById(batchId).orElseThrow {
         NotFoundException("Could not find course with id $batchId")
     }
@@ -39,7 +39,7 @@ fun addStudentsToBatch(batchId: UUID, studentId: List<UUID>) {
     batch.students.addAll(users)
     batchRepository.save(batch)
 }    @Transactional
-fun removeStudentsFromBatch(batchId: UUID, studentId: List<UUID>) {
+fun removeStudentsFromBatch(batchId: UUID, studentId: List<String>) {
     val batch = batchRepository.findById(batchId).orElseThrow {
         NotFoundException("Could not find course with id $batchId")
     }
@@ -63,7 +63,7 @@ fun removeSemestersFromBatch(batchId: UUID, semesterId: List<UUID>) {
     batch.semester.removeAll(semesters)
     batchRepository.save(batch)
 }    @Transactional
-fun addManagersToBatch(batchId: UUID, managerId: List<UUID>) {
+fun addManagersToBatch(batchId: UUID, managerId: List<String>) {
     val batch = batchRepository.findById(batchId).orElseThrow {
         NotFoundException("Could not find course with id $batchId")
     }
@@ -71,7 +71,7 @@ fun addManagersToBatch(batchId: UUID, managerId: List<UUID>) {
     batch.managers.addAll(managers)
     batchRepository.save(batch)
 }    @Transactional
-fun removeManagersFromBatch(batchId: UUID, managerId: List<UUID>) {
+fun removeManagersFromBatch(batchId: UUID, managerId: List<String>) {
     val batch = batchRepository.findById(batchId).orElseThrow {
         NotFoundException("Could not find course with id $batchId")
     }

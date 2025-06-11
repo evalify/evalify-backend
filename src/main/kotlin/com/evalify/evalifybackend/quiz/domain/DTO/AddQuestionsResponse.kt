@@ -6,7 +6,7 @@ data class AddQuestionsResponse(
     val quizId: UUID,
     val sectionId: UUID,
     val addedQuestionCount: Int,
-    val addedBankQuestionIds: List<UUID>,
+    val addedBankQuestionIds: List<UUID?>,
     val message: String
 
 )

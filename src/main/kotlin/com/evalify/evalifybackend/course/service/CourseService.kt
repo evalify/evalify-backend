@@ -30,7 +30,7 @@ class CourseService(
     private val batchRepository: BatchRepository
 ) {
     @Transactional
-    fun assignStudents(courseId: UUID, studentId:List<UUID>){
+    fun assignStudents(courseId: UUID, studentId:List<String>){
         val course = courseRepository.findById(courseId).orElseThrow {
             NotFoundException("Could not find course with id $courseId")
         }
@@ -42,7 +42,7 @@ class CourseService(
     }
 
     @Transactional
-    fun removeStudents(courseId: UUID, studentId: List<UUID>){
+    fun removeStudents(courseId: UUID, studentId: List<String>){
         val course = courseRepository.findById(courseId).orElseThrow {
             NotFoundException("Could not find course with id $courseId")
         }
@@ -54,7 +54,7 @@ class CourseService(
     }
 
     @Transactional
-    fun assignInstructors(courseId: UUID, instructorId:List<UUID>){
+    fun assignInstructors(courseId: UUID, instructorId:List<String>){
         val course = courseRepository.findById(courseId).orElseThrow {
             NotFoundException("Could not find course with id $courseId")
         }
@@ -66,7 +66,7 @@ class CourseService(
     }
 
     @Transactional
-    fun removeInstructors(courseId: UUID, instructorId:List<UUID>){
+    fun removeInstructors(courseId: UUID, instructorId:List<String>){
         val course = courseRepository.findById(courseId).orElseThrow{
             NotFoundException("Could not find course with id $courseId")
         }

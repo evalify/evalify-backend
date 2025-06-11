@@ -121,7 +121,7 @@ class UserService(
         }
     }
 
-    fun updateUser(userId: UUID, request: UpdateUserRequest): UserResponse {
+    fun updateUser(userId: String, request: UpdateUserRequest): UserResponse {
         val user = userRepository.findById(userId).orElseThrow {
             NotFoundException("User with id $userId not found")
         }
@@ -145,14 +145,14 @@ class UserService(
         } catch (e: Exception) {
             throw RuntimeException("Failed to update user: ${e.message}")
         }
-    }    fun deleteUser(userId: UUID) {
+    }    fun deleteUser(userId: String) {
         val user = userRepository.findById(userId).orElseThrow {
             NotFoundException("User with id $userId not found")
         }
         userRepository.delete(user)
     }
 
-    fun bulkDeleteUsers(userIds: List<UUID>) {
+    fun bulkDeleteUsers(userIds: List<String>) {
         val users = userRepository.findAllById(userIds)
         if (users.isEmpty()) {
             throw NotFoundException("No users found for the provided IDs")
@@ -164,7 +164,7 @@ class UserService(
         return userRepository.save(user)
     }
 
-    fun getUserById(userId: UUID): UserResponse {
+    fun getUserById(userId: String): UserResponse {
         val user = userRepository.findById(userId).orElseThrow {
             NotFoundException("User with id $userId not found")
         }

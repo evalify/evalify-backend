@@ -19,7 +19,7 @@ class QuizStudentController(
 ) {
 
     @GetMapping
-    fun getQuiz(@PathVariable studentId: UUID,@PathVariable id: UUID, request: HttpServletRequest)
+    fun getQuiz(@PathVariable studentId: String,@PathVariable id: UUID, request: HttpServletRequest)
     : List<QuestionsReturnDTO>{
         val requestTime = Instant.now()
         return quizStudentService.getQuizQuestions(studentId = studentId, quizId = id, ipAddress = request.remoteAddr,requestTime = requestTime)

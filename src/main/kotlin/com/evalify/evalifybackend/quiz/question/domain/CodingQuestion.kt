@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -34,10 +36,10 @@ class CodingQuestion(
     val returnType: String?,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val params: List<FunctionParam>?,
+    val params: List<FunctionParamDTO>?,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val testcases: List<TestCase>?,
+    val testcases: List<TestCaseDTO>?,
     val language: List<String>?,
     val answer: String?
 ): BaseQuestion(

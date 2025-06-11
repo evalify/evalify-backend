@@ -17,9 +17,10 @@ enum class Role {
 class User (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID? = null,
+    val id: String? = null,
     var name: String,
     var email: String,
+    @Column(unique = true)
     var profileId: String? = null,
     var password: String? = null,
     var image: String? = null,

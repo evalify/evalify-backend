@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class AddBankQuestionDTO(
     val section_id: UUID,
-    val user_id: UUID,
+    val user_id: String,
     val bank_id:List<UUID>
 ) {
 }

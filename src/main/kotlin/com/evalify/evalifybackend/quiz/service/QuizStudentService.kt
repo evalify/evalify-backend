@@ -31,7 +31,7 @@ class QuizStudentService(
     val quizStudentRepository: QuizStudentRepository
 ) {
 
-    fun getQuizQuestions(quizId: UUID,studentId: UUID,ipAddress:String, requestTime :Instant): List<QuestionsReturnDTO> {
+    fun getQuizQuestions(quizId: UUID,studentId: String,ipAddress:String, requestTime :Instant): List<QuestionsReturnDTO> {
         val quiz = quizRepository.findById(quizId).orElseThrow{NotFoundException("quiz with id $quizId not found")}
         val user = userRepository.findById(studentId)
 

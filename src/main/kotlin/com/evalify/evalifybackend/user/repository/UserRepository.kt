@@ -10,7 +10,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import java.util.UUID
 
 @RepositoryRestResource(path = "user")
-interface UserRepository : JpaRepository<User, UUID> {
+interface UserRepository : JpaRepository<User, String> {
     fun findByEmail(email: String): User?
     fun findByProfileId(profileId: String): User?
     fun existsByEmail(email: String): Boolean

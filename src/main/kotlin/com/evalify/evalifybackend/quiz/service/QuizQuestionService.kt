@@ -37,7 +37,7 @@ open class QuizQuestionService(
     @Transactional
     open fun addByQuestionByFilters(
         quizId: UUID, topicId: List<UUID>?, difficulty: List<Difficulty>?, noOfQuestion: Int?,
-        questionTypes: List<QuestionTypes>?, userId: UUID, bankIds: List<UUID>?,sectionId : UUID
+        questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?,sectionId : UUID
     ): AddQuestionsResponse {
 
 
@@ -48,13 +48,15 @@ open class QuizQuestionService(
         val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
-        val user = userRepository.getReferenceById(userId)
         val section = sectionRepository.findById(sectionId).orElseThrow{
             NotFoundException("Quiz with id $sectionId not found")
         }
 
+        val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
+
+
         // for unique addition to the quiz from the bank questions
-        val existingQuestionIds: Set<UUID> = section.quizQuestions.map{ it.bankQuestion.id }.toSet()
+        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion.id }.toSet()
 
         var count : Int
 

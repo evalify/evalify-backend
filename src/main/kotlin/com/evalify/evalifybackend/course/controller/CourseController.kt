@@ -97,7 +97,7 @@ class CourseController(
                 .body(null)
         }
     }    @PutMapping("/{courseId}/assign-students")
-    fun assignStudentsToCourses(@PathVariable courseId: UUID, @RequestBody studentIds: List<UUID>): ResponseEntity<Any> {
+    fun assignStudentsToCourses(@PathVariable courseId: UUID, @RequestBody studentIds: List<String>): ResponseEntity<Any> {
         return try {
             courseService.assignStudents(courseId, studentIds)
             ResponseEntity.ok().build()
@@ -111,7 +111,7 @@ class CourseController(
     }
 
     @DeleteMapping("/{courseId}/students/{studentId}")
-    fun removeStudentFromCourse(@PathVariable courseId: UUID, @PathVariable studentId: UUID): ResponseEntity<Any> {
+    fun removeStudentFromCourse(@PathVariable courseId: UUID, @PathVariable studentId: String): ResponseEntity<Any> {
         return try {
             courseService.removeStudents(courseId, listOf(studentId))
             ResponseEntity.ok().build()
@@ -127,7 +127,7 @@ class CourseController(
     @PostMapping("/{courseId}/students")
     fun assignStudentsToCoursePost(
         @PathVariable courseId: UUID,
-        @RequestBody requestBody: Map<String, List<UUID>>
+        @RequestBody requestBody: Map<String, List<String>>
     ): ResponseEntity<Any> {
         return try {
             val studentIds = requestBody["studentIds"] ?: emptyList()
@@ -142,7 +142,7 @@ class CourseController(
     }
 
     @PutMapping("/{courseId}/assign-instructor")
-    fun assignInstructorsToCourses(@PathVariable courseId: UUID, @RequestBody userId: List<UUID>): ResponseEntity<Any> {
+    fun assignInstructorsToCourses(@PathVariable courseId: UUID, @RequestBody userId: List<String>): ResponseEntity<Any> {
         return try {
             courseService.assignInstructors(courseId, userId)
             ResponseEntity.ok().build()
@@ -156,7 +156,7 @@ class CourseController(
     }
 
     @PutMapping("/{courseId}/remove-instructor")
-    fun removeInstructorsFromCourse(@PathVariable courseId: UUID, @RequestBody userId: List<UUID>): ResponseEntity<Any> {
+    fun removeInstructorsFromCourse(@PathVariable courseId: UUID, @RequestBody userId: List<String>): ResponseEntity<Any> {
         return try {
             courseService.removeInstructors(courseId, userId)
             ResponseEntity.ok().build()
@@ -286,7 +286,7 @@ class CourseController(
     @PostMapping("/{courseId}/instructors")
     fun assignInstructorsToCoursePost(
         @PathVariable courseId: UUID,
-        @RequestBody requestBody: Map<String, List<UUID>>
+        @RequestBody requestBody: Map<String, List<String>>
     ): ResponseEntity<Any> {
         return try {
             val instructorIds = requestBody["instructorIds"] ?: emptyList()
@@ -302,7 +302,7 @@ class CourseController(
     }
 
     @DeleteMapping("/{courseId}/instructors/{instructorId}")
-    fun removeInstructorFromCourse(@PathVariable courseId: UUID, @PathVariable instructorId: UUID): ResponseEntity<Any> {
+    fun removeInstructorFromCourse(@PathVariable courseId: UUID, @PathVariable instructorId: String): ResponseEntity<Any> {
         return try {
             courseService.removeInstructors(courseId, listOf(instructorId))
             ResponseEntity.ok().build()
@@ -344,7 +344,8 @@ class CourseController(
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
         return try {
-            val userId = UUID.fromString(request["userId"].toString())
+            val userId = request["userId"].toString()
+
 
             val currentUser = userRepository.findById(userId).orElse(null)
                 ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -370,7 +371,7 @@ class CourseController(
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
         return try {
-            val userId = UUID.fromString(request["userId"].toString())
+            val userId = request["userId"].toString()
             val query = request["query"]?.toString()
                 ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(mapOf("error" to "Query parameter is required"))
@@ -399,7 +400,7 @@ class CourseController(
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
         return try {
-            val userId = UUID.fromString(request["userId"].toString())
+            val userId = request["userId"].toString()
 
             val currentUser = userRepository.findById(userId).orElse(null)
                 ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)

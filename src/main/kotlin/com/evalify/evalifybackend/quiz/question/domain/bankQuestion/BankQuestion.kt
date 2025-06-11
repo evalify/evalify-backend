@@ -20,7 +20,7 @@ import java.util.UUID
 class BankQuestion (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID? = null,
 
     @OneToOne
     val question: BaseQuestion,
@@ -28,6 +28,6 @@ class BankQuestion (
     val updatedAt: Instant = Instant.now(),
 
     @ManyToOne
-    val updateBy: User
+    val updateBy: User? = null,
 
 )

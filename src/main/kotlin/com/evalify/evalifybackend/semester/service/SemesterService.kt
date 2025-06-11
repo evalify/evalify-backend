@@ -28,7 +28,7 @@ class SemesterService
     private val courseRepository: CourseRepository,
     private val batchRepository: BatchRepository
 ) {
-    fun assignManagersToSemester(semesterId: UUID, managersId: List<UUID>) {
+    fun assignManagersToSemester(semesterId: UUID, managersId: List<String>) {
         val semester = semesterRepository.findById(semesterId).orElseThrow {
             NotFoundException("Semester $semesterId not found")
         }
@@ -40,7 +40,7 @@ class SemesterService
         semesterRepository.save(semester)
     }
 
-    fun removeManagersFromSemester(semesterId: UUID, managersId: List<UUID>) {
+    fun removeManagersFromSemester(semesterId: UUID, managersId: List<String>) {
         val semester = semesterRepository.findById(semesterId).orElseThrow {
             NotFoundException("Semester $semesterId not found")
         }

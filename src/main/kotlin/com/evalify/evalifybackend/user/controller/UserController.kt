@@ -74,7 +74,7 @@ class UserController (private val userService: UserService)
 
     @PutMapping("/{userId}")
     fun updateUser(
-        @PathVariable userId: UUID,
+        @PathVariable userId: String,
         @RequestBody request: UpdateUserRequest
     ): ResponseEntity<Any> {
         return try {
@@ -91,7 +91,7 @@ class UserController (private val userService: UserService)
     }
 
     @DeleteMapping("/{userId}")
-    fun deleteUser(@PathVariable userId: UUID): ResponseEntity<Any> {
+    fun deleteUser(@PathVariable userId: String): ResponseEntity<Any> {
         return try {
             userService.deleteUser(userId)
             ResponseEntity.ok(mapOf("message" to "User deleted successfully"))
@@ -109,14 +109,14 @@ class UserController (private val userService: UserService)
             HttpStatus.CREATED
         )
     }    @DeleteMapping("/bulk")
-fun deleteUsers(@RequestBody users: List<UUID>): ResponseEntity<Any> {
+fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
     return ResponseEntity(
         userService.bulkDeleteUsers(users),
         HttpStatus.OK
     )
 }
     @GetMapping("/{userId}")
-    fun getUserById(@PathVariable userId: UUID): ResponseEntity<Any> {
+    fun getUserById(@PathVariable userId: String): ResponseEntity<Any> {
         return try {
             val user = userService.getUserById(userId)
             ResponseEntity.ok(user)

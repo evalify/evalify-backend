@@ -26,7 +26,7 @@ class QuizQuestionController(val questionService: QuizQuestionService) {
         @RequestParam(required = false) difficulty : List<Difficulty>,
         @RequestParam(required = false) nofQuestions : Int,
         @RequestParam(required = false) questionType : List<QuestionTypes>,
-        @RequestParam(required = true) userId : UUID
+        @RequestParam(required = true) userId : String
     ): ResponseEntity<AddQuestionsResponse> {
         val response = questionService.addByQuestionByFilters(quizId = quizId,topicId = topicId,difficulty = difficulty,noOfQuestion = nofQuestions,
             questionTypes = questionType,userId = userId,bankIds = bankIds,sectionId = sectionID)

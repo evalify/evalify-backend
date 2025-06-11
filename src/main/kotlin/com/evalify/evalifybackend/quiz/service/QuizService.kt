@@ -8,7 +8,7 @@ import java.util.*
 
 @Service
 class QuizService(private val quizRepository: QuizRepository,private val userRepository: UserRepository) {
-    fun addStudentToQuiz(quizId: UUID, studentId:List<UUID> ){
+    fun addStudentToQuiz(quizId: UUID, studentId:List<String> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{
             NotFoundException("quiz with id $quizRepository not found")
         }
@@ -17,7 +17,7 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         quizRepository.save(quiz)
     }
 
-    fun removeStudentFromQuiz(quizId: UUID, studentId:List<UUID> ){
+    fun removeStudentFromQuiz(quizId: UUID, studentId:List<String> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{
             NotFoundException("quiz with id $quizId not found")
         }
