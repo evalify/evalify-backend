@@ -5,7 +5,9 @@ import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.ReturnBankQuestionsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.SearchTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.UpdateBankStudentDTO
 import com.evalify.evalifybackend.bank.service.BankManagerService
@@ -34,6 +36,13 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 ) {
 
 
+
+
+
+
+
+
+
     @PostMapping("/'")
     fun createBank(@RequestBody bank: CreateBankDTO): ResponseEntity<CreateBankDTO> {
 
@@ -42,10 +51,27 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
         return ResponseEntity.ok(result)
     }
 
+    @PutMapping("/{bankId}")
+    fun editBank(@RequestBody bank: CreateBankDTO,@PathVariable bankId:UUID) :  ResponseEntity<CreateBankDTO> {
+
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        val bank = bankService.editBank(dto = bank, userId = userId, bankId = bankId )
+        return ResponseEntity.ok(bank)
+
+    }
+
     @PutMapping("/{bankId}/")
     fun deleteBank(@PathVariable bankId: UUID) {
         bankService.deleteBank(bankId)
 
+    }
+
+    @PatchMapping("/bankId")
+    fun updateBank(@RequestBody bank: CreateBankDTO,@PathVariable bankId :UUID) : ResponseEntity<CreateBankDTO> {
+
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        bankService.editBank(dto = bank, userId = userId, bankId = bankId )
+        return ResponseEntity.ok(bank)
     }
 
 
@@ -55,6 +81,10 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
         return ResponseEntity.ok(result)
     }
 
+    @PutMapping("/{bankId}/remove-topic/{topicId}")
+    fun removeTopic(@PathVariable bankId: UUID, @PathVariable topicId: UUID) {
+        bankTopicService.removeTopic(bankId = bankId, topicId = topicId)
+    }
 
 
 
@@ -86,8 +116,9 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 
 
 
+
     @GetMapping("/{bankId}/topics")
-    fun getBankTopics(@PathVariable bankId : UUID): List<Topic>?{
+    fun getBankTopics(@PathVariable bankId : UUID): List<ReturnTopicDTO>?{
         return bankManagerService.getBankTopics(bankId = bankId)
     }
 
@@ -101,14 +132,18 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 
         bankManagerService.createBankQuestion(dto = bankQuestion, bankId = bankId, userId = userId)}
 
-    @PatchMapping("/{bankId}/questions/edit-question/{questionId}")
-        fun editBankQuestion(@PathVariable bankId: UUID, @PathVariable questionId: UUID) {
-            val userId: String? = SecurityUtils.getCurrentUserId()
 
-        }
+    @PutMapping("/{bankId}/questions/edit-question/{questionId}")
+    fun editBankQuestion(@PathVariable bankId: UUID, @PathVariable questionId: UUID,@RequestBody bankQuestion: CreateQuestionDTO) {
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        bankManagerService.editBankQuestion(dto = bankQuestion, questionId = questionId, userId = userId, bankId = bankId)
+    }
+
+
+
 
     @PutMapping("/{bankId}/questions/delete-question/{questionId}")
         fun deleteBankQuestion(@PathVariable bankId: UUID, @PathVariable questionId: UUID) {
-
+                bankManagerService.deleteBankQuestion(questionId)
         }
     }

@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -75,5 +76,26 @@ class DescriptiveQuestion(
     }
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.DESCRIPTIVE
+    }
+
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+        val patchedQuestion = DescriptiveQuestion(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = dto.topic ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            negativeMark = dto.negativeMark ?: this.negativeMark,
+            difficulty = dto.difficulty ?: this.difficulty,
+            expectedAnswer = dto.expectedAnswer ?: this.expectedAnswer,
+            strictness = dto.strictness ?: this.strictness,
+            guidelines = dto.guidelines ?: this.guidelines
+        )
+
+        return patchedQuestion
     }
 }

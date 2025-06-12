@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -33,7 +34,7 @@ class MatchTheFollowing (
     difficulty: Difficulty,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val keys:MutableList<MatchPair> = mutableListOf<MatchPair>()
+    val keys:MutableList<MatchPair>
 
 ): BaseQuestion(
     id=id,
@@ -92,5 +93,23 @@ class MatchTheFollowing (
 
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.MATCH_THE_FOLLOWING
+    }
+
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+        val patchedQuestion = MatchTheFollowing(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = dto.topic ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            difficulty = dto.difficulty ?: this.difficulty,
+            negativeMark = dto.negativeMark ?: this.negativeMark,
+            keys = dto.keys ?: this.keys
+        )
+        return patchedQuestion
     }
 }

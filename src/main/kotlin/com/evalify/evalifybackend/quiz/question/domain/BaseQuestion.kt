@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 
 import jakarta.persistence.DiscriminatorColumn
@@ -88,6 +89,8 @@ abstract class BaseQuestion(
     abstract fun mapToType(shuffleOptions: Boolean = false): QuestionsReturnDTO
 
     abstract fun getQuestionType(): QuestionTypes
+
+    abstract fun patchWith(dto : PatchQuestionDTO) : BaseQuestion?
 }
 
 

@@ -35,9 +35,9 @@ class Bank(
     @ManyToMany
     val sharedUser:MutableList<User> = mutableListOf(),
 
-    val createdAt: Instant,
+    val createdAt: Instant? = Instant.now(),
     @ManyToOne(fetch = FetchType.LAZY)
-    val createdBy: User,
+    val createdBy: User? = null,
 
     @ManyToMany
     val bankQuestion: MutableList<BankQuestion> = mutableListOf()

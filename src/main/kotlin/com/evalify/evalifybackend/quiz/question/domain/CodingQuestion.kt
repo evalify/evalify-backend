@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -96,6 +97,31 @@ class CodingQuestion(
 
     }
 
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+        val patchedQuestion = CodingQuestion(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = dto.topic ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            negativeMark = dto.negativeMark ?: this.negativeMark,
+            difficulty = dto.difficulty ?: this.difficulty,
+            driverCode = dto.driverCode ?: this.driverCode,
+            boilerCode = dto.boilerCode ?: this.boilerCode,
+            functionName = dto.functionName ?: this.functionName,
+            returnType = dto.returnType ?: this.returnType,
+            params = dto.params ?: this.params,
+            testcases = dto.testcases ?: this.testcases,
+            language = dto.language ?: this.language,
+            answer = dto.answer ?: this.answer
+        )
+        return patchedQuestion
+    }
+
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.CODING
     }
@@ -104,5 +130,8 @@ class CodingQuestion(
  class FunctionParam(val param: String, val type: String)
 
  class TestCase(val input: List<Any>, val expected: Any)
+
+
+
 
 

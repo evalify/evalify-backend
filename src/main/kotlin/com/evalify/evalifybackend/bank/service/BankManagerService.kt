@@ -5,7 +5,9 @@ import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
 import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.ReturnBankQuestionsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
 import com.evalify.evalifybackend.bank.domain.DTO.TopicDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
@@ -61,10 +63,11 @@ class BankManagerService(
 
     @Transactional
     fun getBankQuestions(bankId: UUID) : ReturnBankQuestionsDTO {
-        val bank = bankRepository.findById(bankId)
+        val bank = bankRepository.findByIdWithQuestions(bankId)
 
-        val bankQuestions = bank.get().bankQuestion
-        val topics = bank.get().topics
+
+        val bankQuestions = bank.bankQuestion
+        val topics = bank.topics
 
         return ReturnBankQuestionsDTO(
             questions = bankQuestions,
@@ -73,12 +76,16 @@ class BankManagerService(
 
     }
 
-
-    fun getBankTopics(bankId: UUID): List<Topic>? {
+    @Transactional
+    fun getBankTopics(bankId: UUID): List<ReturnTopicDTO>? {
         val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
-        return bank.topics
-    }
+        val topics = bank.topics
 
+        return topics?.map { topic -> ReturnTopicDTO(id = topic.id, name = topic.name) }
+
+
+    }
+    @Transactional
     fun getQuestionsByTopic(topic: List<UUID>, bankId: UUID): List<BankQuestion> {
 
         val topics = topicRepo.findAllById(topic)
@@ -285,9 +292,12 @@ class BankManagerService(
 
         )
 
-        bankQuestionRepository.save(bankQuestion)
+        bankQuestionRepository.save(bankQuestions)
 
     }
+
+
+
 
     fun deleteBankQuestion(questionId : UUID ){
 

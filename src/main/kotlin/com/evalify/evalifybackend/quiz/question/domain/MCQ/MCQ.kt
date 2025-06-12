@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -32,7 +33,7 @@ class MCQ(
     difficulty: Difficulty,
     @Type(JsonBinaryType::class)
     @Column(columnDefinition = "jsonb")
-    val options: MutableList<MCQOption> = mutableListOf<MCQOption>()
+    val options: MutableList<MCQOption>
 
 ) : BaseQuestion(
     id=id,
@@ -80,5 +81,25 @@ class MCQ(
 
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.MCQ
+    }
+
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+
+        val patchedQuestion = MCQ(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = dto.topic ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            negativeMark = dto.negativeMark ?: this.negativeMark,
+            difficulty = dto.difficulty ?: this.difficulty,
+            options = dto.options?: this.options
+
+        )
+        return patchedQuestion
     }
 }

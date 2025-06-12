@@ -44,4 +44,27 @@ class BankService(private val bankRepository: BankRepository, private val userRe
         bankRepository.deleteById(bankId)
     }
 
+
+    fun editBank(dto : CreateBankDTO , bankId : UUID , userId : String?): CreateBankDTO{
+        if(userId == null) throw RuntimeException("User id cannot be null")
+
+        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+
+        val bank = Bank(
+            id = bankId,
+            name = dto.name,
+            semester = dto.semester,
+
+            courseCode = dto.courseCode
+        )
+
+        val savedBank = bankRepository.save(bank)
+        return CreateBankDTO(
+            name = savedBank.name,
+            courseCode = savedBank.courseCode,
+            semester = savedBank.semester,
+            )
+
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain.FillUp
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BlankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -88,4 +90,25 @@ class FillUp(
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.FILL_UP
     }
+
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+        val patchedQuestion = FillUp(
+                id = this.id,
+                bank = this.bank,
+                topic = dto.topic?:this.topic,
+                question = dto.question?:this.question,
+                explanation = dto.explanation?:this.explanation,
+                hint = dto.hint?:this.hint,
+                marks = dto.marks?:this.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy?:this.bloomsTaxonomy,
+                co = dto.co?:this.co,
+                negativeMark = dto.negativeMark?:this.negativeMark,
+                difficulty = dto.difficulty?:this.difficulty,
+                strictMatch = dto.strictMatch?:this.strictMatch,
+                llmEval = dto.llmEval?:this.llmEval,
+                template = dto.template?:this.template,
+                blanks = dto.blanks?:this.blanks
+
+        )
+        return patchedQuestion }
 }

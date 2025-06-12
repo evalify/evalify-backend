@@ -80,4 +80,21 @@ class TrueFalse(
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.TRUEFALSE
     }
+
+    override fun patchWith(dto: com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO): BaseQuestion? {
+        val patchedQuestion = TrueFalse(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = dto.topic ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            difficulty = dto.difficulty ?: this.difficulty,
+            answer = dto.trueFalseAnswer ?: this.answer
+        )
+        return patchedQuestion
+    }
 }
