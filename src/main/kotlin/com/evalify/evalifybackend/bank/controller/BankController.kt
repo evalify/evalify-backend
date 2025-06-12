@@ -2,12 +2,16 @@ package com.evalify.evalifybackend.bank.controller
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.CreateBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.ReturnBankQuestionsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.SearchTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.UpdateBankStudentDTO
 import com.evalify.evalifybackend.bank.service.BankManagerService
+import com.evalify.evalifybackend.bank.service.BankService
 import com.evalify.evalifybackend.bank.service.BankStudentService
+import com.evalify.evalifybackend.bank.service.BankTopicService
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.security.utils.SecurityUtils
@@ -25,7 +29,34 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/bank")
-class BankController(val bankStudentService: BankStudentService, val bankManagerService: BankManagerService) {
+class BankController(val bankStudentService: BankStudentService, val bankManagerService: BankManagerService,
+                     val bankService: BankService, val bankTopicService: BankTopicService
+) {
+
+
+    @PostMapping("/'")
+    fun createBank(@RequestBody bank: CreateBankDTO): ResponseEntity<CreateBankDTO> {
+
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        val result = bankService.createBank(dto = bank,userId = userId)
+        return ResponseEntity.ok(result)
+    }
+
+    @PutMapping("/{bankId}/")
+    fun deleteBank(@PathVariable bankId: UUID) {
+        bankService.deleteBank(bankId)
+
+    }
+
+
+    @PostMapping("/{bankId}/add-topic")
+    fun addTopic(@PathVariable bankId: UUID, @RequestBody topic: CreateTopicDTO):ResponseEntity<CreateTopicDTO> {
+        val result = bankTopicService.addTopic(dto = topic , bankId = bankId)
+        return ResponseEntity.ok(result)
+    }
+
+
+
 
 
     @GetMapping("/")

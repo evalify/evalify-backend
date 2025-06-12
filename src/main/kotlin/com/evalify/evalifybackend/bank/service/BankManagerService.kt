@@ -48,7 +48,7 @@ class BankManagerService(
 
         return banks.map { bank ->
             BankDetailsDTO(
-                bankId = bank.id,
+                bankId = bank?.id,
                 course = bank.courseCode,
                 name = bank.name,
                 semester = "S${bank.semester}",

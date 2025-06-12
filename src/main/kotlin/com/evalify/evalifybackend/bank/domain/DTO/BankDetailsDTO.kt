@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class BankDetailsDTO(
     val course : String?,
-    val bankId : UUID,
+    val bankId : UUID?,
     val name : String,
     val semester: String,
     val topics : Int?,

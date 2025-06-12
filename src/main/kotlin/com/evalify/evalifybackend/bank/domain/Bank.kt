@@ -23,13 +23,13 @@ import java.util.UUID
 class Bank(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID? = null,
     val name: String,
     val courseCode: String? = null,
     val semester: Int,
 
     @OneToMany(fetch = FetchType.LAZY , mappedBy = "bank")
-    val topics : List<Topic>?,
+    val topics : MutableList<Topic>? = mutableListOf(),
 
 
     @ManyToMany
