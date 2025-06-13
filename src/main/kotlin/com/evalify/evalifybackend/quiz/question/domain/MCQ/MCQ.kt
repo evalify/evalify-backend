@@ -90,7 +90,8 @@ class MCQ(
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty,
-            explanation = this.explanation
+            explanation = this.explanation,
+            type = this.getQuestionType()
 
         )
     }

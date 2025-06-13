@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.domain.DTO
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 
@@ -18,7 +19,8 @@ class CodingBankReturnDTO(
     val driverCode: String?,
     val boilerCode: String?,
     val testcases: List<TestCaseDTO>?,
-    val answer: String?
+    val answer: String?,
+    val type : QuestionTypes?
 ) : BankQuestionsReturnDTO(
     hint = hintText,
     marks = markValue,

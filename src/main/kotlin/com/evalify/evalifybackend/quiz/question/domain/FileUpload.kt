@@ -92,6 +92,7 @@ class FileUpload(
                 strictness = this.strictness,
                 guidelines = this.guidelines,
                 explanation = this.explanation,
+                type = this.getQuestionType()
               )
 
     }

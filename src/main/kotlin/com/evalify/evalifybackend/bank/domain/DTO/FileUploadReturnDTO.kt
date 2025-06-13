@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.domain.DTO
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 
 data class FileUploadReturnDTO(
@@ -14,6 +15,7 @@ data class FileUploadReturnDTO(
     val expectedAnswer:String?,
     val strictness:Float?,
     val guidelines:String?,
+    val type : QuestionTypes?
 
 ) : BankQuestionsReturnDTO(
     hint = hintText,

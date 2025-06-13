@@ -101,6 +101,7 @@ class MatchTheFollowing (
             coValue = this.co,
             difficultyLevel = this.difficulty,
             explanation = this.explanation,
+            type = this.getQuestionType()
         )
     }
 

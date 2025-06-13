@@ -102,7 +102,8 @@ class FillUp(
             strictMatch = this.strictMatch,
             llmEval = this.llmEval,
             template = this.template,
-            explanation = this.explanation
+            explanation = this.explanation,
+            type = this.getQuestionType()
 
         )
     }

@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.domain.DTO
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.BlanksDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
@@ -18,6 +19,7 @@ class FillUpsBankReturnDTO  (
     val strictMatch: Boolean?,
     val llmEval: Boolean?,
     val template: String?,
+    val type : QuestionTypes?
 ): BankQuestionsReturnDTO(
     hint = hintText,
     marks = markValue,

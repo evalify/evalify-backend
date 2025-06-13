@@ -114,7 +114,8 @@ class CodingQuestion(
             driverCode = this.driverCode,
             boilerCode = this.boilerCode,
             testcases = this.testcases,
-            answer = this.answer
+            answer = this.answer,
+            type = this.getQuestionType()
 
         )
     }

@@ -91,7 +91,8 @@ class DescriptiveQuestion(
             strictness = this.strictness,
             guidelines = this.guidelines,
             explanation = this.explanation,
-            answer = this.answer
+            answer = this.answer,
+            type = this.getQuestionType()
 
         )
     }
