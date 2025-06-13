@@ -9,11 +9,11 @@ INSERT INTO "user" (id, name, email, profile_id, image, role, phone_number, is_a
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440007', 'Henry Zhao', 'henry.zhao@example.com', 'henryz', NULL, 1, '6665554443', TRUE, CURRENT_TIMESTAMP, NULL),
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440008', 'Isla Moore', 'isla.moore@example.com', 'islababy', NULL, 0, '5554443332', TRUE, CURRENT_TIMESTAMP, NULL),
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440009', 'Jake Brown', 'jake.brown@example.com', 'jakeb', 'https://example.com/images/jake.jpg', 2, '4443332221', FALSE, CURRENT_TIMESTAMP, NULL);
-INSERT INTO semester(id,name,year,is_active) VALUES(gen_random_uuid(),'AIE 2024',2024,true);
-INSERT INTO semester(id,name,year,is_active) VALUES(gen_random_uuid(),'AIDS 2024',2024,true);
-INSERT INTO semester(id,name,year,is_active) VALUES(gen_random_uuid(),'MECH 2024',2024,true);
-INSERT INTO semester(id,name,year,is_active) VALUES(gen_random_uuid(),'CSE 2024',2024,true);
-INSERT INTO semester(id,name,year,is_active) VALUES(gen_random_uuid(),'CIVIL 2024',2024,true);
+INSERT INTO semester(id,name,year,is_active) VALUES('8d0d1345-2ed6-4cd1-b020-f9c9ae71a3eb','AIE 2024',2024,true);
+INSERT INTO semester(id,name,year,is_active) VALUES('81c3f9a5-3322-4f12-a735-b8c7e637d450','AIDS 2024',2024,true);
+INSERT INTO semester(id,name,year,is_active) VALUES('6f7e1b15-753e-4c79-94d4-51e515a64763','MECH 2024',2024,true);
+INSERT INTO semester(id,name,year,is_active) VALUES('51c005b7-0f0e-42ed-a6f5-9e24c648a90f','CSE 2024',2024,true);
+INSERT INTO semester(id,name,year,is_active) VALUES('01359e2e-0987-4f63-b95b-e9b2b6f6258d','CIVIL 2024',2024,true);
 -- 1. AI Fundamentals - Semester 1
 -- 1. AI Fundamentals - Semester 1
 INSERT INTO bank (
@@ -41,7 +41,7 @@ INSERT INTO bank (
     created_at,
     created_by_id
 ) VALUES (
-             gen_random_uuid(),
+             '42bb8622-58c5-4ec3-a1b1-85d10a1281d8',
              'Machine Learning Basics',
              'ML201',
              2,
@@ -58,7 +58,7 @@ INSERT INTO bank (
     created_at,
     created_by_id
 ) VALUES (
-             gen_random_uuid(),
+             'a194b8f0-1aa0-4be6-8003-d80f9cb00517',
              'Data Structures',
              'CS301',
              3,
@@ -75,7 +75,7 @@ INSERT INTO bank (
     created_at,
     created_by_id
 ) VALUES (
-             gen_random_uuid(),
+             '66cd0d4c-ecc3-4a97-8713-5d8013c1b08a',
              'Database Systems',
              'DB401',
              4,
@@ -92,7 +92,7 @@ INSERT INTO bank (
     created_at,
     created_by_id
 ) VALUES (
-             gen_random_uuid(),
+             '1a432f82-cb59-4ce6-bd61-9c13a7581c12',
              'Operating Systems',
              'OS501',
              5,
@@ -185,16 +185,6 @@ VALUES
 
 
 
--- Course 1
-INSERT INTO course (id, name, description, image, type, semester_id)
-VALUES (
-           '1e1f4b10-d2f2-4f39-b0fa-98337b60a9b1',
-           'Data Structures',
-           'Introduction to data structures and algorithms.',
-           'https://example.com/img1.png',
-           'CORE',
-           '067387c5-c86a-490f-a84f-aabe7a115ebf'
-       );
 
 -- Course 2
 INSERT INTO course (id, name, description, image, type, semester_id)
@@ -204,7 +194,7 @@ VALUES (
            'Concepts of relational databases and SQL.',
            'https://example.com/img2.png',
            'ELECTIVE',
-           '3727b098-d67e-44a2-9440-7dd81d2f36e1'
+           '8d0d1345-2ed6-4cd1-b020-f9c9ae71a3eb'
        );
 
 -- Course 3
@@ -215,7 +205,7 @@ VALUES (
            'Fundamentals of network protocols and architecture.',
            'https://example.com/img3.png',
            'CORE',
-           '067387c5-c86a-490f-a84f-aabe7a115ebf'
+           '81c3f9a5-3322-4f12-a735-b8c7e637d450'
        );
 
 -- Course 4
@@ -226,7 +216,7 @@ VALUES (
            'Understanding the design of OS and process management.',
            'https://example.com/img4.png',
            'CORE',
-           '3727b098-d67e-44a2-9440-7dd81d2f36e1'
+           '6f7e1b15-753e-4c79-94d4-51e515a647631'
        );
 
 -- Course 5
@@ -237,7 +227,7 @@ VALUES (
            'Introduction to ML algorithms and data preprocessing.',
            'https://example.com/img5.png',
            'ELECTIVE',
-           '067387c5-c86a-490f-a84f-aabe7a115ebf'
+           '51c005b7-0f0e-42ed-a6f5-9e24c648a90f'
        );
 
 
@@ -256,7 +246,7 @@ INSERT INTO section (
     is_active,
     quiz_id
 ) VALUES (
-             gen_random_uuid(),
+             '23d79308-1010-4b8c-bf09-ec7cb9e9c2aa',
              'Introduction',
              true,
              '3a333333-3333-3333-3333-333333333333'
@@ -269,7 +259,7 @@ INSERT INTO section (
     is_active,
     quiz_id
 ) VALUES (
-             gen_random_uuid(),
+             'd9a89d3d-5ec0-4696-87e5-e94e9cde7b88',
              'Basic Concepts',
              true,
              '3a333333-3333-3333-3333-333333333333'
@@ -282,7 +272,7 @@ INSERT INTO section (
     is_active,
     quiz_id
 ) VALUES (
-             gen_random_uuid(),
+             'f8eab973-77c5-44b5-9e5d-5e90b5e5bd9d',
              'Advanced Topics',
              true,
              '3a333333-3333-3333-3333-333333333333'
@@ -295,7 +285,7 @@ INSERT INTO section (
     is_active,
     quiz_id
 ) VALUES (
-             gen_random_uuid(),
+             'e6fd2e91-2804-44f3-9fd3-c38ae8d6c310',
              'Case Studies',
              true,
              '7a777777-7777-7777-7777-777777777777'
@@ -308,7 +298,7 @@ INSERT INTO section (
     is_active,
     quiz_id
 ) VALUES (
-             gen_random_uuid(),
+             '2b43882a-f2d4-4a7d-bbb5-bba0c61248a6',
              'Final Review',
              true,
              '7a777777-7777-7777-7777-777777777777'

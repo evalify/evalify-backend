@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.topic.repository.TopicRepo
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -11,6 +12,7 @@ import java.util.UUID
 @Service
 class BankTopicService(private val bankRepository: BankRepository, private val topicRepo: TopicRepo) {
 
+    @Transactional
     fun addTopic(dto: CreateTopicDTO,bankId: UUID): CreateTopicDTO{
 
         val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
@@ -28,6 +30,8 @@ class BankTopicService(private val bankRepository: BankRepository, private val t
 
     }
 
+
+    @Transactional
     fun removeTopic(bankId: UUID, topicId: UUID){
 
         val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }

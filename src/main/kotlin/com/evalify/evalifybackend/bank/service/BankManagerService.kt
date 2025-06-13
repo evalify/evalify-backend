@@ -48,6 +48,11 @@ class BankManagerService(
     fun getDetailsOfBank(): MutableList<BankDetailsDTO> {
         val banks = bankRepository.findAll()
 
+        println("testing${banks[2].bankQuestion}")
+        val question = banks.map{bank -> bank.bankQuestion}.flatten()
+
+        println(question.map{question -> question.question})
+
         return banks.map { bank ->
             BankDetailsDTO(
                 id = bank?.id,
@@ -58,6 +63,7 @@ class BankManagerService(
                 topics = bank.topics?.size,
                 access = bank.sharedUser.map { AccessDTO(it.id,it.name,it.email) } // or it.id, or build DTO
             )
+
         }.toMutableList()
     }
 
@@ -78,17 +84,24 @@ class BankManagerService(
 
     @Transactional
     fun getBankQuestions(bankId: UUID) : ReturnBankQuestionsDTO {
-        val bank = bankRepository.findByIdWithQuestions(bankId)
+        val bank = bankRepository.findById(bankId).orElseThrow{ NotFoundException("Bank with ID $bankId not found") }
 
+        //println(bank)
+        bank.sharedUser.size
 
+        bank.bankQuestion.size
+        bank.topics?.size
         val bankQuestions = bank.bankQuestion
         val topics = bank.topics
+
+        //println(bankQuestions)
 
         return ReturnBankQuestionsDTO(
             questions = bankQuestions,
             topics = topics?.map { TopicDTO(it.id, it.name) }
         )
     }
+
 
     @Transactional
     fun getBankTopics(bankId: UUID): List<ReturnTopicDTO>? {

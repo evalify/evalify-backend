@@ -9,7 +9,9 @@ import java.util.UUID
 
 interface BankRepository : JpaRepository<Bank, UUID> {
 
-    @Query("SELECT b FROM Bank b LEFT JOIN FETCH b.bankQuestion WHERE b.id = :id")
-    fun findByIdWithQuestions(@Param("id") id: UUID): Bank
+//    @Query("SELECT '*' FROM Bank  WHERE id = :id")
+//    fun findByIdWithQuestions(@Param("id") id: UUID): Bank
+
+
 
 }
