@@ -43,5 +43,24 @@ class BankTopicService(private val bankRepository: BankRepository, private val t
 
     }
 
+    @Transactional
+    fun editTopic(bankId : UUID, topic: CreateTopicDTO , topicId: UUID) : CreateTopicDTO {
+
+        val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
+        val topic = Topic(
+            name = topic.name,
+            bank = bank,
+            id = topicId
+        )
+
+        topicRepo.save(topic)
+        bank.topics?.add(topic)
+
+        return CreateTopicDTO(
+            name = topic.name
+        )
+
+    }
+
 
 }

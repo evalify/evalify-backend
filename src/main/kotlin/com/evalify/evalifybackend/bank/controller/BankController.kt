@@ -19,6 +19,7 @@ import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.security.utils.SecurityUtils
 import jakarta.transaction.Transactional
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -34,16 +35,20 @@ import java.util.UUID
 class BankController(val bankStudentService: BankStudentService, val bankManagerService: BankManagerService,
                      val bankService: BankService, val bankTopicService: BankTopicService
 ) {
+    @GetMapping("/")
+    fun getDetailsOfBank() : ResponseEntity<MutableList<BankDetailsDTO>>{
+        val result =  bankManagerService.getDetailsOfBank()
+        return ResponseEntity.ok(result)
+    }
+
+    @GetMapping("/{bankId}")
+    fun getBankDetails(@PathVariable bankId: UUID) : ResponseEntity<BankDetailsDTO> {
+        val result = bankManagerService.getBankInfo(bankId = bankId)
+        return ResponseEntity.ok(result)
+    }
 
 
-
-
-
-
-
-
-
-    @PostMapping("/'")
+    @PostMapping("/")
     fun createBank(@RequestBody bank: CreateBankDTO): ResponseEntity<CreateBankDTO> {
 
         val userId: String? = SecurityUtils.getCurrentUserId()
@@ -60,46 +65,36 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 
     }
 
-    @PutMapping("/{bankId}/")
+    @DeleteMapping("/{bankId}")
     fun deleteBank(@PathVariable bankId: UUID) {
         bankService.deleteBank(bankId)
 
     }
 
-    @PatchMapping("/bankId")
-    fun updateBank(@RequestBody bank: CreateBankDTO,@PathVariable bankId :UUID) : ResponseEntity<CreateBankDTO> {
-
-        val userId: String? = SecurityUtils.getCurrentUserId()
-        bankService.editBank(dto = bank, userId = userId, bankId = bankId )
-        return ResponseEntity.ok(bank)
+    @GetMapping("/{bankId}/topics")
+    fun getBankTopics(@PathVariable bankId : UUID): List<ReturnTopicDTO>?{
+        return bankManagerService.getBankTopics(bankId = bankId)
     }
 
-
-    @PostMapping("/{bankId}/add-topic")
+    @PostMapping("/{bankId}/topic")
     fun addTopic(@PathVariable bankId: UUID, @RequestBody topic: CreateTopicDTO):ResponseEntity<CreateTopicDTO> {
         val result = bankTopicService.addTopic(dto = topic , bankId = bankId)
         return ResponseEntity.ok(result)
     }
 
-    @PutMapping("/{bankId}/remove-topic/{topicId}")
+    @PutMapping("/{bankId}/topic/{topicId}")
+    fun editTopic(@PathVariable bankId: UUID, @PathVariable topicId: UUID,@RequestBody topic: CreateTopicDTO)
+    :ResponseEntity<CreateTopicDTO>{
+        val result = bankTopicService.editTopic(bankId = bankId, topicId = topicId , topic = topic )
+        return ResponseEntity.ok(result)
+    }
+
+
+    @DeleteMapping("/{bankId}/topic/{topicId}")
     fun removeTopic(@PathVariable bankId: UUID, @PathVariable topicId: UUID) {
         bankTopicService.removeTopic(bankId = bankId, topicId = topicId)
     }
 
-
-
-
-    @GetMapping("/")
-    fun getDetailsOfBank() : ResponseEntity<MutableList<BankDetailsDTO>>{
-        val result =  bankManagerService.getDetailsOfBank()
-        return ResponseEntity.ok(result)
-    }
-
-    @GetMapping("/{bankId}")
-    fun getBankDetails(@PathVariable bankId: UUID) : ResponseEntity<BankDetailsDTO> {
-        val result = bankManagerService.getBankInfo(bankId = bankId)
-        return ResponseEntity.ok(result)
-    }
 
     @GetMapping("/{bankId}/questions")
     @Transactional
@@ -117,17 +112,6 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
         val result = bankManagerService.getQuestionsByTopic(topicId, bankId)
         return ResponseEntity.ok(result)
     }
-
-
-
-
-
-    @GetMapping("/{bankId}/topics")
-    fun getBankTopics(@PathVariable bankId : UUID): List<ReturnTopicDTO>?{
-        return bankManagerService.getBankTopics(bankId = bankId)
-    }
-
-
 
     @PutMapping("/{bankId}/questions/add-question/")
     fun addBankQuestion(@PathVariable bankId:UUID,@RequestBody bankQuestion: CreateQuestionDTO) {
