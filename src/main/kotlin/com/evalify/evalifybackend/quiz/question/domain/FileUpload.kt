@@ -1,6 +1,9 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.DescriptiveBankReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.FileUploadReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -75,9 +78,28 @@ class FileUpload(
             difficultyLevel = this.difficulty
         )
     }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+
+            return FileUploadReturnDTO(
+                question = this.question,
+                hintText = this.hint,
+                markValue = this.marks,
+                taxonomy = this.bloomsTaxonomy,
+                coValue = this.co,
+                difficultyLevel = this.difficulty,
+                expectedAnswer = this.expectedAnswer,
+                strictness = this.strictness,
+                guidelines = this.guidelines,
+                explanation = this.explanation,
+              )
+
+    }
+
     override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.FILE_UPLOAD
     }
+
 
     override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
         val patchedQuestion = FileUpload(

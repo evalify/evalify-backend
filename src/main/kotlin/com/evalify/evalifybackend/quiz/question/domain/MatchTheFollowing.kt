@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.MatchBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -78,8 +80,6 @@ class MatchTheFollowing (
         }
 
 
-
-
         return MatchReturnDTO(
             question = this.question,
             matchPair = pairs.toMutableList(),
@@ -88,6 +88,19 @@ class MatchTheFollowing (
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return MatchBankReturnDTO(
+            question = this.question,
+            keys = this.keys,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            explanation = this.explanation,
         )
     }
 

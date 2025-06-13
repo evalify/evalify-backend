@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
 
@@ -87,6 +88,8 @@ abstract class BaseQuestion(
     abstract fun copyQuestion(): BaseQuestion
 
     abstract fun mapToType(shuffleOptions: Boolean = false): QuestionsReturnDTO
+
+    abstract fun mapToBankType() : BankQuestionsReturnDTO
 
     abstract fun getQuestionType(): QuestionTypes
 

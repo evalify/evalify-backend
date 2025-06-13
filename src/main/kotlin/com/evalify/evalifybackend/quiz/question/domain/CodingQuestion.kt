@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.CodingBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
@@ -95,6 +97,26 @@ class CodingQuestion(
                 difficultyLevel = this.difficulty
             )
 
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return CodingBankReturnDTO(
+            question = this.question,
+            functionName = this.functionName,
+            returnType = this.returnType,
+            params = this.params,
+            language = this.language,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            driverCode = this.driverCode,
+            boilerCode = this.boilerCode,
+            testcases = this.testcases,
+            answer = this.answer
+
+        )
     }
 
     override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {

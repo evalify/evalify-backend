@@ -1,7 +1,9 @@
 package com.evalify.evalifybackend.quiz.question.domain.FillUp
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.BlankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.FillUpsBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -85,6 +87,23 @@ class FillUp(
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return FillUpsBankReturnDTO(
+            question = this.question,
+            blanks = this.blanks,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            strictMatch = this.strictMatch,
+            llmEval = this.llmEval,
+            template = this.template,
+            explanation = this.explanation
+
         )
     }
     override fun getQuestionType(): QuestionTypes {

@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.bank.controller
 
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
@@ -39,6 +40,7 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
     fun getDetailsOfBank() : ResponseEntity<MutableList<BankDetailsDTO>>{
         val result =  bankManagerService.getDetailsOfBank()
         return ResponseEntity.ok(result)
+
     }
 
     @GetMapping("/{bankId}")
@@ -98,7 +100,7 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 
     @GetMapping("/{bankId}/questions")
     @Transactional
-    fun getBankQuestions(@PathVariable bankId: UUID): ResponseEntity<ReturnBankQuestionsDTO> {
+    fun getBankQuestions(@PathVariable bankId: UUID): ResponseEntity<List<BankQuestionsReturnDTO>> {
         val result = bankManagerService.getBankQuestions(bankId)
         return ResponseEntity.ok(result)
     }

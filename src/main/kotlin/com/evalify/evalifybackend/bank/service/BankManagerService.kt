@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.bank.service
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
 import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
@@ -83,23 +84,15 @@ class BankManagerService(
     }
 
     @Transactional
-    fun getBankQuestions(bankId: UUID) : ReturnBankQuestionsDTO {
+    fun getBankQuestions(bankId: UUID) : List<BankQuestionsReturnDTO> {
         val bank = bankRepository.findById(bankId).orElseThrow{ NotFoundException("Bank with ID $bankId not found") }
-
-        //println(bank)
-        bank.sharedUser.size
-
-        bank.bankQuestion.size
-        bank.topics?.size
         val bankQuestions = bank.bankQuestion
-        val topics = bank.topics
 
-        //println(bankQuestions)
+        return bankQuestions.map { bankQuestion ->
+            val baseQuestion = bankQuestion.question
+            baseQuestion.mapToBankType()
+        }
 
-        return ReturnBankQuestionsDTO(
-            questions = bankQuestions,
-            topics = topics?.map { TopicDTO(it.id, it.name) }
-        )
     }
 
 
@@ -216,7 +209,8 @@ class BankManagerService(
                 difficulty = dto.difficulty,
                 expectedAnswer = dto.expectedAnswer,
                 strictness = dto.strictness,
-                guidelines = dto.guidelines
+                guidelines = dto.guidelines,
+                answer = dto.answer
             )
 
             QuestionTypes.FILE_UPLOAD  -> FileUpload(

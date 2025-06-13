@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.MCQBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -76,6 +78,20 @@ class MCQ(
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return MCQBankReturnDTO(
+            question = this.question,
+            options = this.options,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            explanation = this.explanation
+
         )
     }
 

@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.DescriptiveBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -29,7 +31,8 @@ class DescriptiveQuestion(
     difficulty: Difficulty,
     val expectedAnswer:String?,
     val strictness:Float?,
-    val guidelines:String?
+    val guidelines:String?,
+    val answer : String?
 ) : BaseQuestion(
     id=id,
     question = question,
@@ -59,6 +62,7 @@ class DescriptiveQuestion(
             expectedAnswer = expectedAnswer,
             strictness = strictness,
             guidelines = guidelines,
+            answer = answer
 
         )
         return copiedQuestion
@@ -72,6 +76,23 @@ class DescriptiveQuestion(
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return DescriptiveBankReturnDTO(
+            question = this.question,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            expectedAnswer = this.expectedAnswer,
+            strictness = this.strictness,
+            guidelines = this.guidelines,
+            explanation = this.explanation,
+            answer = this.answer
+
         )
     }
     override fun getQuestionType(): QuestionTypes {
@@ -93,7 +114,8 @@ class DescriptiveQuestion(
             difficulty = dto.difficulty ?: this.difficulty,
             expectedAnswer = dto.expectedAnswer ?: this.expectedAnswer,
             strictness = dto.strictness ?: this.strictness,
-            guidelines = dto.guidelines ?: this.guidelines
+            guidelines = dto.guidelines ?: this.guidelines,
+            answer = dto.answer ?: this.answer
         )
 
         return patchedQuestion

@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
+import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.TrueFalseBankDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -74,6 +76,20 @@ class TrueFalse(
             taxonomy = this.bloomsTaxonomy,
             coValue = this.co,
             difficultyLevel = this.difficulty
+        )
+    }
+
+    override fun mapToBankType(): BankQuestionsReturnDTO {
+        return TrueFalseBankDTO(
+            question = this.question,
+            answers = this.answer,
+            hintText = this.hint,
+            markValue = this.marks,
+            taxonomy = this.bloomsTaxonomy,
+            coValue = this.co,
+            difficultyLevel = this.difficulty,
+            explanation = this.explanation,
+
         )
     }
 
