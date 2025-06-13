@@ -7,11 +7,9 @@ import org.springframework.data.repository.query.Param
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import java.util.UUID
 
-@RepositoryRestResource(path = "bank")
 interface BankRepository : JpaRepository<Bank, UUID> {
 
     @Query("SELECT b FROM Bank b LEFT JOIN FETCH b.bankQuestion WHERE b.id = :id")
     fun findByIdWithQuestions(@Param("id") id: UUID): Bank
-
 
 }

@@ -93,7 +93,12 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
     fun getDetailsOfBank() : ResponseEntity<MutableList<BankDetailsDTO>>{
         val result =  bankManagerService.getDetailsOfBank()
         return ResponseEntity.ok(result)
+    }
 
+    @GetMapping("/{bankId}")
+    fun getBankDetails(@PathVariable bankId: UUID) : ResponseEntity<BankDetailsDTO> {
+        val result = bankManagerService.getBankInfo(bankId = bankId)
+        return ResponseEntity.ok(result)
     }
 
     @GetMapping("/{bankId}/questions")

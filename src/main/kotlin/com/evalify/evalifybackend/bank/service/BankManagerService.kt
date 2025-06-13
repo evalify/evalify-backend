@@ -50,15 +50,30 @@ class BankManagerService(
 
         return banks.map { bank ->
             BankDetailsDTO(
-                bankId = bank?.id,
-                course = bank.courseCode,
+                id = bank?.id,
+                courseCode = bank.courseCode,
                 name = bank.name,
                 semester = "S${bank.semester}",
                 questions = bank.bankQuestion.size,
                 topics = bank.topics?.size,
-                access = bank.sharedUser.map { AccessDTO(it.id,it.name,it.name) } // or it.id, or build DTO
+                access = bank.sharedUser.map { AccessDTO(it.id,it.name,it.email) } // or it.id, or build DTO
             )
         }.toMutableList()
+    }
+
+    @Transactional
+    fun getBankInfo(bankId:UUID): BankDetailsDTO {
+        val bank = bankRepository.findById(bankId).orElseThrow { NotFoundException("Bank with ID $bankId not found") }
+
+        return BankDetailsDTO(
+            id = bank?.id,
+            courseCode = bank.courseCode,
+            name = bank.name,
+            semester = "S${bank.semester}",
+            questions = bank.bankQuestion.size,
+            topics = bank.topics?.size,
+            access = bank.sharedUser.map { AccessDTO(it.id,it.name,it.email) }
+        )
     }
 
     @Transactional
@@ -73,7 +88,6 @@ class BankManagerService(
             questions = bankQuestions,
             topics = topics?.map { TopicDTO(it.id, it.name) }
         )
-
     }
 
     @Transactional

@@ -45,3 +45,4 @@ out/
 .env.dev
 .env.stagging
 .env.prod
+.env
