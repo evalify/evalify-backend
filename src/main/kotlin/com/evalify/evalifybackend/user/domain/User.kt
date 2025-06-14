@@ -16,7 +16,6 @@ enum class Role {
 @Table(name = "\"user\"")
 class User (
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     val id: String? = null,
     var name: String,
     var email: String,

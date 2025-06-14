@@ -36,6 +36,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("org.springframework.boot:spring-boot-starter-data-rest")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+	implementation("io.minio:minio:8.5.17")
 
 	//VJson
 	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
