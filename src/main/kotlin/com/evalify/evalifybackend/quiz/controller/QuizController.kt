@@ -1,14 +1,28 @@
 package com.evalify.evalifybackend.quiz.controller
 
+
 import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.PermutationsDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.SelectionCriteriaDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.TopicCriteriaDTO
+
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizStudentDTO
+import com.evalify.evalifybackend.quiz.domain.dto.CreateQuizDTO
+import com.evalify.evalifybackend.quiz.domain.dto.PatchQuizDTO
+
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
 import com.evalify.evalifybackend.quiz.service.QuizQuestionService
 import com.evalify.evalifybackend.quiz.service.QuizService
+import com.evalify.evalifybackend.security.utils.SecurityUtils
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,17 +30,47 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("quiz")
+@RequestMapping("/api/quiz")
 class QuizController(val quizService:QuizService,val quizCourseService: QuizCourseService,val quizLabService: QuizLabService,val quizQuestionService: QuizQuestionService) {
-@PutMapping("{quizId}/add-student")
+
+    @PostMapping("/")
+    fun createQuiz(@RequestBody quizDTO: CreateQuizDTO)
+    {
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        quizService.createQuiz(quizDTO,userId)
+    }
+
+
+    @PatchMapping("/{quizId}")
+    fun editQuiz(@RequestBody dto : PatchQuizDTO, @PathVariable quizId: UUID)
+    {
+        quizService.editQuiz(dto,quizId)
+    }
+
+    @GetMapping("/{quizId}/randomize")
+    fun getSets(@RequestBody dto : SelectionCriteriaDTO, @PathVariable quizId: UUID): ResponseEntity<Set<PermutationsDTO>> {
+
+        val result = quizService.randomize(dto,quizId)
+        return ResponseEntity.ok(result)
+
+    }
+
+    @DeleteMapping("/{quizId}")
+    fun deleteQuiz(@PathVariable quizId: UUID)
+    {
+        quizService.deleteQuiz(quizId)
+    }
+
+
+    @PutMapping("{quizId}/add-student")
 fun addStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
     quizService.addStudentToQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-@PutMapping("{quizId}/remove-student")
+    @PutMapping("{quizId}/remove-student")
 fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
         quizService.removeStudentFromQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-@PutMapping("{quizId}/add-course")
+    @PutMapping("{quizId}/add-course")
     fun addCourseToQuiz(@RequestBody courseDTO:UpdateQuizCourseDTO,@PathVariable quizId:UUID){
         quizCourseService.assignCourseToQuiz(courseId = courseDTO.course, quizId = quizId)
     }
@@ -43,6 +87,17 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
     fun removeLabFromQuiz(@RequestBody labDTO:UpdateQuizLabDTO,@PathVariable quizId:UUID){
         quizLabService.removeLabToQuiz(labId = labDTO.lab, quizId = quizId)
     }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

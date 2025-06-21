@@ -287,6 +287,8 @@ class BankManagerService(
         )
 
         bankQuestionRepository.save(bankQuestion)
+        bank.bankQuestion.add(bankQuestion)
+        bankRepository.save(bank)
 
 
     }

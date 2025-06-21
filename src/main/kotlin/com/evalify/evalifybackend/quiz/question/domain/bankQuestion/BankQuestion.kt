@@ -18,10 +18,10 @@ import java.util.UUID
 @Entity
 @Table(name = "bank_question")
 class BankQuestion (
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID? = null,
-
     @OneToOne
     val question: BaseQuestion,
 
@@ -30,4 +30,4 @@ class BankQuestion (
     @ManyToOne
     val updateBy: User? = null,
 
-)
+)   
