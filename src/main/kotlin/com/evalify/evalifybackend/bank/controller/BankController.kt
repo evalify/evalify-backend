@@ -50,8 +50,8 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
     }
 
 
-    @PostMapping("/{userId}/")
-    fun createBank(@RequestBody bank: CreateBankDTO,@PathVariable userId : String): ResponseEntity<CreateBankDTO> {
+    @PostMapping("/")
+    fun createBank(@RequestBody bank: CreateBankDTO): ResponseEntity<CreateBankDTO> {
 
         val userId: String? = SecurityUtils.getCurrentUserId()
         val result = bankService.createBank(dto = bank,userId = userId)
