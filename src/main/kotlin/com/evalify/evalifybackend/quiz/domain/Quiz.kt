@@ -85,4 +85,6 @@ class Quiz(
     @ManyToOne(fetch = FetchType.LAZY)
     val createdBy: User? = null
 
-)
+){
+
+}

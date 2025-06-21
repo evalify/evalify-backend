@@ -21,11 +21,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
@@ -46,25 +48,15 @@ open class QuizController(val quizService:QuizService,val quizCourseService: Qui
     {
         quizService.editQuiz(dto,quizId)
     }
-
-
-
-    @DeleteMapping("/{quizId}")
-    fun deleteQuiz(@PathVariable quizId: UUID)
-    {
-        quizService.deleteQuiz(quizId)
-    }
-
-
     @PutMapping("{quizId}/add-student")
 fun addStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
     quizService.addStudentToQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-    @PutMapping("{quizId}/remove-student")
+@PutMapping("{quizId}/remove-student")
 fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
         quizService.removeStudentFromQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-    @PutMapping("{quizId}/add-course")
+@PutMapping("{quizId}/add-course")
     fun addCourseToQuiz(@RequestBody courseDTO:UpdateQuizCourseDTO,@PathVariable quizId:UUID){
         quizCourseService.assignCourseToQuiz(courseId = courseDTO.course, quizId = quizId)
     }
@@ -82,16 +74,15 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
         quizLabService.removeLabToQuiz(labId = labDTO.lab, quizId = quizId)
     }
 
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Deletes a quiz by its ID
+     * @param quizId The UUID of the quiz to delete
+     */
+    @DeleteMapping("{quizId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteQuiz(@PathVariable quizId: UUID) {
+        quizService.deleteQuiz(quizId)
+    }
 
 
 

@@ -1,0 +1,47 @@
+package com.evalify.evalifybackend.quiz.controller
+
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
+import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.service.QuizInstructorService
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
+
+/**
+ * Controller for instructor-specific quiz operations
+ */
+@RestController
+@RequestMapping("quiz")
+class QuizInstructorController(private val quizInstructorService: QuizInstructorService) {
+
+    /**
+     * Retrieves all quizzes for a specific course
+     * @param courseId The UUID of the course
+     * @return List of QuizPreviewDTO objects
+     */
+    @GetMapping("/course/{courseId}")
+    fun getQuizzesByCourseId(@PathVariable courseId: UUID): List<QuizPreviewDTO> {
+        return quizInstructorService.getQuizzesByCourseId(courseId)
+    }
+
+    /**
+     * Updates a quiz with the provided data
+     * @param quizId The UUID of the quiz to update
+     * @param quizUpdateDTO The DTO containing the updated quiz data
+     * @return ResponseEntity with the updated Quiz entity
+     */
+    @PutMapping("/{quizId}")
+    fun updateQuiz(
+        @PathVariable quizId: UUID,
+        @RequestBody quizUpdateDTO: QuizUpdateDTO
+    ): ResponseEntity<Quiz> {
+        val updatedQuiz = quizInstructorService.updateQuiz(quizId, quizUpdateDTO)
+        return ResponseEntity.ok(updatedQuiz)
+    }
+}

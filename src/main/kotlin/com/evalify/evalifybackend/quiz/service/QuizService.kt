@@ -122,7 +122,6 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         return updatedQuiz
     }
 
-
     fun editQuiz(dto: PatchQuizDTO, quizID : UUID) {
 
         val quiz = quizRepository.findById(quizID).orElseThrow { NotFoundException("Quiz not found") }
@@ -137,16 +136,7 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         )
 
          quizRepository.save(patchedQuiz)
-
-
-
     }
-
-    fun deleteQuiz(quizId: UUID) {
-        val quiz = quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }
-        quizRepository.delete(quiz)
-    }
-
     fun addStudentToQuiz(quizId: UUID, studentId:List<String> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{
             NotFoundException("quiz with id $quizRepository not found")
@@ -165,7 +155,15 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         quizRepository.save(quiz)
     }
 
-
-
-
+    /**
+     * Deletes a quiz by its ID
+     * @param quizId The UUID of the quiz to delete
+     * @throws NotFoundException if the quiz is not found
+     */
+    fun deleteQuiz(quizId: UUID) {
+        if (!quizRepository.existsById(quizId)) {
+            throw NotFoundException("Quiz with id $quizId not found")
+        }
+        quizRepository.deleteById(quizId)
+    }
 }
