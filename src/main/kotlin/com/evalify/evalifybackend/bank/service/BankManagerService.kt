@@ -49,11 +49,6 @@ class BankManagerService(
     fun getDetailsOfBank(): MutableList<BankDetailsDTO> {
         val banks = bankRepository.findAll()
 
-        println("testing${banks[2].bankQuestion}")
-        val question = banks.map{bank -> bank.bankQuestion}.flatten()
-
-        println(question.map{question -> question.question})
-
         return banks.map { bank ->
             BankDetailsDTO(
                 id = bank?.id,
@@ -289,6 +284,7 @@ class BankManagerService(
         bankQuestionRepository.save(bankQuestion)
         bank.bankQuestion.add(bankQuestion)
         bankRepository.save(bank)
+
 
 
     }

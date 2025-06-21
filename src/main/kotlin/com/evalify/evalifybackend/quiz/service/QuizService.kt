@@ -8,8 +8,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.SelectionCriteriaDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.TopicCriteriaDTO
 
 import com.evalify.evalifybackend.quiz.domain.Quiz
-import com.evalify.evalifybackend.quiz.domain.dto.CreateQuizDTO
-import com.evalify.evalifybackend.quiz.domain.dto.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.CreateQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.user.domain.User

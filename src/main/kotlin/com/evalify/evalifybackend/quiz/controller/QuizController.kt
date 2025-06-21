@@ -9,8 +9,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.TopicCriteriaDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizStudentDTO
-import com.evalify.evalifybackend.quiz.domain.dto.CreateQuizDTO
-import com.evalify.evalifybackend.quiz.domain.dto.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.CreateQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.PatchQuizDTO
 
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
@@ -31,7 +31,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/quiz")
-class QuizController(val quizService:QuizService,val quizCourseService: QuizCourseService,val quizLabService: QuizLabService,val quizQuestionService: QuizQuestionService) {
+open class QuizController(val quizService:QuizService,val quizCourseService: QuizCourseService,val quizLabService: QuizLabService,val quizQuestionService: QuizQuestionService) {
 
     @PostMapping("/")
     fun createQuiz(@RequestBody quizDTO: CreateQuizDTO)
@@ -47,13 +47,7 @@ class QuizController(val quizService:QuizService,val quizCourseService: QuizCour
         quizService.editQuiz(dto,quizId)
     }
 
-    @GetMapping("/{quizId}/randomize")
-    fun getSets(@RequestBody dto : SelectionCriteriaDTO, @PathVariable quizId: UUID): ResponseEntity<Set<PermutationsDTO>> {
 
-        val result = quizService.randomize(dto,quizId)
-        return ResponseEntity.ok(result)
-
-    }
 
     @DeleteMapping("/{quizId}")
     fun deleteQuiz(@PathVariable quizId: UUID)

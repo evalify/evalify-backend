@@ -1,4 +1,4 @@
-package com.evalify.evalifybackend.quiz.domain.dto
+package com.evalify.evalifybackend.quiz.domain.DTO
 
 import java.time.Instant
 import java.util.UUID
