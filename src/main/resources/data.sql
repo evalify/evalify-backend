@@ -8,7 +8,12 @@ INSERT INTO "user" (id, name, email, profile_id, image, role, phone_number, is_a
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440006', 'Grace Kim', 'grace.kim@example.com', 'gracek', 'https://example.com/images/grace.jpg', 3, '7776665554', TRUE, CURRENT_TIMESTAMP, NULL),
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440007', 'Henry Zhao', 'henry.zhao@example.com', 'henryz', NULL, 1, '6665554443', TRUE, CURRENT_TIMESTAMP, NULL),
                                                                                                                              ('550e8400-e29b-41d4-a716-446655440008', 'Isla Moore', 'isla.moore@example.com', 'islababy', NULL, 0, '5554443332', TRUE, CURRENT_TIMESTAMP, NULL),
-                                                                                                                             ('550e8400-e29b-41d4-a716-446655440009', 'Jake Brown', 'jake.brown@example.com', 'jakeb', 'https://example.com/images/jake.jpg', 2, '4443332221', FALSE, CURRENT_TIMESTAMP, NULL);
+                                                                                                                             ('550e8400-e29b-41d4-a716-446655440009', 'Jake Brown', 'jake.brown@example.com', 'jakeb', 'https://example.com/images/jake.jpg', 2, '4443332221', FALSE, CURRENT_TIMESTAMP, NULL),
+                                                                                                                             ('064ed34e-473b-4b0e-b2f3-d2c2853e3de1','admin','admin@gmail.com','admin','https://example.com/images/jake.jpg',2,'4661465465',FALSE,CURRENT_TIMESTAMP,NULL),
+                                                                                                                             ('54098e2d-3171-45d6-9795-cb8394ea4315','staff','staff@gmail.com','staff','https://example.com/images/jake.jpg',2,'4661465465',FALSE,CURRENT_TIMESTAMP,NULL),
+                                                                                                                             ('f107a124-38a7-482f-972f-8810897e8d09','student','student@gmail.com','student','https://example.com/images/jake.jpg',2,'4661465465',FALSE,CURRENT_TIMESTAMP,NULL);
+
+
 INSERT INTO semester(id,name,year,is_active) VALUES('8d0d1345-2ed6-4cd1-b020-f9c9ae71a3eb','AIE 2024',2024,true);
 INSERT INTO semester(id,name,year,is_active) VALUES('81c3f9a5-3322-4f12-a735-b8c7e637d450','AIDS 2024',2024,true);
 INSERT INTO semester(id,name,year,is_active) VALUES('6f7e1b15-753e-4c79-94d4-51e515a64763','MECH 2024',2024,true);
