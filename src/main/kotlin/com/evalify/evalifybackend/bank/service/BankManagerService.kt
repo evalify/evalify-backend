@@ -266,6 +266,8 @@ class BankManagerService(
         return baseQuestion
     }
 
+
+    @Transactional
     fun createBankQuestion(dto : CreateQuestionDTO , bankId : UUID , userId : String?){
 
         if(userId == null) throw RuntimeException("User id cannot be null")
@@ -288,7 +290,7 @@ class BankManagerService(
 
 
     }
-
+    @Transactional
     fun editBankQuestion(dto : CreateQuestionDTO , bankId : UUID , questionId : UUID , userId : String?){
 
         if(userId == null) throw RuntimeException("User id cannot be null")
@@ -317,7 +319,7 @@ class BankManagerService(
 
 
 
-
+    @Transactional
     fun deleteBankQuestion(questionId : UUID ){
 
         val bankQuestion = bankQuestionRepository.findById(questionId).orElseThrow { NotFoundException("Question not found") }

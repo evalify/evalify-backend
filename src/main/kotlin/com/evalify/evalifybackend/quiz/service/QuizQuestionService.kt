@@ -1,5 +1,8 @@
 package com.evalify.evalifybackend.quiz.service
 
+import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
@@ -10,8 +13,22 @@ import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepositor
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.question.domain.CodingQuestion
+import com.evalify.evalifybackend.quiz.question.domain.DescriptiveQuestion
+import com.evalify.evalifybackend.quiz.question.domain.FileUpload
+import com.evalify.evalifybackend.quiz.question.domain.FillUp.FillUp
+import com.evalify.evalifybackend.quiz.question.domain.FillUp.blanks
+import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQ
+import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
+import com.evalify.evalifybackend.quiz.question.domain.MCQ.MMCQ
+import com.evalify.evalifybackend.quiz.question.domain.MCQ.TrueFalse
+import com.evalify.evalifybackend.quiz.question.domain.MatchPair
+import com.evalify.evalifybackend.quiz.question.domain.MatchTheFollowing
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
@@ -29,9 +46,9 @@ open class QuizQuestionService(
     val questionRepository: QuestionRepository,
     val userRepository: UserRepository,
     val topicRepo: TopicRepo,
-    val sectionRepository: SectionRepository
+    val sectionRepository: SectionRepository,
+    private val bankQuestionRepository: BankQuestionRepository
 ) {
-
 
 
     @Transactional
@@ -56,7 +73,7 @@ open class QuizQuestionService(
 
 
         // for unique addition to the quiz from the bank questions
-        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion.id }.toSet()
+        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
 
         var count : Int
 
@@ -147,7 +164,240 @@ open class QuizQuestionService(
             message = "Questions added successfully"
         )
     }
+
+    fun createQuestion(dto: CreateQuizQuestionDTO): BaseQuestion {
+        val topics = topicRepo.findAllById(dto.topicIds)
+
+        val baseQuestion: BaseQuestion = when (dto.type) {
+            QuestionTypes.MCQ ->   MCQ(
+                id = null,
+                question = dto.question,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                bank = null,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                options = dto.options?.map {
+                    MCQOption(text = it.text, isCorrect = it.isCorrect)
+                }?.toMutableList() ?: mutableListOf()
+            )
+
+            QuestionTypes.MMCQ ->   MMCQ(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                options = dto.options?.map {
+                    MCQOption(text = it.text, isCorrect = it.isCorrect)
+                }?.toMutableList() ?: mutableListOf()
+            )
+
+            QuestionTypes.CODING ->  CodingQuestion(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                driverCode = dto.driverCode,
+                boilerCode = dto.boilerCode,
+                functionName = dto.functionName,
+                returnType = dto.returnType,
+                params = dto.params?.map { FunctionParamDTO(it.param, it.type) } ?: listOf(),
+                testcases = dto.testcases?.map { TestCaseDTO(it.input, it.expected) } ?: listOf(),
+                language = dto.language,
+                answer = dto.answer
+            )
+
+            QuestionTypes.FILL_UP -> FillUp(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                strictMatch = dto.strictMatch,
+                llmEval = dto.llmEval,
+                template = dto.template,
+                blanks = dto.blanks?.map { blanks(it.id, it.answers) } ?: listOf()
+            )
+
+            QuestionTypes.DESCRIPTIVE  -> DescriptiveQuestion(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                expectedAnswer = dto.expectedAnswer,
+                strictness = dto.strictness,
+                guidelines = dto.guidelines,
+                answer = dto.answer
+            )
+
+            QuestionTypes.FILE_UPLOAD  -> FileUpload(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                expectedAnswer = dto.expectedAnswer,
+                strictness = dto.strictness,
+                guidelines = dto.guidelines
+            )
+
+            QuestionTypes.MATCH_THE_FOLLOWING -> MatchTheFollowing(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                keys = dto.keys?.map {
+                    MatchPair(
+                        id = UUID.randomUUID().toString(),
+                        leftPair = it.leftPair,
+                        rightPair = it.rightPair
+                    )
+                }?.toMutableList() ?: mutableListOf()
+            )
+
+            QuestionTypes.TRUEFALSE  -> TrueFalse(
+                id = null,
+                question = dto.question,
+                bank = null,
+                topic = topics.toMutableList(),
+                explanation = dto.explanation,
+                hint = dto.hint,
+                marks = dto.marks,
+                bloomsTaxonomy = dto.bloomsTaxonomy,
+                co = dto.co,
+                negativeMark = dto.negativeMark,
+                difficulty = dto.difficulty,
+                answer = dto.trueFalseAnswer ?: false
+            )
+
+        }
+
+        return baseQuestion
+    }
+
+
+    @Transactional
+    fun createQuizQuestion(dto: CreateQuizQuestionDTO, quizId: UUID,userId:String?) {
+
+        if(userId == null) throw RuntimeException("User id cannot be null")
+        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+        val section = sectionRepository.findById(dto.sectionId).orElseThrow { RuntimeException("Section not found") }
+
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+
+        val baseQuestion = createQuestion(dto)
+        val savedQuestion = questionRepository.save(baseQuestion)
+
+        val quizQuestion = QuizQuestion(
+            question = savedQuestion,
+            section = section,
+            updateBy = user
+        )
+
+        quizQuestionRepository.save(quizQuestion)
+        section.quizQuestions.add(quizQuestion)
+        sectionRepository.save(section)
+    }
+
+    fun addSelectQuestions(quizId: UUID, dto: AddBankQuestionDTO,userId:String?) : quizQuestionAddResponse {
+
+        if(userId == null) throw RuntimeException("User id cannot be null")
+
+        val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+        val section = sectionRepository.findById(dto.sectionId).orElseThrow{
+            NotFoundException("Quiz with id ${dto.sectionId} not found")
+        }
+
+        val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
+
+        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+
+        val finalQuestions : MutableList<BankQuestion> = mutableListOf()
+        val bankQuestions = bankQuestionRepository.findAllById(dto.bankQuestionId)
+
+        bankQuestions.forEach { bankQuestion ->
+            if(bankQuestion.id !in existingQuestionIds){
+                finalQuestions.add(bankQuestion)
+            }
+        }
+
+        finalQuestions.forEach { bankQuestion ->
+
+            val dupQuestion = bankQuestion.question.copyQuestion()
+
+            val duplicatedQuestion = questionRepository.save(dupQuestion)
+
+            val quizQuestions = QuizQuestion(
+                question = duplicatedQuestion,
+                section = section,
+                updateBy = user,
+                bankQuestion = bankQuestion
+            )
+
+            val savedQuizQuestion = quizQuestionRepository.save(quizQuestions)
+            section.quizQuestions.add(savedQuizQuestion)
+            sectionRepository.save(section)
+
+
+
+        }
+        return quizQuestionAddResponse(
+            quizId = quizId,
+            sectionId = dto.sectionId,
+            message = "Question added successfully",
+        )
 }
+}
+
+
 
 
 

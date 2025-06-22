@@ -16,7 +16,7 @@ INSERT INTO "user" (id, name, email, profile_id, image, role, phone_number, is_a
 
 INSERT INTO semester(id,name,year,is_active) VALUES('8d0d1345-2ed6-4cd1-b020-f9c9ae71a3eb','AIE 2024',2024,true);
 INSERT INTO semester(id,name,year,is_active) VALUES('81c3f9a5-3322-4f12-a735-b8c7e637d450','AIDS 2024',2024,true);
-INSERT INTO semester(id,name,year,is_active) VALUES('6f7e1b15-753e-4c79-94d4-51e515a64763','MECH 2024',2024,true);
+-- INSERT INTO semester(id,name,year,is_active) VALUES('6f7e1b15-753e-4c79-94d4-51e515a64763','MECH 2024',2024,true);
 INSERT INTO semester(id,name,year,is_active) VALUES('51c005b7-0f0e-42ed-a6f5-9e24c648a90f','CSE 2024',2024,true);
 INSERT INTO semester(id,name,year,is_active) VALUES('01359e2e-0987-4f63-b95b-e9b2b6f6258d','CIVIL 2024',2024,true);
 -- 1. AI Fundamentals - Semester 1

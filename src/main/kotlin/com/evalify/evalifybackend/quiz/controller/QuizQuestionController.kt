@@ -2,19 +2,27 @@ package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.service.QuizQuestionService
+import com.evalify.evalifybackend.security.utils.SecurityUtils
+import okhttp3.internal.userAgent
 import org.aspectj.weaver.patterns.TypePatternQuestions
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
 
 
 @RestController
-class QuizQuestionController(val questionService: QuizQuestionService) {
+class QuizQuestionController(val questionService: QuizQuestionService,
+
+) {
 
 
     @PostMapping("/quiz/{quizId}/section/{sectionID}/addQuestions")
@@ -30,6 +38,27 @@ class QuizQuestionController(val questionService: QuizQuestionService) {
     ): ResponseEntity<AddQuestionsResponse> {
         val response = questionService.addByQuestionByFilters(quizId = quizId,topicId = topicId,difficulty = difficulty,noOfQuestion = nofQuestions,
             questionTypes = questionType,userId = userId,bankIds = bankIds,sectionId = sectionID)
+
+        return ResponseEntity.ok(response)
+
+    }
+
+
+    @PostMapping("/quiz/{quizId}/addQuestion")
+    fun addQuizQuestion(
+        @PathVariable quizId: UUID,@RequestBody dto: CreateQuizQuestionDTO
+    ){
+        val userId: String? = SecurityUtils.getCurrentUserId()
+        questionService.createQuizQuestion(dto,quizId,userId)
+    }
+
+    @PostMapping("/quiz/{quizId}/addSelectQuestion/")
+    fun addBankQuestionToQuiz(
+        @PathVariable quizId: UUID,
+        @RequestParam dto : AddBankQuestionDTO
+    ):ResponseEntity<quizQuestionAddResponse>{
+        val userId = SecurityUtils.getCurrentUserId()
+        val response = questionService.addSelectQuestions(quizId,dto, userId)
 
         return ResponseEntity.ok(response)
 

@@ -63,7 +63,7 @@ abstract class BaseQuestion(
     val question: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)
-    val bank: Bank?,
+    val bank: Bank? = null,
 
     @ManyToMany(fetch = FetchType.LAZY)
     val topic: MutableList<Topic> = mutableListOf(),

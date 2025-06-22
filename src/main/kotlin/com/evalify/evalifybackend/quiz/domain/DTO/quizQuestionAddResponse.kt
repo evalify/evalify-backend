@@ -2,9 +2,9 @@ package com.evalify.evalifybackend.quiz.domain.DTO
 
 import java.util.UUID
 
-data class AddBankQuestionDTO(
+data class quizQuestionAddResponse(
+    val quizId: UUID?,
     val sectionId: UUID,
-    val bankQuestionId: List<UUID>,
+    val message: String) {
 
-) {
 }

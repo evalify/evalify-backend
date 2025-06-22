@@ -26,7 +26,7 @@ class QuizQuestion (
     val id: UUID?=null,
 
     @OneToOne
-    val question: BaseQuestion,
+    val question: BaseQuestion? = null,
 
     @ManyToOne
     val section: Section,
@@ -38,6 +38,6 @@ class QuizQuestion (
 
     @ManyToOne
     @JoinColumn(unique = true)
-    val bankQuestion: BankQuestion
+    val bankQuestion: BankQuestion? = null
 
 )
