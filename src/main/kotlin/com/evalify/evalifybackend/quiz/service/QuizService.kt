@@ -4,23 +4,27 @@ import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.lab.repository.LabRepository
-import com.evalify.evalifybackend.quiz.domain.DTO.SelectionCriteriaDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.TopicCriteriaDTO
+import com.evalify.evalifybackend.questions.domain.BaseQuestion
+import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
 
 import com.evalify.evalifybackend.quiz.domain.Quiz
-import com.evalify.evalifybackend.quiz.domain.DTO.CreateQuizDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
+import com.evalify.evalifybackend.quiz.domain.QuizUser
+import com.evalify.evalifybackend.quiz.domain.QuizUserId
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
-import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.stereotype.Service
-import java.time.Instant
 import java.util.*
 import kotlin.String
-import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
+import com.evalify.evalifybackend.quiz.util.CombinationUtils
+
 
 @Service
 class QuizService(private val quizRepository: QuizRepository,private val userRepository: UserRepository, private val courseRepository: CourseRepository, private val batchRepository: BatchRepository,
@@ -62,8 +66,15 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
             batch = batches,
             student = students.toMutableList(),
             lab = labs,
-            createdBy = user
+
            )
+        val quizUser = QuizUser(
+            id = QuizUserId(quiz.id,user.id),
+            quiz = quiz,
+            user = user,
+            tags = SharedTags.OWNER
+        )
+        quiz.sharedUsers.add(quizUser)
 
         quizRepository.save(quiz)
     }
@@ -116,7 +127,7 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
             student = updatedStudents,
             lab = updatedLabs,
             createdAt = existing.createdAt,
-            createdBy = existing.createdBy
+
         )
 
         return updatedQuiz
@@ -136,6 +147,14 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         )
 
          quizRepository.save(patchedQuiz)
+    }
+
+    fun publishQuiz(quizId : UUID, noSets : Int) {
+        val quiz = quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }
+        val publishedQuiz = quiz.publishQuiz(noSets)
+        quizRepository.save(publishedQuiz)
+
+
     }
     fun addStudentToQuiz(quizId: UUID, studentId:List<String> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{
@@ -166,4 +185,91 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
         }
         quizRepository.deleteById(quizId)
     }
-}
+
+    fun shareQuiz(quizID: UUID, shareDTO: ShareQuizDTO) {
+
+        val quiz = quizRepository.findById(quizID).orElseThrow { NotFoundException("Quiz with id $quizID not found") }
+
+        val user = userRepository.findAllById(shareDTO.userID)
+
+        user.map{
+            user->
+            val quizUser = QuizUser(
+                id =  QuizUserId(quizID,user.id),
+                quiz = quiz,
+                user = user,
+                tags = SharedTags.SHARED
+            )
+            quiz.sharedUsers.add(quizUser)
+            quizRepository.save(quiz)
+
+           }
+
+
+    }
+
+    fun checkAvailability(quizId: UUID, dto: SelectionCriteriaDTO): PermutationsDTO {
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+
+        // Step 1: Flatten all BaseQuestions from the quiz
+        val allQuestions: List<BaseQuestion> = quiz.section
+            .flatMap { it.quizQuestions }
+            .mapNotNull { it.question }
+
+        // Step 2: Group by each topic ID → then by difficulty
+        val grouped: Map<UUID, Map<String, List<BaseQuestion>>> = allQuestions
+            .flatMap { question ->
+                question.topic.map { topic -> topic.id!! to question } // each topic ID points to the question
+            }
+            .groupBy({ it.first }, { it.second }) // Group by topicId
+            .mapValues { (_, questions) ->
+                questions.groupBy { it.difficulty.name.lowercase() } // group by difficulty string
+            }
+
+        val topicDifficultyCombos = mutableListOf<List<List<BaseQuestion>>>()
+
+        for (topic in dto.criteria) {
+            val topicGroup = grouped[topic.topicId] ?: return PermutationsDTO(false, 0)
+
+            fun getCombinations(diff: String, count: Int): List<List<BaseQuestion>> {
+                val qList = topicGroup[diff] ?: return emptyList()
+                if (qList.size < count) return emptyList()
+                return CombinationUtils.combinations(qList, count)
+            }
+
+            val easyCombs = getCombinations("easy", topic.easy)
+            val medCombs = getCombinations("medium", topic.medium)
+            val hardCombs = getCombinations("hard", topic.hard)
+
+            if (easyCombs.isEmpty() || medCombs.isEmpty() || hardCombs.isEmpty())
+                return PermutationsDTO(false, 0)
+
+            topicDifficultyCombos.add(easyCombs)
+            topicDifficultyCombos.add(medCombs)
+            topicDifficultyCombos.add(hardCombs)
+        }
+
+        // Step 3: Cartesian product of all topic-difficulty combinations
+        val allCombinations = CombinationUtils.cartesianProduct(topicDifficultyCombos)
+
+        // Step 4: Filter only those combinations whose total marks == dto.totalMarks
+        val validSets = allCombinations.filter { set ->
+            set.flatten().sumOf { it.marks } == dto.totalMarks
+        }.map { set ->
+            set.flatten().mapNotNull { it.id }.sorted()
+        }.toSet()
+
+        // Step 5: Count unique permutations
+        val totalPerms = validSets.sumOf { ids ->
+            val freq = ids.groupingBy { it }.eachCount()
+            val numerator = CombinationUtils.factorial(ids.size)
+            val denominator = freq.values.fold(1L) { acc, count -> acc * CombinationUtils.factorial(count) }
+            numerator / denominator
+        }
+
+        return PermutationsDTO(validSets.isNotEmpty(), totalPerms.toInt())
+    }}
+
+

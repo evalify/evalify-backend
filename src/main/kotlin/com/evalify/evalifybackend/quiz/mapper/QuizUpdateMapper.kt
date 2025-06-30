@@ -30,6 +30,6 @@ fun Quiz.updateQuiz(quizUpdateDTO: QuizUpdateDTO):Quiz{
         lab = this.lab,
         batch = this.batch,
         createdAt = this.createdAt,
-        createdBy = this.createdBy
+//        createdBy = this.createdBy
     )
 }

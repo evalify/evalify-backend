@@ -32,6 +32,8 @@ class QuizStudent(
 
     val ipAddress: MutableList<String>,
 
+    val responses: MutableList<String>? = mutableListOf(),
 
-    ) {
+    var setNumber : Int = 1
+ ) {
 }

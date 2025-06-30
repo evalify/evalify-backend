@@ -1,9 +1,9 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.quiz
 
-import com.evalify.evalifybackend.bank.domain.DTO.BlankDTO
-import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
-import com.evalify.evalifybackend.bank.domain.DTO.MatchPairDTO
-import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.BlankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.MatchPairDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy

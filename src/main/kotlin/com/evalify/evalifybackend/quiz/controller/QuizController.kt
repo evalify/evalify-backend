@@ -1,16 +1,15 @@
 package com.evalify.evalifybackend.quiz.controller
 
 
-import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.PermutationsDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.SelectionCriteriaDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.TopicCriteriaDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
 
-import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizCourseDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizLabDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.UpdateQuizStudentDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.CreateQuizDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizCourseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizLabDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
@@ -24,12 +23,12 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
 @RequestMapping("/api/quiz")
@@ -48,28 +47,28 @@ open class QuizController(val quizService:QuizService,val quizCourseService: Qui
     {
         quizService.editQuiz(dto,quizId)
     }
-    @PutMapping("{quizId}/add-student")
+    @PostMapping("{quizId}/add-student")
 fun addStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
     quizService.addStudentToQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-@PutMapping("{quizId}/remove-student")
+    @DeleteMapping("{quizId}/remove-student")
 fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable quizId:UUID){
         quizService.removeStudentFromQuiz(studentId = studentDTO.studentId, quizId = quizId)
 }
-@PutMapping("{quizId}/add-course")
+    @PostMapping("{quizId}/add-course")
     fun addCourseToQuiz(@RequestBody courseDTO:UpdateQuizCourseDTO,@PathVariable quizId:UUID){
         quizCourseService.assignCourseToQuiz(courseId = courseDTO.course, quizId = quizId)
     }
-    @PutMapping("{quizId}/remove-course")
+    @DeleteMapping("{quizId}/remove-course")
     fun removeCourse(@RequestBody courseDTO:UpdateQuizCourseDTO,@PathVariable quizId:UUID){
         quizCourseService.removeCourseFromQuiz(courseId = courseDTO.course, quizId = quizId)
     }
 
-    @PutMapping("{quizId}/add-lab")
+    @PostMapping("{quizId}/add-lab")
     fun addLabToQuiz(@RequestBody labDTO:UpdateQuizLabDTO,@PathVariable quizId:UUID){
         quizLabService.assignLabToQuiz(labId = labDTO.lab, quizId = quizId)
     }
-    @PutMapping("{quizId}/remove-lab")
+    @DeleteMapping("{quizId}/remove-lab")
     fun removeLabFromQuiz(@RequestBody labDTO:UpdateQuizLabDTO,@PathVariable quizId:UUID){
         quizLabService.removeLabToQuiz(labId = labDTO.lab, quizId = quizId)
     }
@@ -82,6 +81,26 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteQuiz(@PathVariable quizId: UUID) {
         quizService.deleteQuiz(quizId)
+    }
+
+    @PostMapping("{quizId}/share")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun shareQuiz(@PathVariable quizID : UUID, @RequestBody shareDTO: ShareQuizDTO){
+
+        quizService.shareQuiz(quizID,shareDTO)
+    }
+
+    @PostMapping("{quizId}/publish")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun publishQuiz(@PathVariable quizId: UUID, @RequestParam(required = false) quizSets : Int){
+        quizService.publishQuiz(quizId,quizSets)
+    }
+
+    @GetMapping("{quizId}/combinations")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun checkAvail(@PathVariable quizId: UUID, @RequestBody dto : SelectionCriteriaDTO) : ResponseEntity<PermutationsDTO>{
+        val result = quizService.checkAvailability(quizId,dto)
+        return ResponseEntity.ok(result)
     }
 
 

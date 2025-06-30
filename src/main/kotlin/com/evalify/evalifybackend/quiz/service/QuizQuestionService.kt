@@ -1,8 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
-import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
-import com.evalify.evalifybackend.bank.domain.DTO.FunctionParamDTO
-import com.evalify.evalifybackend.bank.domain.DTO.TestCaseDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
@@ -13,10 +12,10 @@ import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepositor
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
-import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddBankQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddQuestionsResponse
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.quizQuestionAddResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.question.domain.CodingQuestion
 import com.evalify.evalifybackend.quiz.question.domain.DescriptiveQuestion
@@ -36,7 +35,6 @@ import com.evalify.evalifybackend.usewr.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
-import java.util.concurrent.CompletableFuture.anyOf
 
 @Service
 open class QuizQuestionService(

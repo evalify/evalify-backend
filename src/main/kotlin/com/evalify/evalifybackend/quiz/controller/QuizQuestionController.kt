@@ -2,14 +2,12 @@ package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
-import com.evalify.evalifybackend.quiz.domain.DTO.AddBankQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddBankQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddQuestionsResponse
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.quizQuestionAddResponse
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.service.QuizQuestionService
 import com.evalify.evalifybackend.security.utils.SecurityUtils
-import okhttp3.internal.userAgent
-import org.aspectj.weaver.patterns.TypePatternQuestions
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping

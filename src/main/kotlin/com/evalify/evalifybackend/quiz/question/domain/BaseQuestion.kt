@@ -1,15 +1,14 @@
 package com.evalify.evalifybackend.questions.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated

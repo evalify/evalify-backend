@@ -1,17 +1,15 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.DescriptiveBankReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.FileUploadReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.FileUploadReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.evalify.evalifybackend.quiz.domain.DTO.DescriptiveReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.FileUploadDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.FileUploadDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import java.util.UUID

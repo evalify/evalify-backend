@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.lab.domain.Lab
 import com.evalify.evalifybackend.section.domain.Section
 import com.evalify.evalifybackend.user.domain.User
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -13,7 +14,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
-import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.Instant
@@ -25,6 +25,7 @@ import kotlin.time.Duration
 class Quiz(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+
     val id: UUID? = null,
     val name: String,
     val description: String? = null,
@@ -45,7 +46,7 @@ class Quiz(
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
 //    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
-    @OneToMany(mappedBy = "quiz", cascade = [jakarta.persistence.CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val section:MutableList<Section> = mutableListOf(),
 
 //    TODO: Add Relations btw Courses, Student, Lab, Class
@@ -82,9 +83,45 @@ class Quiz(
     val batch:MutableList<Batch> = mutableListOf(),
 
     val createdAt: Instant  = Instant.now(),
-    @ManyToOne(fetch = FetchType.LAZY)
-    val createdBy: User? = null
+    var noOfSets : Int = 1,
 
-){
+
+
+    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val sharedUsers: MutableList<QuizUser> = mutableListOf()
+) {
+
+
+    fun publishQuiz(noOfSets: Int) : Quiz {
+        val quiz = Quiz(
+            id = this.id,
+            name = this.name,
+            description = this.description,
+            instructions = this.instructions,
+            startTime = this.startTime,
+            endTime = this.endTime,
+            duration = this.duration,
+            password = this.password,
+            fullScreen = this.fullScreen,
+            shuffleQuestions = this.shuffleQuestions,
+            shuffleOptions = this.shuffleOptions,
+            linearQuiz = this.linearQuiz,
+            calculator = this.calculator,
+            autoSubmit = this.autoSubmit,
+            publishResult = this.publishResult,
+            publishQuiz = true, // perhaps you're publishing here
+            section = this.section,
+            course = this.course,
+            student = this.student,
+            lab = this.lab,
+            batch = this.batch,
+            createdAt = this.createdAt,
+            noOfSets = noOfSets,
+            sharedUsers = this.sharedUsers
+        )
+
+        return quiz
+    }
+
 
 }

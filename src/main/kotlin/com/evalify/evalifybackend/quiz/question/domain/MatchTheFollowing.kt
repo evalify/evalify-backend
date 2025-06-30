@@ -1,16 +1,16 @@
 package com.evalify.evalifybackend.quiz.question.domain
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.MatchBankReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.MatchBankReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.evalify.evalifybackend.quiz.domain.DTO.MatchReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.MatchShuffleDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchShuffleDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue

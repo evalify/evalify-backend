@@ -1,16 +1,16 @@
 package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.MCQBankReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.MCQBankReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MCQOptionDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.McqReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column

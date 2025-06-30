@@ -1,16 +1,15 @@
 package com.evalify.evalifybackend.quiz.question.domain.MCQ
 
 import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.TrueFalseBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.TrueFalseBankDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
-import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.TrueFalseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.TrueFalseDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
@@ -98,7 +97,7 @@ class TrueFalse(
         return QuestionTypes.TRUEFALSE
     }
 
-    override fun patchWith(dto: com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO): BaseQuestion? {
+    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
         val patchedQuestion = TrueFalse(
             id = this.id,
             question = dto.question ?: this.question,

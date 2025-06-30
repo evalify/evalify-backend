@@ -1,6 +1,6 @@
 package com.evalify.evalifybackend.bank.service
 
-import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
+import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.topic.repository.TopicRepo

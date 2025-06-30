@@ -27,3 +27,4 @@ class QuizLabService(private val labRepository:LabRepository, private val quizRe
 
 
 }
+

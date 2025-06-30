@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.bank.domain
 
 import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.course.domain.Course
+import com.evalify.evalifybackend.quiz.domain.QuizUser
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.user.domain.User
@@ -38,6 +39,10 @@ class Bank(
     val createdAt: Instant? = Instant.now(),
     @ManyToOne(fetch = FetchType.LAZY)
     val createdBy: User? = null,
+
+    @OneToMany(mappedBy = "bank", cascade = [jakarta.persistence.CascadeType.ALL], orphanRemoval = true)
+    val sharedUsers: MutableList<BankUser> = mutableListOf(),
+
 
     @ManyToMany
     val bankQuestion: MutableList<BankQuestion> = mutableListOf()

@@ -2,20 +2,8 @@ package com.evalify.evalifybackend.quiz.service
 
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
-import com.evalify.evalifybackend.quiz.domain.DTO.BlanksDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.CodingReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.DescriptiveReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.FillUpsReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.MCQOptionDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.MatchReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.McqReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
-import com.evalify.evalifybackend.quiz.question.domain.CodingQuestion
-import com.evalify.evalifybackend.quiz.question.domain.DescriptiveQuestion
-import com.evalify.evalifybackend.quiz.question.domain.FillUp.FillUp
-import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQ
-import com.evalify.evalifybackend.quiz.question.domain.MatchTheFollowing
 import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
@@ -37,7 +25,7 @@ class QuizStudentService(
 
 
         if (requestTime.isAfter(quiz.startTime) && requestTime.isBefore(quiz.endTime)){
-            //First time entering into a quiz
+
             val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId,studentId) ?: quizStudentRepository.save(
                 QuizStudent(
                     quiz = quiz,
@@ -49,6 +37,8 @@ class QuizStudentService(
                     ipAddress = mutableListOf(ipAddress)
                 )
             )
+
+
 
             //Add ip address to the list
             if(!quizStudent.ipAddress.contains(ipAddress)){

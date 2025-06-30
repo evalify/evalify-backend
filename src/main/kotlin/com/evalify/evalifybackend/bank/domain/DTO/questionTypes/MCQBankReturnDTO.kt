@@ -1,0 +1,25 @@
+package com.evalify.evalifybackend.bank.domain.DTO.questionTypes
+
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.questions.domain.Difficulty
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
+
+data class MCQBankReturnDTO(
+    val question:String,
+    val options:List<MCQOption>,
+    val hintText: String?,
+    val markValue: Int,
+    val taxonomy: Taxonomy?,
+    val coValue: Int,
+    val difficultyLevel: Difficulty?,
+    val explanation: String?,
+    val type : QuestionTypes?
+) : BankQuestionsReturnDTO(
+    hint = hintText,
+    marks = markValue,
+    bloomsTaxonomy = taxonomy,
+    co = coValue,
+    difficulty = difficultyLevel
+)

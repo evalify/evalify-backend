@@ -1,28 +1,23 @@
 package com.evalify.evalifybackend.bank.controller
 
-import com.evalify.evalifybackend.bank.domain.Bank
-import com.evalify.evalifybackend.bank.domain.DTO.BankDetailsDTO
-import com.evalify.evalifybackend.bank.domain.DTO.BankQuestionsReturnDTO
-import com.evalify.evalifybackend.bank.domain.DTO.CreateBankDTO
-import com.evalify.evalifybackend.bank.domain.DTO.CreateQuestionDTO
-import com.evalify.evalifybackend.bank.domain.DTO.CreateTopicDTO
-import com.evalify.evalifybackend.bank.domain.DTO.PatchQuestionDTO
-import com.evalify.evalifybackend.bank.domain.DTO.ReturnBankQuestionsDTO
-import com.evalify.evalifybackend.bank.domain.DTO.ReturnTopicDTO
-import com.evalify.evalifybackend.bank.domain.DTO.SearchTopicDTO
-import com.evalify.evalifybackend.bank.domain.DTO.UpdateBankStudentDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
+import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.service.BankManagerService
 import com.evalify.evalifybackend.bank.service.BankService
 import com.evalify.evalifybackend.bank.service.BankStudentService
 import com.evalify.evalifybackend.bank.service.BankTopicService
-import com.evalify.evalifybackend.quiz.question.domain.Topic
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.GetSharedUsersDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.security.utils.SecurityUtils
 import jakarta.transaction.Transactional
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -71,6 +66,27 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
     fun deleteBank(@PathVariable bankId: UUID) {
         bankService.deleteBank(bankId)
 
+    }
+
+    @GetMapping("/{bankId}/share")
+    fun getSharedBanks(@PathVariable bankId: UUID): ResponseEntity<GetSharedUsersDTO> {
+        val result = bankService.getShareBank(bankId)
+        return ResponseEntity.ok(result)
+    }
+
+
+
+    @PostMapping("/{bankId}/share")
+    fun shareBank(@PathVariable bankId: UUID,@RequestBody dto : ShareQuizDTO) {
+        bankService.shareBank(bankId,dto)
+
+    }
+
+
+
+    @DeleteMapping("/{bankId}/share")
+    fun unshareBank(@PathVariable bankId: UUID,@RequestBody dto : ShareQuizDTO) {
+        bankService.unshareBank(bankId,dto)
     }
 
     @GetMapping("/{bankId}/topics")
@@ -133,7 +149,7 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
 
 
 
-    @PutMapping("/{bankId}/questions/delete-question/{questionId}")
+    @DeleteMapping("/{bankId}/questions/delete-question/{questionId}")
         fun deleteBankQuestion(@PathVariable bankId: UUID, @PathVariable questionId: UUID) {
                 bankManagerService.deleteBankQuestion(questionId)
         }
