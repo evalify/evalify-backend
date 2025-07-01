@@ -26,7 +26,7 @@ class QuizQuestion (
     val id: UUID?=null,
 
     @OneToOne
-    val question: BaseQuestion? = null,
+    val question: BaseQuestion,
 
     @ManyToOne
     val section: Section,

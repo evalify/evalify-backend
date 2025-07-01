@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.util.UUID
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
+import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import jakarta.persistence.JoinColumn
 
 @Entity
@@ -24,7 +25,7 @@ class QuizSetQuestion(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id") // ✅ Explicit join column
-    val question: BaseQuestion,
+    val question: QuizQuestion,
 
     val order: Int // ✅ Include this if you want to preserve order
 )

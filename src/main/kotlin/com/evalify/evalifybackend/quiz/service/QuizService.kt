@@ -164,28 +164,28 @@ class QuizService(
          quizRepository.save(patchedQuiz)
     }
 
-    fun publishQuiz(quizId : UUID, noSets : Int,dto : SelectionCriteriaDTO)  {
+    fun publishQuiz(quizId: UUID, noSets: Int, dto: SelectionCriteriaDTO) {
         val quiz = quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }
-        val allQuestions: List<BaseQuestion> = quiz.section
-            .flatMap { it.quizQuestions }
-            .mapNotNull { it.question }
 
-        val grouped: Map<UUID, Map<String, List<BaseQuestion>>> = allQuestions
-            .flatMap { question ->
-                question.topic.map { topic -> topic.id!! to question }
+        val allQuestions: List<QuizQuestion> = quiz.section
+            .flatMap { it.quizQuestions }
+
+        val grouped: Map<UUID, Map<String, List<QuizQuestion>>> = allQuestions
+            .flatMap { quizQuestion ->
+                quizQuestion.question?.topic?.map { topic -> topic.id!! to quizQuestion } ?: emptyList()
             }
             .groupBy({ it.first }, { it.second })
-            .mapValues { (_, questions) ->
-                questions.groupBy { it.difficulty.name.lowercase() }
+            .mapValues { (_, quizQuestions) ->
+                quizQuestions.groupBy { it.question?.difficulty?.name?.lowercase() ?: "" }
             }
 
-        val topicDifficultyCombos = mutableListOf<List<List<BaseQuestion>>>()
+        val topicDifficultyCombos = mutableListOf<List<List<QuizQuestion>>>()
 
         for (topic in dto.criteria) {
             val topicGroup = grouped[topic.topicId]
                 ?: throw IllegalStateException("No questions found for topic ${topic.topicId}")
 
-            fun getCombinations(diff: String, count: Int): List<List<BaseQuestion>> {
+            fun getCombinations(diff: String, count: Int): List<List<QuizQuestion>> {
                 val qList = topicGroup[diff] ?: emptyList()
                 if (qList.size < count) throw IllegalStateException("Insufficient questions for $diff in topic ${topic.topicId}")
                 return CombinationUtils.combinations(qList, count)
@@ -204,12 +204,11 @@ class QuizService(
 
         val validSets = allCombinations
             .map { set -> set.flatten() }
-            .filter { questions -> questions.sumOf { it.marks } == dto.totalMarks }
-            .distinctBy { it.mapNotNull { q -> q.id }.sorted() }
+            .filter { quizQuestions -> quizQuestions.sumOf { it.question?.marks ?: 0 } == dto.totalMarks }
+            .distinctBy { it.mapNotNull { q -> q.question?.id }.sorted() }
 
         if (validSets.size < noSets)
             throw IllegalStateException("Only ${validSets.size} valid sets available, but $noSets requested")
-
 
         val publishedQuiz = quiz.publishQuiz(noSets)
         val updatedQuiz = quizRepository.save(publishedQuiz)
@@ -219,14 +218,13 @@ class QuizService(
 
             val quizSet = QuizSet(
                 setNumber = i,
-                quiz = updatedQuiz,
-
+                quiz = updatedQuiz
             )
 
-            val quizSetQuestions = set.mapIndexed { order, question ->
+            val quizSetQuestions = set.mapIndexed { order, quizQuestion ->
                 QuizSetQuestion(
                     quizSet = quizSet,
-                    question = question,
+                    question = quizQuestion,
                     order = order
                 )
             }
@@ -234,8 +232,8 @@ class QuizService(
             quizSet.questions.addAll(quizSetQuestions)
             quizSetRepository.save(quizSet)
         }
-
     }
+
     fun addStudentToQuiz(quizId: UUID, studentId:List<String> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{
             NotFoundException("quiz with id $quizRepository not found")
@@ -293,19 +291,19 @@ class QuizService(
             NotFoundException("Quiz with id $quizId not found")
         }
 
-        // Step 1: Flatten all BaseQuestions from the quiz
+
         val allQuestions: List<BaseQuestion> = quiz.section
             .flatMap { it.quizQuestions }
             .mapNotNull { it.question }
 
-        // Step 2: Group by each topic ID → then by difficulty
+
         val grouped: Map<UUID, Map<String, List<BaseQuestion>>> = allQuestions
             .flatMap { question ->
-                question.topic.map { topic -> topic.id!! to question } // each topic ID points to the question
+                question.topic.map { topic -> topic.id!! to question }
             }
-            .groupBy({ it.first }, { it.second }) // Group by topicId
+            .groupBy({ it.first }, { it.second })
             .mapValues { (_, questions) ->
-                questions.groupBy { it.difficulty.name.lowercase() } // group by difficulty string
+                questions.groupBy { it.difficulty.name.lowercase() }
             }
 
         val topicDifficultyCombos = mutableListOf<List<List<BaseQuestion>>>()
@@ -331,17 +329,17 @@ class QuizService(
             topicDifficultyCombos.add(hardCombs)
         }
 
-        // Step 3: Cartesian product of all topic-difficulty combinations
+
         val allCombinations = CombinationUtils.cartesianProduct(topicDifficultyCombos)
 
-        // Step 4: Filter only those combinations whose total marks == dto.totalMarks
+
         val validSets = allCombinations.filter { set ->
             set.flatten().sumOf { it.marks } == dto.totalMarks
         }.map { set ->
             set.flatten().mapNotNull { it.id }.sorted()
         }.toSet()
 
-        // Step 5: Count unique permutations
+
         val totalPerms = validSets.sumOf { ids ->
             val freq = ids.groupingBy { it }.eachCount()
             val numerator = CombinationUtils.factorial(ids.size)
