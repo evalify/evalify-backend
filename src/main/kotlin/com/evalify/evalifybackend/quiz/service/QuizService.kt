@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.service
 
+
 import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.course.repository.CourseRepository
@@ -13,9 +14,13 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
+import com.evalify.evalifybackend.quiz.domain.QuizSet
+import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
 import com.evalify.evalifybackend.quiz.domain.QuizUser
 import com.evalify.evalifybackend.quiz.domain.QuizUserId
+import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
+import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -24,11 +29,21 @@ import kotlin.String
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import com.evalify.evalifybackend.quiz.util.CombinationUtils
+import org.apache.commons.lang3.stream.IntStreams.range
+import org.springframework.beans.factory.annotation.Autowired
 
 
 @Service
-class QuizService(private val quizRepository: QuizRepository,private val userRepository: UserRepository, private val courseRepository: CourseRepository, private val batchRepository: BatchRepository,
-    private val labRepository: LabRepository, private val topicRepo: TopicRepo) {
+class QuizService(
+    private val quizRepository: QuizRepository,
+    private val userRepository: UserRepository,
+    private val courseRepository: CourseRepository,
+    private val batchRepository: BatchRepository,
+    private val labRepository: LabRepository,
+    private val quizSetRepository: QuizSetRepository,
+    private val topicRepo: TopicRepo
+
+) {
 
 
     fun createQuiz(quizDTO: CreateQuizDTO, userId : String?)
@@ -149,11 +164,76 @@ class QuizService(private val quizRepository: QuizRepository,private val userRep
          quizRepository.save(patchedQuiz)
     }
 
-    fun publishQuiz(quizId : UUID, noSets : Int) {
+    fun publishQuiz(quizId : UUID, noSets : Int,dto : SelectionCriteriaDTO)  {
         val quiz = quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }
-        val publishedQuiz = quiz.publishQuiz(noSets)
-        quizRepository.save(publishedQuiz)
+        val allQuestions: List<BaseQuestion> = quiz.section
+            .flatMap { it.quizQuestions }
+            .mapNotNull { it.question }
 
+        val grouped: Map<UUID, Map<String, List<BaseQuestion>>> = allQuestions
+            .flatMap { question ->
+                question.topic.map { topic -> topic.id!! to question }
+            }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, questions) ->
+                questions.groupBy { it.difficulty.name.lowercase() }
+            }
+
+        val topicDifficultyCombos = mutableListOf<List<List<BaseQuestion>>>()
+
+        for (topic in dto.criteria) {
+            val topicGroup = grouped[topic.topicId]
+                ?: throw IllegalStateException("No questions found for topic ${topic.topicId}")
+
+            fun getCombinations(diff: String, count: Int): List<List<BaseQuestion>> {
+                val qList = topicGroup[diff] ?: emptyList()
+                if (qList.size < count) throw IllegalStateException("Insufficient questions for $diff in topic ${topic.topicId}")
+                return CombinationUtils.combinations(qList, count)
+            }
+
+            val easyCombs = getCombinations("easy", topic.easy)
+            val medCombs = getCombinations("medium", topic.medium)
+            val hardCombs = getCombinations("hard", topic.hard)
+
+            topicDifficultyCombos.add(easyCombs)
+            topicDifficultyCombos.add(medCombs)
+            topicDifficultyCombos.add(hardCombs)
+        }
+
+        val allCombinations = CombinationUtils.cartesianProduct(topicDifficultyCombos)
+
+        val validSets = allCombinations
+            .map { set -> set.flatten() }
+            .filter { questions -> questions.sumOf { it.marks } == dto.totalMarks }
+            .distinctBy { it.mapNotNull { q -> q.id }.sorted() }
+
+        if (validSets.size < noSets)
+            throw IllegalStateException("Only ${validSets.size} valid sets available, but $noSets requested")
+
+
+        val publishedQuiz = quiz.publishQuiz(noSets)
+        val updatedQuiz = quizRepository.save(publishedQuiz)
+
+        for (i in 0 until noSets) {
+            val set = validSets[i]
+
+            val quizSet = QuizSet(
+                setNumber = i,
+                quiz = updatedQuiz,
+
+            )
+
+            val quizSetQuestions = set.mapIndexed { order, question ->
+                QuizSetQuestion(
+                    quizSet = quizSet,
+                    question = question,
+                    order = order
+                )
+            }
+
+            quizSet.questions.addAll(quizSetQuestions)
+            quizSetRepository.save(quizSet)
+        }
 
     }
     fun addStudentToQuiz(quizId: UUID, studentId:List<String> ){

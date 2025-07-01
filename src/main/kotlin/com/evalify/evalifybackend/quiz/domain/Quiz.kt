@@ -109,7 +109,7 @@ class Quiz(
             calculator = this.calculator,
             autoSubmit = this.autoSubmit,
             publishResult = this.publishResult,
-            publishQuiz = true, // perhaps you're publishing here
+            publishQuiz = true,
             section = this.section,
             course = this.course,
             student = this.student,

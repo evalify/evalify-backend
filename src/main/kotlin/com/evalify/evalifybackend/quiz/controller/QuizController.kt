@@ -92,8 +92,10 @@ fun removeStudent(@RequestBody studentDTO:UpdateQuizStudentDTO,@PathVariable qui
 
     @PostMapping("{quizId}/publish")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun publishQuiz(@PathVariable quizId: UUID, @RequestParam(required = false) quizSets : Int){
-        quizService.publishQuiz(quizId,quizSets)
+    fun publishQuiz(@PathVariable quizId: UUID, @RequestParam(required = false) quizSets : Int,
+         @RequestBody dto : SelectionCriteriaDTO){
+
+        quizService.publishQuiz(quizId,quizSets,dto)
     }
 
     @GetMapping("{quizId}/combinations")

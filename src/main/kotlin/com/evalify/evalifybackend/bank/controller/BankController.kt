@@ -52,7 +52,7 @@ class BankController(val bankStudentService: BankStudentService, val bankManager
         val result = bankService.createBank(dto = bank,userId = userId)
         return ResponseEntity.ok(result)
     }
-
+    // TODO: PATCH METHOD FOR EDITING BANKS
     @PutMapping("/{bankId}")
     fun editBank(@RequestBody bank: CreateBankDTO,@PathVariable bankId:UUID) :  ResponseEntity<CreateBankDTO> {
 

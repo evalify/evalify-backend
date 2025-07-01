@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.domain
 
+import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -25,6 +26,7 @@ class QuizSet(
     @ManyToOne(fetch = FetchType.LAZY)
     val quiz: Quiz,
 
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    val questions: MutableList<QuizQuestion> = mutableListOf()
+    @OneToMany(mappedBy = "quizSet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val questions: MutableList<QuizSetQuestion> = mutableListOf()
+
 )
