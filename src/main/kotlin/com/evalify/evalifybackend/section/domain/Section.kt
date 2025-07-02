@@ -12,7 +12,7 @@ class Section(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID? = null,
     val name: String,
-    val isActive: Boolean = true,
+
 
     @OneToMany(fetch = FetchType.LAZY)
     val quizQuestions: MutableList<QuizQuestion> = mutableListOf(),

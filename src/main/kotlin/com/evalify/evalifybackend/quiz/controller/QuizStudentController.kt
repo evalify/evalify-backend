@@ -29,7 +29,7 @@ class QuizStudentController(
     }
 
     @PatchMapping("/update")
-    fun updateQuiz(@PathVariable studentId: String,@PathVariable id: UUID, request: HttpServletRequest){
+    fun updateQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest){
 
     }
 
@@ -39,7 +39,7 @@ class QuizStudentController(
     }
 
     @PostMapping("/submit")
-    fun submitQuiz(@PathVariable studentId: String,@PathVariable id: UUID, request: HttpServletRequest){
+    fun submitQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest){
 
     }
 }
