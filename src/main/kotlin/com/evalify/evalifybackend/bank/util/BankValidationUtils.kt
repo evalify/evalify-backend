@@ -1,0 +1,131 @@
+package com.evalify.evalifybackend.bank.util
+
+import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
+import com.evalify.evalifybackend.bank.exception.BankValidationException
+
+/** Utility class for bank-related validations */
+object BankValidationUtils {
+
+    private const val MIN_BANK_NAME_LENGTH = 3
+    private const val MAX_BANK_NAME_LENGTH = 100
+    private const val MIN_COURSE_CODE_LENGTH = 2
+    private const val MAX_COURSE_CODE_LENGTH = 10
+    private const val MIN_SEMESTER = 1
+    private const val MAX_SEMESTER = 8
+    private const val MIN_TOPIC_NAME_LENGTH = 2
+    private const val MAX_TOPIC_NAME_LENGTH = 50
+
+    /** Validates bank creation/edit data */
+    fun validateBankData(dto: CreateBankDTO) {
+        validateBankName(dto.name)
+        dto.courseCode?.let { validateCourseCode(it) }
+        validateSemester(dto.semester)
+    }
+
+    /** Validates topic creation/edit data */
+    fun validateTopicData(dto: CreateTopicDTO) {
+        validateTopicName(dto.name)
+    }
+
+    /** Validates question creation/edit data */
+    fun validateQuestionData(dto: CreateQuestionDTO) {
+        validateQuestionTitle(dto.question)
+        validateQuestionDescription(dto.explanation)
+        validateTopicIds(dto.topicIds)
+    }
+
+    private fun validateBankName(name: String) {
+        if (name.isBlank()) {
+            throw BankValidationException("Bank name cannot be empty", "name")
+        }
+        if (name.length < MIN_BANK_NAME_LENGTH) {
+            throw BankValidationException(
+                    "Bank name must be at least $MIN_BANK_NAME_LENGTH characters long",
+                    "name"
+            )
+        }
+        if (name.length > MAX_BANK_NAME_LENGTH) {
+            throw BankValidationException(
+                    "Bank name cannot exceed $MAX_BANK_NAME_LENGTH characters",
+                    "name"
+            )
+        }
+    }
+
+    private fun validateCourseCode(courseCode: String) {
+        if (courseCode.isBlank()) {
+            throw BankValidationException("Course code cannot be empty", "courseCode")
+        }
+        if (courseCode.length < MIN_COURSE_CODE_LENGTH) {
+            throw BankValidationException(
+                    "Course code must be at least $MIN_COURSE_CODE_LENGTH characters long",
+                    "courseCode"
+            )
+        }
+        if (courseCode.length > MAX_COURSE_CODE_LENGTH) {
+            throw BankValidationException(
+                    "Course code cannot exceed $MAX_COURSE_CODE_LENGTH characters",
+                    "courseCode"
+            )
+        }
+        if (!courseCode.matches(Regex("^[A-Z0-9]+$"))) {
+            throw BankValidationException(
+                    "Course code must contain only uppercase letters and numbers",
+                    "courseCode"
+            )
+        }
+    }
+
+    private fun validateSemester(semester: Int) {
+        if (semester < MIN_SEMESTER || semester > MAX_SEMESTER) {
+            throw BankValidationException(
+                    "Semester must be between $MIN_SEMESTER and $MAX_SEMESTER",
+                    "semester"
+            )
+        }
+    }
+
+    private fun validateTopicName(name: String) {
+        if (name.isBlank()) {
+            throw BankValidationException("Topic name cannot be empty", "name")
+        }
+        if (name.length < MIN_TOPIC_NAME_LENGTH) {
+            throw BankValidationException(
+                    "Topic name must be at least $MIN_TOPIC_NAME_LENGTH characters long",
+                    "name"
+            )
+        }
+        if (name.length > MAX_TOPIC_NAME_LENGTH) {
+            throw BankValidationException(
+                    "Topic name cannot exceed $MAX_TOPIC_NAME_LENGTH characters",
+                    "name"
+            )
+        }
+    }
+
+    private fun validateQuestionTitle(title: String) {
+        if (title.isBlank()) {
+            throw BankValidationException("Question title cannot be empty", "title")
+        }
+        if (title.length > 200) {
+            throw BankValidationException("Question title cannot exceed 200 characters", "title")
+        }
+    }
+
+    private fun validateQuestionDescription(description: String?) {
+        if (description != null && description.length > 2000) {
+            throw BankValidationException(
+                    "Question description cannot exceed 2000 characters",
+                    "description"
+            )
+        }
+    }
+
+    private fun validateTopicIds(topicIds: List<Any>) {
+        if (topicIds.isEmpty()) {
+            throw BankValidationException("At least one topic must be selected", "topicIds")
+        }
+    }
+}

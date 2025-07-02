@@ -1,17 +1,8 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.sharing
 
-import com.evalify.evalifybackend.bank.domain.BankUser
-
 enum class SharedTags {
-   OWNER,SHARED
-
+    OWNER,
+    SHARED
 }
 
-
-data class SharedUserDTO(
-    val user: BankUser,
-    val tag : SharedTags
-
-    ) {
-
-}
+data class SharedUserDTO(val user: SimpleUserDTO?, val tag: SharedTags) {}

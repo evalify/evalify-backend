@@ -4,125 +4,245 @@ import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.BankUser
 import com.evalify.evalifybackend.bank.domain.BankUserId
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.exception.BankAlreadySharedException
+import com.evalify.evalifybackend.bank.exception.BankNotFoundException
 import com.evalify.evalifybackend.bank.repository.BankRepository
+import com.evalify.evalifybackend.bank.util.BankSecurityUtils
+import com.evalify.evalifybackend.common.logging.logger
+import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.GetSharedUsersDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
 import com.evalify.evalifybackend.usewr.repository.UserRepository
-import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
-
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class BankService(private val bankRepository: BankRepository, private val userRepository: UserRepository) {
+@Transactional
+class BankService(
+        private val bankRepository: BankRepository,
+        private val userRepository: UserRepository
+) {
 
-    fun createBank(dto : CreateBankDTO , userId : String?) : CreateBankDTO {
+        private val logger by logger()
 
-        if(userId == null) throw RuntimeException("User id cannot be null")
+        fun createBank(dto: CreateBankDTO, userId: String): CreateBankDTO {
+                logger.info("Creating bank '{}' for user: {}", dto.name, userId)
 
-        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+                val user =
+                        userRepository.findById(userId).orElseThrow {
+                                NotFoundException("User with ID $userId not found")
+                        }
 
-        val bank = Bank(
-                name = dto.name,
-                semester = dto.semester,
-                createdAt = Instant.now(),
-                courseCode = dto.courseCode
+                val bank =
+                        Bank(
+                                name = dto.name,
+                                semester = dto.semester,
+                                createdAt = Instant.now(),
+                                courseCode = dto.courseCode,
+                                createdBy = user
+                        )
 
-            )
-        val bankUser = BankUser(
-            id = BankUserId(bank.id,user.id),
-            bank = bank,
-            user = user,
-            tags = SharedTags.OWNER
-        )
-        bank.sharedUsers.add(bankUser)
+                val bankUser =
+                        BankUser(
+                                id =
+                                        BankUserId(
+                                                bank.id,
+                                                user.id
+                                                        ?: throw NotFoundException(
+                                                                "User ID cannot be null"
+                                                        )
+                                        ),
+                                bank = bank,
+                                user = user,
+                                tags = SharedTags.OWNER
+                        )
+                bank.sharedUsers.add(bankUser)
 
+                val savedBank = bankRepository.save(bank)
+                logger.info(
+                        "Successfully created bank with ID: {} for user: {}",
+                        savedBank.id,
+                        userId
+                )
 
-        val savedBank = bankRepository.save(bank)
-            return CreateBankDTO(
-                name = savedBank.name,
-                courseCode = savedBank.courseCode,
-                semester = savedBank.semester,
-
-
-            )
-
-    }
-
-    fun deleteBank(bankId: UUID) {
-
-        val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
-
-        bankRepository.deleteById(bankId)
-    }
-
-
-    fun editBank(dto : CreateBankDTO , bankId : UUID , userId : String?): CreateBankDTO{
-        if(userId == null) throw RuntimeException("User id cannot be null")
-
-        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-
-        val bank = Bank(
-            id = bankId,
-            name = dto.name,
-            semester = dto.semester,
-
-            courseCode = dto.courseCode
-        )
-
-        val savedBank = bankRepository.save(bank)
-        return CreateBankDTO(
-            name = savedBank.name,
-            courseCode = savedBank.courseCode,
-            semester = savedBank.semester,
-            )
-
-    }
-
-    fun shareBank(bankId: UUID, dto: ShareQuizDTO) {
-        val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
-
-        val user = userRepository.findAllById(dto.userID)
-
-        user.map{
-                user->
-            val bankUser = BankUser(
-                id = BankUserId(bankId, user.id),
-                bank = bank,
-                user = user,
-                tags = SharedTags.SHARED
-            )
-            bank.sharedUsers.add(bankUser)
-            bankRepository.save(bank)
-
+                return CreateBankDTO(
+                        name = savedBank.name,
+                        courseCode = savedBank.courseCode,
+                        semester = savedBank.semester
+                )
         }
 
+        fun deleteBank(bankId: UUID, userId: String) {
+                logger.info("Deleting bank: {} by user: {}", bankId, userId)
 
-    }
+                val bank =
+                        bankRepository.findById(bankId).orElseThrow {
+                                BankNotFoundException(bankId.toString())
+                        }
 
-    fun unshareBank(bankId: UUID, dto: ShareQuizDTO) {
-        val bank = bankRepository.findById(bankId).orElseThrow { RuntimeException("Bank not found") }
-        val user = userRepository.findAllById(dto.userID)
+                BankSecurityUtils.ensureOwnership(bank, userId)
 
-        bank.sharedUsers.removeIf { it.id.userId == user[0].id }
-        bankRepository.save(bank)
-    }
-
-    fun getShareBank(bankId: UUID) : GetSharedUsersDTO {
-        val bank = bankRepository.findById(bankId)
-        val users = bank.get().sharedUsers.map{
-            user ->
-            SharedUserDTO(
-                user = user,
-                tag = user.tags
-            )
+                bankRepository.deleteById(bankId)
+                logger.info("Successfully deleted bank: {} by user: {}", bankId, userId)
         }
 
-        return GetSharedUsersDTO(users)
+        fun editBank(dto: CreateBankDTO, userId: String, bankId: UUID): CreateBankDTO {
+                logger.info("Editing bank: {} by user: {}", bankId, userId)
 
-    }
+                val existingBank =
+                        bankRepository.findById(bankId).orElseThrow {
+                                BankNotFoundException(bankId.toString())
+                        }
 
+                BankSecurityUtils.ensureOwnership(existingBank, userId)
 
+                val updatedBank =
+                        Bank(
+                                id = bankId,
+                                name = dto.name,
+                                semester = dto.semester,
+                                courseCode = dto.courseCode,
+                                createdBy = existingBank.createdBy,
+                                createdAt = existingBank.createdAt,
+                                sharedUsers = existingBank.sharedUsers,
+                                topics = existingBank.topics,
+                                bankQuestion = existingBank.bankQuestion
+                        )
+
+                val savedBank = bankRepository.save(updatedBank)
+                logger.info("Successfully updated bank: {} by user: {}", bankId, userId)
+
+                return CreateBankDTO(
+                        name = savedBank.name,
+                        courseCode = savedBank.courseCode,
+                        semester = savedBank.semester
+                )
+        }
+
+        fun shareBank(bankId: UUID, dto: ShareQuizDTO, userId: String) {
+                logger.info(
+                        "Sharing bank: {} with users: {} by user: {}",
+                        bankId,
+                        dto.userID,
+                        userId
+                )
+
+                val bank =
+                        bankRepository.findById(bankId).orElseThrow {
+                                BankNotFoundException(bankId.toString())
+                        }
+
+                BankSecurityUtils.ensureOwnership(bank, userId)
+
+                val usersToShare = userRepository.findAllById(dto.userID)
+                if (usersToShare.size != dto.userID.size) {
+                        val foundIds = usersToShare.map { it.id }
+                        val missingIds = dto.userID.filterNot { foundIds.contains(it) }
+                        throw NotFoundException("Users not found: $missingIds")
+                }
+
+                var sharedCount = 0
+                usersToShare.forEach { user ->
+                        val userIdValue =
+                                user.id ?: throw NotFoundException("User ID cannot be null")
+
+                        // Check if already shared
+                        val alreadyShared = bank.sharedUsers.any { it.user?.id == userIdValue }
+                        if (alreadyShared) {
+                                logger.warn(
+                                        "Bank {} is already shared with user {}",
+                                        bankId,
+                                        userIdValue
+                                )
+                                throw BankAlreadySharedException(bankId.toString(), userIdValue)
+                        }
+
+                        val bankUser =
+                                BankUser(
+                                        id = BankUserId(bankId, userIdValue),
+                                        bank = bank,
+                                        user = user,
+                                        tags = SharedTags.SHARED
+                                )
+                        bank.sharedUsers.add(bankUser)
+                        sharedCount++
+                }
+
+                bankRepository.save(bank)
+                logger.info("Successfully shared bank: {} with {} users", bankId, sharedCount)
+        }
+
+        fun unshareBank(bankId: UUID, dto: ShareQuizDTO, userId: String) {
+                logger.info(
+                        "Unsharing bank: {} from users: {} by user: {}",
+                        bankId,
+                        dto.userID,
+                        userId
+                )
+
+                val bank =
+                        bankRepository.findById(bankId).orElseThrow {
+                                BankNotFoundException(bankId.toString())
+                        }
+
+                BankSecurityUtils.ensureOwnership(bank, userId)
+
+                var unsharedCount = 0
+                dto.userID.forEach { userIdToUnshare ->
+                        val removed =
+                                bank.sharedUsers.removeIf {
+                                        it.user?.id == userIdToUnshare &&
+                                                it.tags == SharedTags.SHARED
+                                }
+                        if (removed) unsharedCount++
+                }
+
+                bankRepository.save(bank)
+                logger.info("Successfully unshared bank: {} from {} users", bankId, unsharedCount)
+        }
+
+        fun getShareBank(bankId: UUID, userId: String): GetSharedUsersDTO {
+                logger.debug("Retrieving shared users for bank: {} by user: {}", bankId, userId)
+
+                val bank =
+                        bankRepository.findById(bankId).orElseThrow {
+                                BankNotFoundException(bankId.toString())
+                        }
+
+                BankSecurityUtils.ensureBankAccess(bank, userId)
+
+                val users =
+                        bank.sharedUsers.map { bankUser ->
+                                // Create SimpleUserDTO to avoid serialization issues with Hibernate
+                                // proxies
+                                val simpleUser =
+                                        bankUser.user?.let { user ->
+                                                // Force initialization if needed
+                                                val actualUser =
+                                                        if (user.id != null) {
+                                                                userRepository
+                                                                        .findById(user.id!!)
+                                                                        .orElse(null)
+                                                        } else null
+
+                                                actualUser?.let {
+                                                        SimpleUserDTO(
+                                                                id = it.id!!,
+                                                                name = it.name,
+                                                                email = it.email,
+                                                                profileId = it.profileId
+                                                        )
+                                                }
+                                        }
+                                SharedUserDTO(user = simpleUser, tag = bankUser.tags)
+                        }
+
+                logger.debug("Retrieved {} shared users for bank: {}", users.size, bankId)
+                return GetSharedUsersDTO(users)
+        }
 }

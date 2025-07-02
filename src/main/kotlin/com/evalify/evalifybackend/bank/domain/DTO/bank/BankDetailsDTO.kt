@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.domain.DTO.bank
 
 import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import java.util.UUID
 
 data class BankDetailsDTO(
@@ -10,7 +11,7 @@ data class BankDetailsDTO(
     val semester: String,
     val topics : Int?,
     val questions : Int,
-    val access : List<AccessDTO>
+    val access : List<SharedUserDTO>
 
 ) {
 }
