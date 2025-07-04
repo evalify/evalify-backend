@@ -9,14 +9,14 @@ import java.util.UUID
 class Lab (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
-    val name: String,
-    val block: String,
-    val ipSubnet: String,
+    var id: UUID? = null,
+    var name: String,
+    var block: String,
+    var ipSubnet: String,
 
     @OneToMany(fetch = FetchType.LAZY)
-    val labAssistant: List<User>,
+    val labAssistant: List<User> = emptyList(),
 
     @ManyToMany(mappedBy = "lab")
-    val quiz:List<Quiz> = listOf()
+    val quiz: List<Quiz> = emptyList()
 )
