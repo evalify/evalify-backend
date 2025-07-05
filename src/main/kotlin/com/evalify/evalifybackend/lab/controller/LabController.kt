@@ -98,4 +98,9 @@ class LabController(
     fun searchLabsLegacy(@RequestParam query: String): ResponseEntity<List<LabResponse>> {
         return ResponseEntity.ok(labService.searchLabs(query))
     }
+
+    @GetMapping("/count")
+    fun getLabCount(): ResponseEntity<Map<String,Long>> {
+        return ResponseEntity.ok(mapOf("count" to labService.getLabCount()))
+    }
 }

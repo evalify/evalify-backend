@@ -184,6 +184,14 @@ class UserService(
         return facultyUsers.map { it.toUserResponse() }
     }
 
+    fun getUserCount(): Map<Role, Long> {
+        return userRepository.countAllUsers().associate {
+            val role = it[0] as Role
+            val count = (it[1] as Number).toLong()
+            role to count
+        }
+    }
+
 }
 
 fun User.toUserResponse(): UserResponse {

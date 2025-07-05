@@ -437,6 +437,15 @@ class BankController(
         return ResponseEntity.noContent().build()
     }
 
+    @GetMapping("/count")
+    fun getBankCount(): ResponseEntity<Map<String,Long>> {
+        val count = bankManagerService.getBankCount()
+        logger.info("Total banks for admin: {}", count)
+
+        return ResponseEntity.ok(mapOf("count" to count))
+    }
+
+
     private fun getCurrentUserId(): String {
         return SecurityUtils.getCurrentUserId()
                 ?: throw UnauthorizedException("User not authenticated")

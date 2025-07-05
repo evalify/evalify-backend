@@ -104,6 +104,10 @@ class LabService(
     fun searchLabs(query: String): List<LabResponse> {
         return labRepository.findByNameOrBlockOrIpSubnetContainingIgnoreCase(query).map { it.toLabResponse() }
     }
+
+    fun getLabCount(): Long {
+        return labRepository.count()
+    }
 }
 
 fun Lab.toLabResponse(): LabResponse {

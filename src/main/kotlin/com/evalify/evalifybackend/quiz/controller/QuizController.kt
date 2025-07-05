@@ -374,4 +374,14 @@ class QuizController(
         val result = quizService.checkAvailability(quizId, dto)
         return ResponseEntity.ok(result)
     }
+
+    // returns count of total, live, upcoming and completed for all quizzes
+    @GetMapping("/count")
+    fun getAllQuizCount(): ResponseEntity<Map<String, Long>> {
+        val counts = quizService.getQuizCounts()
+
+        logger.debug("Successfully retrieved quiz counts for admin:")
+        return ResponseEntity.ok(counts)
+    }
+
 }

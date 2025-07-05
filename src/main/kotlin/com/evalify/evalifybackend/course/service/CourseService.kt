@@ -570,6 +570,10 @@ class CourseService(
             )
         )
     }
+
+    fun getCourseCount(): Long{
+        return courseRepository.count()
+    }
 }
 
 fun Course.toCourseResponse(): CourseResponse {

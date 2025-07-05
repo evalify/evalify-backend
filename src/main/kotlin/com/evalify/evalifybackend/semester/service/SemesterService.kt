@@ -186,6 +186,10 @@ class SemesterService
         courseRepository.delete(course)
         return courseResponse
     }
+
+    fun getSemesterCount():Long {
+        return semesterRepository.count()
+    }
 }
 
 fun Semester.toSemesterResponse(): SemesterResponse {

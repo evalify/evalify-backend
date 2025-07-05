@@ -36,6 +36,7 @@ import kotlin.time.toDuration
 import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Service
 @Transactional
@@ -519,5 +520,24 @@ class QuizService(
                 }
 
         return PermutationsDTO(validSets.isNotEmpty(), totalPerms.toInt())
+    }
+
+    // returns count of total, live, upcoming and completed for all quizzes
+    fun getQuizCounts(): Map<String, Long> {
+        val now = Instant.now() // Use Instant instead of Date
+        val totalCount = quizRepository.count()
+        val liveCount = quizRepository.countByStartTimeBeforeAndEndTimeAfter(
+            startTime = now,
+            endTime = now
+        )
+        val upcomingCount = quizRepository.countByStartTimeAfter(now)
+        val completedCount = quizRepository.countByEndTimeBefore(now)
+
+        return mapOf(
+            "total" to totalCount,
+            "live" to liveCount,
+            "upcoming" to upcomingCount,
+            "completed" to completedCount
+        )
     }
 }

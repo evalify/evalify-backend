@@ -163,6 +163,9 @@ class DepartmentService(
     fun getBatchesByDepartmentId(departmentId: UUID): List<Batch> {
         return departmentRepository.findBatchesByDepartmentId(departmentId)
     }
+    fun getDepartmentCount(): Long {
+        return departmentRepository.count()
+    }
 }
 
 fun Department.toDepartmentResponse(): DepartmentResponse {

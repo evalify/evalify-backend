@@ -583,4 +583,7 @@ class BankManagerService(
                         bankId
                 )
         }
+        fun getBankCount(): Long {
+                return bankRepository.count()
+        }
 }

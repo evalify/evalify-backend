@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import java.util.UUID
 
-@RepositoryRestResource(path = "semester")
 interface SemesterRepository : JpaRepository<Semester, UUID> {
 
     @Query("SELECT s FROM Semester s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :query, '%')) OR CAST(s.year AS string) LIKE CONCAT('%', :query, '%')")

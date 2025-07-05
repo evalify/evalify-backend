@@ -314,6 +314,10 @@ fun removeManagersFromBatch(batchId: UUID, managerId: List<String>) {
             Sort.by(Sort.Direction.ASC, "name") // Default sort by name
         }
     }
+
+    fun getBatchCount(): Long {
+        return batchRepository.count()
+    }
 }
 
 fun Batch.toBatchResponse(): BatchResponse {

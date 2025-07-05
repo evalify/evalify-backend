@@ -108,6 +108,17 @@ class DepartmentController(
         }
     }
 
+    @GetMapping("/count")
+    fun getDepartmentCount(): ResponseEntity<Map<String, Long>> {
+        return try {
+            val count = departmentService.getDepartmentCount()
+            ResponseEntity.ok(mapOf("count" to count))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
     fun Department.toSimpleDepartmentResponse(): SimpleDepartmentResponse {
         return SimpleDepartmentResponse(
             id = this.id.toString(),

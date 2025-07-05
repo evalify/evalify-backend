@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 class UserController (private val userService: UserService)
 {
     @GetMapping
@@ -159,6 +159,19 @@ fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(mapOf("message" to "Failed to search faculty: ${e.message}"))
+        }
+    }
+
+    @GetMapping("/count")
+    fun getUserCount(): ResponseEntity<Map<Role, Long>> {
+        return try {
+            val userCount = userService.getUserCount()
+            ResponseEntity.ok(userCount)
+        } catch (e: Exception) {
+            println("Error fetching user count: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                null
+            )
         }
     }
 }

@@ -416,4 +416,15 @@ class CourseController(
                 .body(mapOf("error" to "Failed to get active courses: ${e.message}"))
         }
     }
+
+    @GetMapping("/count")
+    fun getCourseCount(): ResponseEntity<Map<String, Long>> {
+        return try {
+            val count = courseService.getCourseCount()
+            ResponseEntity.ok(mapOf("count" to count))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
 }

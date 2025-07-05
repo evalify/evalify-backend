@@ -24,5 +24,8 @@ interface UserRepository : JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE u.role = :role")
     fun findByRolePaged(@Param("role") role: Role, pageable: Pageable): Page<User>
 
+    @Query("SELECT u.role, COUNT(u) FROM User u GROUP BY u.role")
+    fun countAllUsers(): List<Array<Any>>
+
     override fun findAll(pageable: Pageable): Page<User>
 }

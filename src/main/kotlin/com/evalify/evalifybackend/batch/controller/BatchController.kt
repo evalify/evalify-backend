@@ -183,6 +183,16 @@ class BatchController(val batchBankService: BatchBankService, val batchService: 
                 .body(mapOf("message" to "Failed to search batch students: ${e.message}"))
         }
     }
+    @GetMapping("/count")
+    fun getBatchCount(): ResponseEntity<Map<String, Long>> {
+        return try {
+            val count = batchService.getBatchCount()
+            ResponseEntity.ok(mapOf("count" to count))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
 }
 
 fun Semester.toSemesterBatchResponse(): SemesterBatchResponse {

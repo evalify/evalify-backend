@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
-@RequestMapping("/semester")
+@RequestMapping("/api/semester")
 class SemesterController(val semesterService: SemesterService) {
 
     @PutMapping("/{semesterId}/assign-manager")
@@ -102,6 +102,17 @@ class SemesterController(val semesterService: SemesterService) {
             ResponseEntity.badRequest().body(null)
         } catch (e: NotFoundException) {
             ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
+    @GetMapping("/count")
+    fun getSemesterCount(): ResponseEntity<Map<String,Long>> {
+        return try {
+            val count = semesterService.getSemesterCount()
+            ResponseEntity.ok(mapOf("count" to count))
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
