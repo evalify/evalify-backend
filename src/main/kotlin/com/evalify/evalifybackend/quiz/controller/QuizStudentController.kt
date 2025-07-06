@@ -16,7 +16,7 @@ import java.time.Instant
 import java.util.UUID
 
 @RestController
-@RequestMapping("student/{studentId}/quiz/{quizId}")
+@RequestMapping("/student/{studentId}/quiz/{quizId}")
 class QuizStudentController(
     val quizStudentService: QuizStudentService,
 ) {

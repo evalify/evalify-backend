@@ -4,19 +4,19 @@ import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 
-class MatchReturnDTO (
-    val question:String,
-    val hintText: String?,
-    val matchPair : MutableList<MatchShuffleDTO>,
-    val markValue: Int,
-    val taxonomy: Taxonomy?,
-    val coValue: Int,
-    val difficultyLevel: Difficulty?
-) : QuestionsReturnDTO(
-    hint = hintText,
-    marks = markValue,
-    bloomsTaxonomy = taxonomy,
-    co = coValue,
-    difficulty = difficultyLevel
-
-)
+class MatchReturnDTO(
+        val question: String,
+        override val hint: String?,
+        val matchPair: MutableList<MatchShuffleDTO>,
+        override val marks: Int,
+        override val bloomsTaxonomy: Taxonomy?,
+        override val co: Int,
+        override val difficulty: Difficulty?
+) :
+        QuestionsReturnDTO(
+                hint = hint,
+                marks = marks,
+                bloomsTaxonomy = bloomsTaxonomy,
+                co = co,
+                difficulty = difficulty
+        )

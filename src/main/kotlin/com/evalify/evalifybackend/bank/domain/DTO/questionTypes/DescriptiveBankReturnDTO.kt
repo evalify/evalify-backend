@@ -7,11 +7,11 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 
 data class DescriptiveBankReturnDTO(
     val question: String,
-    val hintText: String?,
-    val markValue: Int,
-    val taxonomy: Taxonomy?,
-    val coValue: Int,
-    val difficultyLevel: Difficulty?,
+    override val hint: String?,
+    override val marks: Int,
+    override val bloomsTaxonomy: Taxonomy?,
+    override val co: Int,
+    override val difficulty: Difficulty?,
     val explanation : String?,
     val expectedAnswer:String?,
     val strictness:Float?,
@@ -19,11 +19,11 @@ data class DescriptiveBankReturnDTO(
     val answer : String?,
     val type : QuestionTypes?
 ) : BankQuestionsReturnDTO(
-    hint = hintText,
-    marks = markValue,
-    bloomsTaxonomy = taxonomy,
-    co = coValue,
-    difficulty = difficultyLevel
+    hint = hint,
+    marks = marks,
+    bloomsTaxonomy = bloomsTaxonomy,
+    co = co,
+    difficulty = difficulty
 ){
 
 }

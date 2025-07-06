@@ -15,81 +15,80 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
-import org.hibernate.annotations.Type
 import java.util.UUID
+import org.hibernate.annotations.Type
 
 @Entity
 @DiscriminatorValue(value = "TRUE_FALSE")
 class TrueFalse(
-    id: UUID?,
-    question: String = "",
-    bank: Bank?,
-    topic: MutableList<Topic>,
-    explanation: String? = "",
-    hint: String? = "",
-    marks: Int,
-    bloomsTaxonomy: Taxonomy,
-    co: Int,
-    negativeMark: Int? = null,
-    difficulty: Difficulty,
-    @Type(JsonBinaryType::class)
-    @Column(columnDefinition = "jsonb")
-    val answer : Boolean,
-) : BaseQuestion(
-    id=id,
-    question = question,
-    bank = bank,
-    topic = topic,
-    explanation = explanation,
-    hint = hint,
-    marks = marks,
-    bloomsTaxonomy = bloomsTaxonomy,
-    co = co,
-    negativeMark = negativeMark,
-    difficulty = difficulty
-){
+        id: UUID?,
+        question: String = "",
+        bank: Bank?,
+        topic: MutableList<Topic>,
+        explanation: String? = "",
+        hint: String? = "",
+        marks: Int,
+        bloomsTaxonomy: Taxonomy,
+        co: Int,
+        negativeMark: Int? = null,
+        difficulty: Difficulty,
+        @Type(JsonBinaryType::class) @Column(columnDefinition = "jsonb") val answer: Boolean,
+) :
+        BaseQuestion(
+                id = id,
+                question = question,
+                bank = bank,
+                topic = topic,
+                explanation = explanation,
+                hint = hint,
+                marks = marks,
+                bloomsTaxonomy = bloomsTaxonomy,
+                co = co,
+                negativeMark = negativeMark,
+                difficulty = difficulty
+        ) {
     override fun copyQuestion(): TrueFalse {
-        val copiedQuestion = TrueFalse(
-            id = null,
-            question = question,
-            bank = bank,
-            topic = topic,
-            explanation = explanation,
-            hint = hint,
-            marks = marks,
-            bloomsTaxonomy = bloomsTaxonomy,
-            co = co,
-            negativeMark = negativeMark,
-            difficulty = difficulty,
-            answer = answer,
-        )
+        val copiedQuestion =
+                TrueFalse(
+                        id = null,
+                        question = question,
+                        bank = bank,
+                        topic = topic,
+                        explanation = explanation,
+                        hint = hint,
+                        marks = marks,
+                        bloomsTaxonomy = bloomsTaxonomy,
+                        co = co,
+                        negativeMark = negativeMark,
+                        difficulty = difficulty,
+                        answer = answer,
+                )
         return copiedQuestion
     }
 
-    override fun mapToType(shuffleOptions:Boolean): QuestionsReturnDTO {
+    override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
         return TrueFalseDTO(
-            question = this.question,
-            answers = this.answer,
-            hintText = this.hint,
-            markValue = this.marks,
-            taxonomy = this.bloomsTaxonomy,
-            coValue = this.co,
-            difficultyLevel = this.difficulty
+                question = this.question,
+                answers = this.answer,
+                hint = this.hint,
+                marks = this.marks,
+                bloomsTaxonomy = this.bloomsTaxonomy,
+                co = this.co,
+                difficulty = this.difficulty
         )
     }
 
     override fun mapToBankType(): BankQuestionsReturnDTO {
         return TrueFalseBankDTO(
-            question = this.question,
-            answers = this.answer,
-            hintText = this.hint,
-            markValue = this.marks,
-            taxonomy = this.bloomsTaxonomy,
-            coValue = this.co,
-            difficultyLevel = this.difficulty,
-            explanation = this.explanation,
-            type = this.getQuestionType()
-
+                question = this.question,
+                answers = this.answer,
+                hint = this.hint,
+                marks = this.marks,
+                bloomsTaxonomy = this.bloomsTaxonomy,
+                co = this.co,
+                difficulty = this.difficulty,
+                explanation = this.explanation,
+                type = this.getQuestionType()
         )
     }
 
@@ -98,19 +97,20 @@ class TrueFalse(
     }
 
     override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
-        val patchedQuestion = TrueFalse(
-            id = this.id,
-            question = dto.question ?: this.question,
-            bank = this.bank,
-            topic = dto.topic ?: this.topic,
-            explanation = dto.explanation ?: this.explanation,
-            hint = dto.hint ?: this.hint,
-            marks = dto.marks ?: this.marks,
-            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
-            co = dto.co ?: this.co,
-            difficulty = dto.difficulty ?: this.difficulty,
-            answer = dto.trueFalseAnswer ?: this.answer
-        )
+        val patchedQuestion =
+                TrueFalse(
+                        id = this.id,
+                        question = dto.question ?: this.question,
+                        bank = this.bank,
+                        topic = dto.topic ?: this.topic,
+                        explanation = dto.explanation ?: this.explanation,
+                        hint = dto.hint ?: this.hint,
+                        marks = dto.marks ?: this.marks,
+                        bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+                        co = dto.co ?: this.co,
+                        difficulty = dto.difficulty ?: this.difficulty,
+                        answer = dto.trueFalseAnswer ?: this.answer
+                )
         return patchedQuestion
     }
 }

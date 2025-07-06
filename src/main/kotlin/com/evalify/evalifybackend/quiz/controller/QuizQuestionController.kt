@@ -12,18 +12,20 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
 
 
 @RestController
+@RequestMapping("/api/quiz")
 class QuizQuestionController(val questionService: QuizQuestionService,
 
 ) {
 
 
-    @PostMapping("/quiz/{quizId}/section/{sectionID}/addQuestions")
+    @PostMapping("/{quizId}/section/{sectionID}/addQuestions")
     fun addBankQuestionsToQuiz(
         @PathVariable quizId: UUID,
         @PathVariable sectionID : UUID,
@@ -42,7 +44,7 @@ class QuizQuestionController(val questionService: QuizQuestionService,
     }
 
 
-    @PostMapping("/quiz/{quizId}/addQuestion")
+    @PostMapping("/{quizId}/addQuestion")
     fun addQuizQuestion(
         @PathVariable quizId: UUID,@RequestBody dto: CreateQuizQuestionDTO
     ){
@@ -50,7 +52,7 @@ class QuizQuestionController(val questionService: QuizQuestionService,
         questionService.createQuizQuestion(dto,quizId,userId)
     }
 
-    @PostMapping("/quiz/{quizId}/addSelectQuestion/")
+    @PostMapping("/{quizId}/addSelectQuestion/")
     fun addBankQuestionToQuiz(
         @PathVariable quizId: UUID,
         @RequestParam dto : AddBankQuestionDTO

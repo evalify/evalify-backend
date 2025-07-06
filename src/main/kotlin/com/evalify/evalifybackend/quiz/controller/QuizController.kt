@@ -204,7 +204,7 @@ class QuizController(
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
 
-    @PostMapping("/")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     fun createQuiz(@Valid @RequestBody quizDTO: CreateQuizDTO): ResponseEntity<Map<String, Any>> {
         val userId = getCurrentUserId()

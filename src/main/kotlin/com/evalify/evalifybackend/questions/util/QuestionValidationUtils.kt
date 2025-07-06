@@ -283,7 +283,7 @@ object QuestionValidationUtils {
         }
     }
 
-    private fun validateBloomsTaxonomy(@Suppress("UNUSED_PARAMETER") taxonomy: Taxonomy) {
+    private fun validateBloomsTaxonomy(@Suppress("UNUSED_PARAMETER") bloomsTaxonomy: Taxonomy) {
         // Enum validation is automatically handled, but we can add business logic if needed
         // For now, all enum values are valid
     }

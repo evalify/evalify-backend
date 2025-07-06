@@ -17,7 +17,7 @@ import java.util.UUID
  * Controller for instructor-specific quiz operations
  */
 @RestController
-@RequestMapping("quiz")
+@RequestMapping("/api/quiz")
 class QuizInstructorController(private val quizInstructorService: QuizInstructorService) {
 
     /**

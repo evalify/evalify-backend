@@ -7,19 +7,20 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
 
 data class MCQBankReturnDTO(
-    val question:String,
-    val options:List<MCQOption>,
-    val hintText: String?,
-    val markValue: Int,
-    val taxonomy: Taxonomy?,
-    val coValue: Int,
-    val difficultyLevel: Difficulty?,
-    val explanation: String?,
-    val type : QuestionTypes?
-) : BankQuestionsReturnDTO(
-    hint = hintText,
-    marks = markValue,
-    bloomsTaxonomy = taxonomy,
-    co = coValue,
-    difficulty = difficultyLevel
-)
+        val question: String,
+        val options: List<MCQOption>,
+        override val hint: String?,
+        override val marks: Int,
+        override val bloomsTaxonomy: Taxonomy?,
+        override val co: Int,
+        override val difficulty: Difficulty?,
+        val explanation: String?,
+        val type: QuestionTypes?
+) :
+        BankQuestionsReturnDTO(
+                hint = hint,
+                marks = marks,
+                bloomsTaxonomy = bloomsTaxonomy,
+                co = co,
+                difficulty = difficulty
+        )

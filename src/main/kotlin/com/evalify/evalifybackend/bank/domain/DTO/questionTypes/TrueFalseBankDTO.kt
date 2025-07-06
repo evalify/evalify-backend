@@ -6,19 +6,20 @@ import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 
 class TrueFalseBankDTO(
-    val question:String,
-    val answers : Boolean,
-    val hintText: String?,
-    val markValue: Int,
-    val taxonomy: Taxonomy?,
-    val coValue: Int,
-    val difficultyLevel: Difficulty?,
-    val explanation: String?,
-    val type : QuestionTypes?
-) : BankQuestionsReturnDTO(
-    hint = hintText,
-    marks = markValue,
-    bloomsTaxonomy = taxonomy,
-    co = coValue,
-    difficulty = difficultyLevel
-)
+        val question: String,
+        val answers: Boolean,
+        override val hint: String?,
+        override val marks: Int,
+        override val bloomsTaxonomy: Taxonomy?,
+        override val co: Int,
+        override val difficulty: Difficulty?,
+        val explanation: String?,
+        val type: QuestionTypes?
+) :
+        BankQuestionsReturnDTO(
+                hint = hint,
+                marks = marks,
+                bloomsTaxonomy = bloomsTaxonomy,
+                co = co,
+                difficulty = difficulty
+        )

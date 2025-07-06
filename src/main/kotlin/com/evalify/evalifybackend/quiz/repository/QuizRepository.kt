@@ -9,7 +9,6 @@ import java.time.Instant
 import java.util.Date
 import java.util.UUID
 
-@RepositoryRestResource(path = "quiz")
 interface QuizRepository: JpaRepository<Quiz, UUID> {
     @Query("SELECT q FROM Quiz q JOIN q.course c WHERE c.id = :courseId")
     fun findByCourseId(@Param("courseId") courseId: UUID): List<Quiz>
