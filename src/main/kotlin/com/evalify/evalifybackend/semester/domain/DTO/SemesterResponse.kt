@@ -9,3 +9,4 @@ data class SemesterResponse(
     val isActive: Boolean
 )
 
+

@@ -241,6 +241,13 @@ fun removeManagersFromBatch(batchId: UUID, managerId: List<String>) {
         return batch.toBatchResponse()
     }
 
+    fun deleteBatch(batchId: UUID) {
+        val batch = batchRepository.findById(batchId).orElseThrow {
+            NotFoundException("Batch with id $batchId not found")
+        }
+        batchRepository.delete(batch)
+    }
+
     @Transactional(readOnly = true)
     fun searchBatchStudents(
         batchId: UUID,

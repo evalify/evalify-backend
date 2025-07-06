@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.semester.domain.Semester
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -35,6 +36,20 @@ class BatchController(val batchBankService: BatchBankService, val batchService: 
     fun removeBankFromCourse(@RequestBody bankDto:UpdateBatchBankDTO,@PathVariable batchId:UUID){
         batchBankService.removeBank(batchId = batchId, bankId = bankDto.bank)
     }
+
+    @DeleteMapping("/{batchId}")
+    fun deleteBatch(@PathVariable batchId: UUID): ResponseEntity<Void> {
+        return try {
+            batchService.deleteBatch(batchId)
+            ResponseEntity.noContent().build()
+        } catch (e: NotFoundException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
 
     @PutMapping("/{batchId}/add-students")
     fun addStudents(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {

@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
 import com.evalify.evalifybackend.course.domain.DTO.CreateCourseRequest
 import com.evalify.evalifybackend.semester.domain.DTO.AddOrRemoveCourseDTO
 import com.evalify.evalifybackend.semester.domain.DTO.AssignManagersDTO
+import com.evalify.evalifybackend.semester.domain.DTO.SemesterRequest
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterResponse
 import com.evalify.evalifybackend.semester.service.SemesterService
 import org.springframework.http.HttpStatus
@@ -29,6 +30,46 @@ class SemesterController(val semesterService: SemesterService) {
     @PutMapping("/{semesterId}/add-course")
     fun addCourseToSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
         semesterService.addCourseToSemester(semesterId = semesterId, courseId = courseDto.courseId)
+    }
+
+    @PostMapping
+    fun createSemester(@RequestBody semesterRequest: SemesterRequest): ResponseEntity<SemesterResponse> {
+        return try {
+            val createdSemester = semesterService.createSemester(semesterRequest)
+            ResponseEntity(createdSemester, HttpStatus.CREATED)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
+    @PutMapping("/{semesterId}")
+    fun updateSemester(
+        @PathVariable semesterId: UUID,
+        @RequestBody semesterRequest: SemesterRequest
+    ): ResponseEntity<SemesterResponse> {
+        return try {
+            val updatedSemester = semesterService.updateSemester(semesterId, semesterRequest)
+            ResponseEntity(updatedSemester, HttpStatus.OK)
+        } catch (e: NotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
+    @DeleteMapping("/{semesterId}")
+    fun deleteSemester(@PathVariable semesterId: UUID): ResponseEntity<Void> {
+        return try {
+            semesterService.deleteSemester(semesterId)
+            ResponseEntity.noContent().build()
+        } catch (e: NotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build()
+        }
     }
 
     @PutMapping("/{semesterId}/remove-course")

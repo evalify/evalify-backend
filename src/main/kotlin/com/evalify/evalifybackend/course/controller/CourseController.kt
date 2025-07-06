@@ -267,7 +267,9 @@ class CourseController(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
         }
-    }    @GetMapping("/{courseId}/unassigned-students")
+    }
+    
+    @GetMapping("/{courseId}/unassigned-students")
     fun getUnassignedStudents(
         @PathVariable courseId: UUID
     ): ResponseEntity<List<UserResponse>> {

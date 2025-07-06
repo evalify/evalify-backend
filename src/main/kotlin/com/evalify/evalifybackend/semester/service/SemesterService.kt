@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
 import com.evalify.evalifybackend.course.repository.CourseRepository
+import com.evalify.evalifybackend.semester.domain.DTO.SemesterRequest
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterResponse
 import com.evalify.evalifybackend.semester.domain.Semester
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
@@ -38,6 +39,37 @@ class SemesterService
         }
         semester.managers.addAll(managers)
         semesterRepository.save(semester)
+    }
+
+    fun createSemester(semesterRequest: SemesterRequest): SemesterResponse {
+        val semester = Semester(
+            name = semesterRequest.name,
+            year = semesterRequest.year,
+            isActive = semesterRequest.isActive
+        )
+        val savedSemester = semesterRepository.save(semester)
+        return savedSemester.toSemesterResponse()
+    }
+
+    fun updateSemester(semesterId: UUID, semesterRequest: SemesterRequest): SemesterResponse {
+        val semester = semesterRepository.findById(semesterId).orElseThrow {
+            NotFoundException("Semester with id $semesterId not found")
+        }
+        val newSemester = Semester(
+            id = semester.id,
+            name = semesterRequest.name,
+            year = semesterRequest.year,
+            isActive = semesterRequest.isActive
+        )
+        val updatedSemester = semesterRepository.save(newSemester)
+        return updatedSemester.toSemesterResponse()
+    }
+
+    fun deleteSemester(semesterId: UUID) {
+        val semester = semesterRepository.findById(semesterId).orElseThrow {
+            NotFoundException("Semester with id $semesterId not found")
+        }
+        semesterRepository.delete(semester)
     }
 
     fun removeManagersFromSemester(semesterId: UUID, managersId: List<String>) {
