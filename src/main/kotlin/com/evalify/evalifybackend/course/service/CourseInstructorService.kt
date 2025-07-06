@@ -7,7 +7,9 @@ import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.usewr.repository.UserRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.util.Optional
 import java.util.UUID
 import kotlin.collections.distinctBy
 import kotlin.collections.plus
@@ -19,20 +21,26 @@ class CourseInstructorService(
     val semesterRepository: SemesterRepository
 
 ) {
-    fun getCourseByInstructor(instructorIds: List<String>): List<CourseInstructorPreviewDTO> {
-        // Get instructors by their IDs
-        val instructors: List<User> = userRepository.findAllById(instructorIds)
+    @Transactional
+    fun getCourseByInstructor(instructorId: List<String>): List<CourseInstructorPreviewDTO> {
+        // Get instructor by ID
+        val instructor: User = userRepository.findAllById(instructorId)
+            .firstOrNull() ?: throw IllegalArgumentException("Instructor with ID $instructorId not found")
 
-        // Find courses associated with these instructors
-        val instructorCourses: List<Course> = courseRepository.findAllByInstructors(instructors)
 
-        // Find semesters managed by these instructors
+        // Find courses where this user is an instructor
+        val instructorCourses: List<Course> = courseRepository.findAllByInstructors(listOf(instructor))
+
+        // Find semesters managed by this instructor
         val managerCourses = mutableListOf<Course>()
-        val semesters = semesterRepository.findByManagerId(manager = instructors)
+        val semesters = semesterRepository.findByManagerId(manager = listOf(instructor))
 
-        semesters.stream().forEach {semester->{
+        semesters.forEach { semester ->
+            println("<UNK> <UNK> <UNK> <UNK> ${semester.id} ${semester.name}")
             managerCourses.addAll(semester.courses)
-        } }
+        }
+
+        println(managerCourses)
 
         // Merge the two course lists and remove duplicates
         val allCourses = (instructorCourses + managerCourses).distinctBy { it.id }
@@ -42,9 +50,10 @@ class CourseInstructorService(
             CourseInstructorPreviewDTO(
                 id = course.id!!,
                 name = course.name,
+                courseCode = course.code,
                 description = course.description,
-                quizzes = Integer.valueOf(course.quiz.size),
-                courses = CourseInstructorSemesterDTO(
+                quizzes = course.quiz.size,
+                semester = CourseInstructorSemesterDTO(
                     id = course.semester.id!!,
                     name = course.semester.name
                 )

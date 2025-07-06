@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.user.domain.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -28,6 +29,7 @@ interface CourseRepository : JpaRepository<Course, UUID> {
     @Query("SELECT c FROM Course c WHERE c.semester.isActive = true AND :student MEMBER OF c.students")
     fun findCoursesByActiveSemestersAndStudent(@Param("student") student: User, pageable: Pageable): Page<Course>
 
+    @EntityGraph(attributePaths = ["quiz"])
     @Query("SELECT DISTINCT c FROM Course c JOIN c.instructors i WHERE i IN :instructors")
     fun findAllByInstructors(@Param("instructors") instructors: List<User>): List<Course>
 }

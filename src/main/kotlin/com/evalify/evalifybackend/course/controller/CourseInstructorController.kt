@@ -23,11 +23,6 @@ class CourseInstructorController(
         return courseInstructorService.getCourseByInstructor(listOf(instructorId))
     }
 
-    @PostMapping("/batch")
-    fun getCoursesByInstructors(): List<CourseInstructorPreviewDTO> {
-        val instructorIds = listOf(getCurrentUserId())
-        return courseInstructorService.getCourseByInstructor(instructorIds)
-    }
     private fun getCurrentUserId(): String {
         return SecurityUtils.getCurrentUserId()
             ?: throw UnauthorizedException("User not authenticated")
