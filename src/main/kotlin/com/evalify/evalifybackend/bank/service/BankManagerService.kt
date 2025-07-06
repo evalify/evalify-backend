@@ -1,11 +1,12 @@
 package com.evalify.evalifybackend.bank.service
 
+import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
-import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.exception.BankNotFoundException
 import com.evalify.evalifybackend.bank.exception.BankQuestionNotFoundException
 import com.evalify.evalifybackend.bank.repository.BankRepository
@@ -33,9 +34,10 @@ import com.evalify.evalifybackend.quiz.question.repository.BankQuestionRepositor
 import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.usewr.repository.UserRepository
-import java.util.UUID
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
+
 
 @Service
 @Transactional
@@ -129,6 +131,8 @@ class BankManagerService(
                 )
                 return result
         }
+                // or it.id, or build DTO
+
 
         fun getBankInfo(bankId: UUID, userId: String): BankDetailsDTO {
                 logger.info("Fetching bank info for bankId: {} by user: {}", bankId, userId)
@@ -139,7 +143,6 @@ class BankManagerService(
                         }
 
                 BankSecurityUtils.ensureBankAccess(bank, userId)
-
                 val result =
                         BankDetailsDTO(
                                 id = bank.id,
@@ -224,6 +227,7 @@ class BankManagerService(
                 return result
         }
 
+
         fun getQuestionsByTopic(
                 topicIds: List<UUID>,
                 bankId: UUID,
@@ -234,14 +238,12 @@ class BankManagerService(
                         bankId,
                         userId
                 )
-
                 val topics = topicRepo.findAllById(topicIds)
                 if (topics.size != topicIds.size) {
                         val foundIds = topics.map { it.id }
                         val missingIds = topicIds.filterNot { foundIds.contains(it) }
                         throw NotFoundException("Topics not found: $missingIds")
                 }
-
                 val bank =
                         bankRepository.findById(bankId).orElseThrow {
                                 BankNotFoundException(bankId.toString())

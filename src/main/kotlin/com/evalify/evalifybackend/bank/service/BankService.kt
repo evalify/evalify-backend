@@ -16,9 +16,9 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
 import com.evalify.evalifybackend.usewr.repository.UserRepository
+import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
-import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -207,42 +207,40 @@ class BankService(
         }
 
         fun getShareBank(bankId: UUID, userId: String): GetSharedUsersDTO {
-                logger.debug("Retrieving shared users for bank: {} by user: {}", bankId, userId)
+            logger.debug("Retrieving shared users for bank: {} by user: {}", bankId, userId)
 
-                val bank =
-                        bankRepository.findById(bankId).orElseThrow {
-                                BankNotFoundException(bankId.toString())
+            val bank =
+                bankRepository.findById(bankId).orElseThrow {
+                    BankNotFoundException(bankId.toString())
+                }
+
+            BankSecurityUtils.ensureBankAccess(bank, userId)
+
+            val users =
+                bank.sharedUsers.map { bankUser ->
+                    // Create SimpleUserDTO to avoid serialization issues with Hibernate
+                    // proxies
+                    val simpleUser =
+                        bankUser.user?.let { user ->
+                            // Force initialization if needed
+                            val actualUser =
+                                if (user.id != null) {
+                                    userRepository
+                                        .findById(user.id!!)
+                                        .orElse(null)
+                                } else null
+
+                            actualUser?.let {
+                                SimpleUserDTO(
+                                    id = it.id!!,
+                                    name = it.name,
+                                    email = it.email,
+                                    profileId = it.profileId
+                                )
+                            }
                         }
+                    SharedUserDTO(user = simpleUser, tag = bankUser.tags)
+                }
+            logger.debug("Retrieved {} shared users for bank: {}", users.size, bankId)
+            return GetSharedUsersDTO(users) }}
 
-                BankSecurityUtils.ensureBankAccess(bank, userId)
-
-                val users =
-                        bank.sharedUsers.map { bankUser ->
-                                // Create SimpleUserDTO to avoid serialization issues with Hibernate
-                                // proxies
-                                val simpleUser =
-                                        bankUser.user?.let { user ->
-                                                // Force initialization if needed
-                                                val actualUser =
-                                                        if (user.id != null) {
-                                                                userRepository
-                                                                        .findById(user.id!!)
-                                                                        .orElse(null)
-                                                        } else null
-
-                                                actualUser?.let {
-                                                        SimpleUserDTO(
-                                                                id = it.id!!,
-                                                                name = it.name,
-                                                                email = it.email,
-                                                                profileId = it.profileId
-                                                        )
-                                                }
-                                        }
-                                SharedUserDTO(user = simpleUser, tag = bankUser.tags)
-                        }
-
-                logger.debug("Retrieved {} shared users for bank: {}", users.size, bankId)
-                return GetSharedUsersDTO(users)
-        }
-}

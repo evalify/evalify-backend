@@ -34,7 +34,7 @@ class QuizStudentService(
         studentId: String,
         ipAddress: String,
         requestTime: Instant
-    ): List<QuizQuestionsReturnDTO?> {
+    ): List<QuizQuestionsReturnDTO> {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
@@ -72,6 +72,11 @@ class QuizStudentService(
 
         return emptyList()
     }
+    //TODO() add the logic for distributing the sets serially according to the roll number
+
+
+
+
 }
 
 

@@ -21,8 +21,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import java.util.UUID
 import com.evalify.evalifybackend.quiz.question.domain.Topic
-
-
+import jakarta.persistence.Column
 
 
 enum class Taxonomy {
@@ -59,6 +58,8 @@ abstract class BaseQuestion(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: UUID? = null,
+
+    @Column(columnDefinition = "TEXT")
     val question: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)

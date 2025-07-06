@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.service.QuizCacheService
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
@@ -19,16 +20,20 @@ import java.util.UUID
 @RequestMapping("/student/{studentId}/quiz/{quizId}")
 class QuizStudentController(
     val quizStudentService: QuizStudentService,
+    val quizCacheService: QuizCacheService
 ) {
 
     @GetMapping("/start")
     fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest)
-    : List<QuizQuestionsReturnDTO?>{
+    : ResponseEntity<List<QuizQuestionsReturnDTO?>>{
         val requestTime = Instant.now()
-        return quizStudentService.getQuizQuestions(studentId = studentId, quizId = quizId, ipAddress = request.remoteAddr,requestTime = requestTime)
+        val questions = quizStudentService.getQuizQuestions(studentId = studentId, quizId = quizId, ipAddress = request.remoteAddr,requestTime = requestTime)
+        quizCacheService.storeStudentQuestions(quizId,studentId,questions)
+
+        return ResponseEntity.ok(questions)
     }
 
-    @PatchMapping("/update")
+    @PatchMapping("/save")
     fun updateQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest){
 
     }
