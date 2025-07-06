@@ -148,9 +148,9 @@ object QuizValidationUtils {
         if (title.isBlank()) {
             throw QuizValidationException("Question title cannot be empty", "question")
         }
-        if (title.length > 1000) {
+        if (title.length > 2000) {
             throw QuizValidationException(
-                    "Question title cannot exceed 1000 characters",
+                    "Question title cannot exceed 2000 characters",
                     "question"
             )
         }

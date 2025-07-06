@@ -109,8 +109,8 @@ object BankValidationUtils {
         if (title.isBlank()) {
             throw BankValidationException("Question title cannot be empty", "title")
         }
-        if (title.length > 200) {
-            throw BankValidationException("Question title cannot exceed 200 characters", "title")
+        if (title.length > 2000) {
+            throw BankValidationException("Question title cannot exceed 2000 characters", "title")
         }
     }
 
