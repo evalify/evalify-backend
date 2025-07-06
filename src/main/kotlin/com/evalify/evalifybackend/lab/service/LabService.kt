@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.lab.service
 
+import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
@@ -20,6 +21,8 @@ import java.util.UUID
 class LabService(
     private val labRepository: LabRepository
 ) {
+    
+    private val logger by logger()
 
     fun getAllLabsPaginated(page: Int, size: Int, sortBy: String = "name", sortOrder: String = "asc"): PaginatedResponse<LabResponse> {
         val sort = createSort(sortBy, sortOrder)
@@ -29,7 +32,7 @@ class LabService(
         return PaginatedResponse(
             data = labPage.content.map { it.toLabResponse() },
             pagination = PaginationInfo(
-                current_page = page + 1,
+                current_page = page,
                 per_page = size,
                 total_pages = labPage.totalPages,
                 total_count = labPage.totalElements.toInt()
@@ -38,24 +41,44 @@ class LabService(
     }
 
     fun searchLabsPaginated(query: String, page: Int, size: Int, sortBy: String = "name", sortOrder: String = "asc"): PaginatedResponse<LabResponse> {
-        val sort = createSort(sortBy, sortOrder)
-        val pageable = PageRequest.of(page, size, sort)
-        val labPage: Page<Lab> = labRepository.findByNameOrBlockOrIpSubnetContainingIgnoreCasePage(query, pageable)
+        logger.info("Searching labs with query: '{}', page: {}, size: {}, sortBy: {}, sortOrder: {}", query, page, size, sortBy, sortOrder)
+        
+        try {
+            val sort = createSort(sortBy, sortOrder)
+            val pageable = PageRequest.of(page, size, sort)
+            val labPage: Page<Lab> = labRepository.findByNameOrBlockOrIpSubnetContainingIgnoreCasePage(query, pageable)
 
-        return PaginatedResponse(
-            data = labPage.content.map { it.toLabResponse() },
-            pagination = PaginationInfo(
-                current_page = page + 1,
-                per_page = size,
-                total_pages = labPage.totalPages,
-                total_count = labPage.totalElements.toInt()
+            logger.debug("Found {} labs from {} total", labPage.content.size, labPage.totalElements)
+
+            return PaginatedResponse(
+                data = labPage.content.map { it.toLabResponse() },
+                pagination = PaginationInfo(
+                    current_page = page,
+                    per_page = size,
+                    total_pages = labPage.totalPages,
+                    total_count = labPage.totalElements.toInt()
+                )
             )
-        )
+        } catch (e: Exception) {
+            logger.error("Error searching labs with query: '{}', error: {}", query, e.message, e)
+            throw e
+        }
     }
 
     private fun createSort(sortBy: String, sortOrder: String): Sort {
         val direction = if (sortOrder.lowercase() == "desc") Sort.Direction.DESC else Sort.Direction.ASC
-        return Sort.by(direction, sortBy)
+        
+        // Validate sortBy field to prevent SQL injection and invalid field errors
+        val validSortFields = setOf("id", "name", "block", "ipSubnet")
+        val validatedSortBy = if (validSortFields.contains(sortBy)) {
+            sortBy
+        } else {
+            logger.warn("Invalid sort field '{}', defaulting to 'name'", sortBy)
+            "name" // Default to name if invalid field provided
+        }
+        
+        logger.debug("Creating sort with field: {}, direction: {}", validatedSortBy, direction)
+        return Sort.by(direction, validatedSortBy)
     }
 
     fun getLabById(labId: UUID): LabResponse {

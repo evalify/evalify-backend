@@ -14,7 +14,7 @@ import java.util.*
     val id: UUID? = null,
     val name: String,
     val year: Int,
-    val isActive: Boolean = true,
+    var isActive: Boolean = true,
 
     @Column(nullable = true)
     @OneToMany(fetch = FetchType.LAZY,cascade = [CascadeType.ALL], mappedBy = "semester")

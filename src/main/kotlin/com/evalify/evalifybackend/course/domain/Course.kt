@@ -27,8 +27,9 @@ enum class CourseType {
     @Enumerated(EnumType.STRING)
     val type: CourseType,
 
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     val semester: Semester,
+
     @OneToMany(fetch = FetchType.LAZY)
     val students: MutableList<User> = mutableListOf(),
     @OneToMany(fetch = FetchType.LAZY)

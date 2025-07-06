@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.lab.controller
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
+import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.lab.domain.DTO.CreateLabRequest
 import com.evalify.evalifybackend.lab.domain.DTO.LabResponse
 import com.evalify.evalifybackend.lab.domain.DTO.UpdateLabRequest
@@ -37,9 +38,22 @@ class LabController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<LabResponse>> {
-        return ResponseEntity.ok(
-            labService.searchLabsPaginated(query, page, size, sort_by, sort_order)
-        )
+        return try {
+            val result = labService.searchLabsPaginated(query, page, size, sort_by, sort_order)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            // Return empty result with error message instead of 500
+            val emptyResult = PaginatedResponse(
+                data = emptyList<LabResponse>(),
+                pagination = PaginationInfo(
+                    current_page = page,
+                    per_page = size,
+                    total_pages = 0,
+                    total_count = 0
+                )
+            )
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emptyResult)
+        }
     }
 
     @GetMapping("/{id}")
