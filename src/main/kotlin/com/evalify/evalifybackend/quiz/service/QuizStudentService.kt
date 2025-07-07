@@ -64,7 +64,7 @@ class QuizStudentService(
 
             return finalQuestions?.map { question ->
                 QuizQuestionsReturnDTO(
-                    questions = question.question.question.mapToType(),
+                    questions = question.question.question.mapToType(quiz.shuffleOptions),
                     section = question.question.section
                 )
             } ?: emptyList()

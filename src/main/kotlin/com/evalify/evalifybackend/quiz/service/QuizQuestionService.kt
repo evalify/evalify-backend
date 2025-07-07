@@ -290,7 +290,7 @@ open class QuizQuestionService(
                 difficulty = dto.difficulty,
                 keys = dto.keys?.map {
                     MatchPair(
-                        id = UUID.randomUUID().toString(),
+
                         leftPair = it.leftPair,
                         rightPair = it.rightPair
                     )

@@ -18,7 +18,7 @@ import jakarta.persistence.Entity
 import java.util.UUID
 import org.hibernate.annotations.Type
 
-class MatchPair(val id: String, val leftPair: String, val rightPair: String)
+class MatchPair( val leftPair: String, val rightPair: String)
 
 @Entity
 @DiscriminatorValue(value = "MATCH_THE_FOLLOWING")

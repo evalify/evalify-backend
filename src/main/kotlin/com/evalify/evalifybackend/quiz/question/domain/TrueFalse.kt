@@ -69,7 +69,6 @@ class TrueFalse(
     override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
         return TrueFalseDTO(
                 question = this.question,
-                answers = this.answer,
                 hint = this.hint,
                 marks = this.marks,
                 bloomsTaxonomy = this.bloomsTaxonomy,

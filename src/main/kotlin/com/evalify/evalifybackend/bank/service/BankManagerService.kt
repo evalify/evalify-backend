@@ -431,9 +431,7 @@ class BankManagerService(
                                                         dto.keys
                                                                 ?.map {
                                                                         MatchPair(
-                                                                                id =
-                                                                                        UUID.randomUUID()
-                                                                                                .toString(),
+
                                                                                 leftPair =
                                                                                         it.leftPair,
                                                                                 rightPair =

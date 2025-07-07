@@ -375,7 +375,7 @@ class QuizController(
         return ResponseEntity.ok(result)
     }
 
-    // returns count of total, live, upcoming and completed for all quizzes
+    // returns a count of total, live, upcoming and completed for all quizzes
     @GetMapping("/count")
     fun getAllQuizCount(): ResponseEntity<Map<String, Long>> {
         val counts = quizService.getQuizCounts()

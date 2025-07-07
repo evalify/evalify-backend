@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.config
 
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
@@ -16,6 +18,9 @@ import java.time.Duration
 @EnableCaching
 class CacheConfig {
 
+    /**
+     * Default CacheManager for @Cacheable, @CachePut, etc.
+     */
     @Bean
     fun cacheManager(connectionFactory: RedisConnectionFactory): CacheManager {
         val config = RedisCacheConfiguration.defaultCacheConfig()
@@ -30,5 +35,22 @@ class CacheConfig {
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(config)
             .build()
+    }
+
+    /**
+     * Custom RedisTemplate for storing QuizQuestionsReturnDTO as values in lists
+     */
+    @Bean
+    fun quizQuestionRedisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, QuizQuestionsReturnDTO> {
+        val template = RedisTemplate<String, QuizQuestionsReturnDTO>()
+        template.setConnectionFactory(connectionFactory)
+
+        template.keySerializer = StringRedisSerializer()
+        template.hashKeySerializer = StringRedisSerializer()
+        template.valueSerializer = GenericJackson2JsonRedisSerializer()
+        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+
+        template.afterPropertiesSet()
+        return template
     }
 }

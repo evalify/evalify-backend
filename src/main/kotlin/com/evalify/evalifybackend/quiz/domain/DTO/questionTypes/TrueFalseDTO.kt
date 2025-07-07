@@ -6,7 +6,6 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 
 class TrueFalseDTO(
         val question: String,
-        val answers: Boolean,
         override val hint: String?,
         override val marks: Int,
         override val bloomsTaxonomy: Taxonomy?,
