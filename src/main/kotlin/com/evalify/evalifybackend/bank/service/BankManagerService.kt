@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
@@ -487,63 +488,42 @@ class BankManagerService(
 
                 logger.info("Successfully created bank question for bank: {}", bankId)
         }
-
         fun editBankQuestion(
-                dto: CreateQuestionDTO,
+                patchDTO: PatchQuestionDTO,
                 questionId: UUID,
                 userId: String,
                 bankId: UUID
         ) {
-                logger.info(
-                        "Editing bank question: {} in bank: {} by user: {}",
-                        questionId,
-                        bankId,
-                        userId
-                )
-
-                val bankQuestion =
-                        bankQuestionRepository.findById(questionId).orElseThrow {
-                                BankQuestionNotFoundException(questionId.toString())
-                        }
-
+                val bankQuestion = bankQuestionRepository.findById(questionId).orElseThrow {
+                        BankQuestionNotFoundException(questionId.toString())
+                }
+                val baseQuestion = bankQuestion.question
+                val updatedQuestion = baseQuestion.patchWith(patchDTO)
+                        ?: throw IllegalArgumentException("Failed to patch question")
                 val user =
                         userRepository.findById(userId).orElseThrow {
                                 NotFoundException("User with ID $userId not found")
                         }
-
                 val bank =
                         bankRepository.findById(bankId).orElseThrow {
                                 BankNotFoundException(bankId.toString())
                         }
+                val savedBaseQuestion = baseQuestionRepository.save(updatedQuestion)
 
-                BankSecurityUtils.ensureBankAccess(bank, userId)
-
-                val baseQuestionId =
-                        bankQuestion.question.id
-                                ?: throw BusinessLogicException("Question ID cannot be null")
-
-                val updatedBaseQuestion = createQuestion(dto, bankId)
-
-                if (bankQuestion.question::class != updatedBaseQuestion::class) {
-                        logger.warn("Attempt to change question type for question: {}", questionId)
-                        throw BusinessLogicException("Cannot change question type")
-                }
-
-                updatedBaseQuestion.id = baseQuestionId
-                val savedQuestion = baseQuestionRepository.save(updatedBaseQuestion)
-
-                // Create new BankQuestion with updated data (since properties are val)
+                // Create a new BankQuestion with the updated base question
                 val updatedBankQuestion =
                         BankQuestion(
                                 id = questionId,
-                                question = savedQuestion,
+                                question = savedBaseQuestion,
                                 updateBy = user,
                                 updatedAt = java.time.Instant.now()
                         )
                 bankQuestionRepository.save(updatedBankQuestion)
 
                 logger.info("Successfully updated bank question: {}", questionId)
+                bankQuestionRepository.save(updatedBankQuestion)
         }
+
 
         fun deleteBankQuestion(questionId: UUID, bankId: UUID, userId: String) {
                 logger.info(

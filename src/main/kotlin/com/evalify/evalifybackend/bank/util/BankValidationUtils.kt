@@ -1,9 +1,12 @@
 package com.evalify.evalifybackend.bank.util
 
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.EditBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
 import com.evalify.evalifybackend.bank.exception.BankValidationException
+import java.util.UUID
 
 /** Utility class for bank-related validations */
 object BankValidationUtils {
@@ -18,7 +21,13 @@ object BankValidationUtils {
     private const val MAX_TOPIC_NAME_LENGTH = 50
 
     /** Validates bank creation/edit data */
-    fun validateBankData(dto: CreateBankDTO) {
+    fun validateBankCreateData(dto: CreateBankDTO) {
+        validateBankName(dto.name)
+        dto.courseCode?.let { validateCourseCode(it) }
+        validateSemester(dto.semester)
+    }
+
+    fun validateCreateData(dto: EditBankDTO) {
         validateBankName(dto.name)
         dto.courseCode?.let { validateCourseCode(it) }
         validateSemester(dto.semester)
@@ -36,7 +45,17 @@ object BankValidationUtils {
         validateTopicIds(dto.topicIds)
     }
 
-    private fun validateBankName(name: String) {
+    fun validateEditQuestionData(dto: PatchQuestionDTO) {
+        validateQuestionTitle(dto.question)
+        validateQuestionDescription(dto.explanation)
+        validateTopicIds(dto.topic?.map { it.id } ?: emptyList())
+    }
+
+    private fun validateBankName(name: String?) {
+
+        if(name == null) {
+            throw BankValidationException("Name cannot be null or empty")
+        }
         if (name.isBlank()) {
             throw BankValidationException("Bank name cannot be empty", "name")
         }
@@ -78,7 +97,10 @@ object BankValidationUtils {
         }
     }
 
-    private fun validateSemester(semester: Int) {
+    private fun validateSemester(semester: Int?) {
+        if(semester == null) {
+            throw BankValidationException("Semester cannot be null or empty")
+        }
         if (semester < MIN_SEMESTER || semester > MAX_SEMESTER) {
             throw BankValidationException(
                     "Semester must be between $MIN_SEMESTER and $MAX_SEMESTER",
@@ -105,7 +127,12 @@ object BankValidationUtils {
         }
     }
 
-    private fun validateQuestionTitle(title: String) {
+    private fun validateQuestionTitle(title: String?) {
+
+        if(title == null) {
+            throw BankValidationException("Question title cannot be null or empty")
+        }
+
         if (title.isBlank()) {
             throw BankValidationException("Question title cannot be empty", "title")
         }
@@ -123,7 +150,7 @@ object BankValidationUtils {
         }
     }
 
-    private fun validateTopicIds(topicIds: List<Any>) {
+    private fun validateTopicIds(topicIds: List<UUID?>) {
         if (topicIds.isEmpty()) {
             throw BankValidationException("At least one topic must be selected", "topicIds")
         }

@@ -3,7 +3,9 @@ package com.evalify.evalifybackend.bank.controller
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.EditBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.exception.BankAccessDeniedException
@@ -37,6 +39,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -241,22 +244,21 @@ class BankController(
         val userId = getCurrentUserId()
         logger.info("Creating new bank for user: {}", userId)
 
-        BankValidationUtils.validateBankData(bank)
+        BankValidationUtils.validateBankCreateData(bank)
         val result = bankService.createBank(bank, userId)
 
         logger.info("Successfully created bank: {} for user: {}", result.name, userId)
         return ResponseEntity.status(HttpStatus.CREATED).body(result)
     }
-    // TODO: PATCH METHOD FOR EDITING BANKS
-    @PutMapping("/{bankId}")
+    @PatchMapping("/{bankId}")
     fun editBank(
-            @Valid @RequestBody bank: CreateBankDTO,
+            @Valid @RequestBody bank: EditBankDTO,
             @PathVariable bankId: UUID
     ): ResponseEntity<CreateBankDTO> {
         val userId = getCurrentUserId()
         logger.info("Editing bank: {} by user: {}", bankId, userId)
 
-        BankValidationUtils.validateBankData(bank)
+        BankValidationUtils.validateCreateData(bank)
         val updatedBank = bankService.editBank(bank, userId, bankId)
 
         logger.info("Successfully updated bank: {} by user: {}", bankId, userId)
@@ -339,7 +341,7 @@ class BankController(
         return ResponseEntity.status(HttpStatus.CREATED).body(result)
     }
 
-    @PutMapping("/{bankId}/topic/{topicId}")
+    @PatchMapping("/{bankId}/topic/{topicId}")
     fun editTopic(
             @PathVariable bankId: UUID,
             @PathVariable topicId: UUID,
@@ -407,16 +409,16 @@ class BankController(
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
-    @PutMapping("/{bankId}/questions/{questionId}")
+    @PatchMapping("/{bankId}/questions/{questionId}")
     fun editBankQuestion(
             @PathVariable bankId: UUID,
             @PathVariable questionId: UUID,
-            @Valid @RequestBody bankQuestion: CreateQuestionDTO
+            @Valid @RequestBody bankQuestion: PatchQuestionDTO
     ): ResponseEntity<Void> {
         val userId = getCurrentUserId()
         logger.info("Editing question: {} in bank: {} by user: {}", questionId, bankId, userId)
 
-        BankValidationUtils.validateQuestionData(bankQuestion)
+        BankValidationUtils.validateEditQuestionData(bankQuestion)
         bankManagerService.editBankQuestion(bankQuestion, questionId, userId, bankId)
 
         logger.info("Successfully updated question: {} in bank: {}", questionId, bankId)

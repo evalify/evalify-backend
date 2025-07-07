@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.BankUser
 import com.evalify.evalifybackend.bank.domain.BankUserId
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.EditBankDTO
 import com.evalify.evalifybackend.bank.exception.BankAlreadySharedException
 import com.evalify.evalifybackend.bank.exception.BankNotFoundException
 import com.evalify.evalifybackend.bank.repository.BankRepository
@@ -91,7 +92,7 @@ class BankService(
                 logger.info("Successfully deleted bank: {} by user: {}", bankId, userId)
         }
 
-        fun editBank(dto: CreateBankDTO, userId: String, bankId: UUID): CreateBankDTO {
+        fun editBank(dto: EditBankDTO, userId: String, bankId: UUID): CreateBankDTO {
                 logger.info("Editing bank: {} by user: {}", bankId, userId)
 
                 val existingBank =
@@ -104,9 +105,9 @@ class BankService(
                 val updatedBank =
                         Bank(
                                 id = bankId,
-                                name = dto.name,
-                                semester = dto.semester,
-                                courseCode = dto.courseCode,
+                                name = dto.name?:existingBank.name,
+                                semester = dto.semester?:existingBank.semester,
+                                courseCode = dto.courseCode?:existingBank.courseCode,
                                 createdBy = existingBank.createdBy,
                                 createdAt = existingBank.createdAt,
                                 sharedUsers = existingBank.sharedUsers,

@@ -64,13 +64,13 @@ class BankTopicService(
                     TopicNotFoundException(topicId.toString())
                 }
 
-        // Verify topic belongs to the bank
+        // Verify a topic belongs to the bank
         if (topic.bank?.id != bankId) {
             logger.warn("Topic {} does not belong to bank {}", topicId, bankId)
             throw ConflictException("Topic does not belong to this bank")
         }
 
-        // Check if topic is being used by questions
+        // Check if a topic is being used by questions
         val questionsUsingTopic =
                 bank.bankQuestion.any { bankQuestion ->
                     bankQuestion.question.topic.any { it.id == topicId }
@@ -112,13 +112,13 @@ class BankTopicService(
                     TopicNotFoundException(topicId.toString())
                 }
 
-        // Verify topic belongs to the bank
+        // Verify a topic belongs to the bank
         if (existingTopic.bank?.id != bankId) {
             logger.warn("Topic {} does not belong to bank {}", topicId, bankId)
             throw ConflictException("Topic does not belong to this bank")
         }
 
-        // Check for duplicate topic names (excluding current topic)
+        // Check for duplicate topic names (excluding a current topic)
         val duplicateTopic =
                 bank.topics?.find {
                     it.id != topicId && it.name.equals(topicDto.name, ignoreCase = true)
@@ -130,7 +130,7 @@ class BankTopicService(
             )
         }
 
-        // Create new topic with updated name (since name is val in entity)
+        // Create a new topic with updated name (since name is val in entity)
         val updatedTopic = Topic(id = topicId, name = topicDto.name, bank = bank)
         val savedTopic = topicRepo.save(updatedTopic)
 
