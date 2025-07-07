@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class TrueFalseResponseDTO(
     override val questionId: UUID,
-    val answer : Boolean
+    val answer : Boolean? = null
 ) : ResponseDTO(
     questionId = questionId
 ) {

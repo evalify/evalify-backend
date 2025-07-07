@@ -27,6 +27,5 @@ class QuizSetQuestion(
     @JoinColumn(name = "question_id") // ✅ Explicit join column
     val question: QuizQuestion,
 
-    val order: Int // ✅ Include this if you want to preserve order
 )
 

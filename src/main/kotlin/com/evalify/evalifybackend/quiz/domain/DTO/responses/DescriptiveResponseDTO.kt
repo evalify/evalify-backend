@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class DescriptiveResponseDTO(
     override val questionId : UUID,
-    val answer : String,
+    val answer : String? = null,
 ) : ResponseDTO(
     questionId = questionId,
 ) {

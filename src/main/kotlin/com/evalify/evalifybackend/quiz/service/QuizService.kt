@@ -396,7 +396,7 @@ class QuizService(
 
             val quizSetQuestions =
                     set.mapIndexed { order, quizQuestion ->
-                        QuizSetQuestion(quizSet = quizSet, question = quizQuestion, order = order)
+                        QuizSetQuestion(quizSet = quizSet, question = quizQuestion, )
                     }
 
             quizSet.questions.addAll(quizSetQuestions)

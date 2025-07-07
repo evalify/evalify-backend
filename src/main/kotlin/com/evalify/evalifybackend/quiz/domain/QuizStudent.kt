@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.domain
 
+import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.*
 import kotlin.time.Duration
@@ -32,7 +33,10 @@ class QuizStudent(
 
     val ipAddress: MutableList<String>,
 
-    val responses: MutableList<String>? = mutableListOf(),
+    @ElementCollection
+    @CollectionTable(name = "quiz_student_responses", joinColumns = [JoinColumn(name = "quiz_student_id")])
+    var responses: MutableList<ResponseDTO> = mutableListOf(),
+
 
     var setNumber : Int = 1
  ) {

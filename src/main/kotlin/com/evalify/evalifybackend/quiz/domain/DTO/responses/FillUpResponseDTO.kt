@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class FillUpResponseDTO(
     override val questionId: UUID,
-    val answer : List<BlankResponseDTO>
+    val answer : List<BlankResponseDTO>? = null
 ) : ResponseDTO(
     questionId = questionId
 ) {

@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class FileUploadResponseDTO(
     override val questionId: UUID,
-    val url: String
+    val answer: String? = null
 ) : ResponseDTO(
     questionId = questionId
 ){

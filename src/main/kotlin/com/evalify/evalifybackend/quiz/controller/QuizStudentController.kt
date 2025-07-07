@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.service.QuizCacheService
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
 import jakarta.servlet.http.HttpServletRequest
@@ -33,18 +34,40 @@ class QuizStudentController(
         return ResponseEntity.ok(questions)
     }
 
+    @PatchMapping("/update")
+    fun updateQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
+        if(responses == null)
+        {
+            val responses = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
+            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+        }
+        else{
+            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+        }
+    }
+
+    @PatchMapping("/updateCache")
+    fun updateCache(@PathVariable studentId: String,@PathVariable quizId: UUID, answer: ResponseDTO){
+        quizCacheService.updateCache(quizId,studentId,answer)
+
+    }
+
     @PatchMapping("/save")
-    fun updateQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest){
+    fun saveQuestion(@PathVariable studentId: String,@PathVariable quizId: UUID,answer:ResponseDTO){
+        quizStudentService.saveQuestion(quizId,studentId,answer)
 
     }
 
-    @PutMapping("/{questionId}/save")
-    fun saveQuestion(@PathVariable studentId: String,@PathVariable quizId: UUID,@PathVariable questionId: UUID, request: HttpServletRequest){
-
-    }
-
-    @PostMapping("/submit")
-    fun submitQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest){
+    @PatchMapping("/submit")
+    fun submitQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
+        if(responses == null)
+        {
+            val responses = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
+            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+        }
+        else{
+            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+        }
 
     }
 }
