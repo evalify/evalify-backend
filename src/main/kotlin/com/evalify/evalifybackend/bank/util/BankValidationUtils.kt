@@ -6,6 +6,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.CreateTopicDTO
 import com.evalify.evalifybackend.bank.exception.BankValidationException
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import java.util.UUID
 
 /** Utility class for bank-related validations */
@@ -43,6 +44,10 @@ object BankValidationUtils {
         validateQuestionTitle(dto.question)
         validateQuestionDescription(dto.explanation)
         validateTopicIds(dto.topicIds)
+        // Add coding question test case validation
+        if (dto.type == QuestionTypes.CODING) {
+            validateCodingQuestionTestCases(dto.language, dto.testcases)
+        }
     }
 
     fun validateEditQuestionData(dto: PatchQuestionDTO) {
@@ -153,6 +158,27 @@ object BankValidationUtils {
     private fun validateTopicIds(topicIds: List<UUID?>) {
         if (topicIds.isEmpty()) {
             throw BankValidationException("At least one topic must be selected", "topicIds")
+        }
+    }
+
+    /**
+     * Validates that for every language specified, there is at least one test case for that language.
+     */
+    private fun validateCodingQuestionTestCases(languages: List<String>?, testcases: List<com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO>?) {
+        if (languages.isNullOrEmpty()) {
+            throw BankValidationException("At least one language must be specified for coding questions", "language")
+        }
+        if (testcases.isNullOrEmpty()) {
+            throw BankValidationException("At least one test case must be provided for coding questions", "testcases")
+        }
+        val missingLanguages = languages.filter { lang ->
+            testcases.none { it.language == lang }
+        }
+        if (missingLanguages.isNotEmpty()) {
+            throw BankValidationException(
+                "Test cases must be provided for all languages: missing for ${missingLanguages.joinToString()}",
+                "testcases"
+            )
         }
     }
 }

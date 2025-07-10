@@ -12,6 +12,7 @@ import com.evalify.evalifybackend.bank.exception.BankNotFoundException
 import com.evalify.evalifybackend.bank.exception.BankQuestionNotFoundException
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.bank.util.BankSecurityUtils
+import com.evalify.evalifybackend.bank.util.BankValidationUtils
 import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.core.exception.BusinessLogicException
 import com.evalify.evalifybackend.core.exception.NotFoundException
@@ -353,7 +354,7 @@ class BankManagerService(
                                                                 ?: listOf(),
                                                 testcases =
                                                         dto.testcases?.map {
-                                                                TestCaseDTO(it.input, it.expected)
+                                                                TestCaseDTO(it.input, it.expected,it.tags,it.isMinimal,it.language)
                                                         }
                                                                 ?: listOf(),
                                                 language = dto.language,
@@ -465,6 +466,9 @@ class BankManagerService(
 
         fun createBankQuestion(dto: CreateQuestionDTO, bankId: UUID, userId: String) {
                 logger.info("Creating bank question for bank: {} by user: {}", bankId, userId)
+
+                // Add this line to validate the question data
+                BankValidationUtils.validateQuestionData(dto)
 
                 val user =
                         userRepository.findById(userId).orElseThrow {

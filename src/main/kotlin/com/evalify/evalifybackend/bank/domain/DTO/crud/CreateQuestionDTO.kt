@@ -26,11 +26,11 @@ data class CreateQuestionDTO(
 
     val driverCode: String? = null,
     val boilerCode: String? = null,
-    val functionName: String? = null,
-    val returnType: String? = null,
-    val params: List<FunctionParamDTO>? = null,
-    val testcases: List<TestCaseDTO>? = null,
-    val language: List<String>? = null,
+    val functionName: String,
+    val returnType: String,
+    val params: List<FunctionParamDTO>,
+    val testcases: List<TestCaseDTO>,
+    val language: List<String>,
     val answer: String? = null,
 
 

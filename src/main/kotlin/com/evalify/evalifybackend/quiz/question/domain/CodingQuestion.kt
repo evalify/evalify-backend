@@ -6,6 +6,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.CodingBankReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseType
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -35,15 +36,15 @@ class CodingQuestion(
         difficulty: Difficulty,
         val driverCode: String?,
         val boilerCode: String?,
-        val functionName: String?,
-        val returnType: String?,
+        val functionName: String,
+        val returnType: String,
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
-        val params: List<FunctionParamDTO>?,
+        val params: List<FunctionParamDTO>,
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
-        val testcases: List<TestCaseDTO>?,
-        val language: List<String>?,
+        val testcases: List<TestCaseDTO>,
+        val language: List<String>,
         val answer: String?
 ) :
         BaseQuestion(
@@ -96,9 +97,14 @@ class CodingQuestion(
                         marks = this.marks,
                         bloomsTaxonomy = this.bloomsTaxonomy,
                         co = this.co,
-                        difficulty = this.difficulty
-                )
+                        difficulty = this.difficulty,
+                        testcases = this.testcases.filter { testcase ->
+                                testcase.tags == TestCaseType.SAMPLE
+                        })
+
         }
+
+
 
         override fun mapToBankType(): BankQuestionsReturnDTO {
                 return CodingBankReturnDTO(

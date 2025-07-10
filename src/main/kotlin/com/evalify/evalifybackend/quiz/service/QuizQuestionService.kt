@@ -218,7 +218,7 @@ open class QuizQuestionService(
                 functionName = dto.functionName,
                 returnType = dto.returnType,
                 params = dto.params?.map { FunctionParamDTO(it.param, it.type) } ?: listOf(),
-                testcases = dto.testcases?.map { TestCaseDTO(it.input, it.expected) } ?: listOf(),
+                testcases = dto.testcases?.map { TestCaseDTO(it.input, it.expected,it.tags,it.isMinimal,it.language) } ?: listOf(),
                 language = dto.language,
                 answer = dto.answer
             )
