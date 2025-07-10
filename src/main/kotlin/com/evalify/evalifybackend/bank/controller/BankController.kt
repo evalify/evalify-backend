@@ -276,6 +276,8 @@ class BankController(
         return ResponseEntity.noContent().build()
     }
 
+
+
     @GetMapping("/{bankId}/share")
     fun getSharedBanks(@PathVariable bankId: UUID): ResponseEntity<GetSharedUsersDTO> {
         val userId = getCurrentUserId()

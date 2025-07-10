@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.UUID
+import kotlin.random.Random
 import kotlin.toString
 
 @Service
@@ -190,6 +191,10 @@ class UserService(
             val count = (it[1] as Number).toLong()
             role to count
         }
+    }
+
+    fun getAllFaculty(): List<User>{
+        return userRepository.getUsersByRoles(listOf(Role.FACULTY, Role.ADMIN, Role.MANAGER))
     }
 
 }

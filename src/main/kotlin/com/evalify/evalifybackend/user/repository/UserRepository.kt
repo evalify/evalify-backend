@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.usewr.repository
 import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
+import com.evalify.evalifybackend.user.domain.dto.UserResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -26,6 +27,10 @@ interface UserRepository : JpaRepository<User, String> {
 
     @Query("SELECT u.role, COUNT(u) FROM User u GROUP BY u.role")
     fun countAllUsers(): List<Array<Any>>
+
+    @Query("SELECT u FROM User u WHERE u.role IN :roles AND u.isActive = true")
+    fun getUsersByRoles(@Param("roles") roles: List<Role>): List<User>
+
 
     override fun findAll(pageable: Pageable): Page<User>
 }

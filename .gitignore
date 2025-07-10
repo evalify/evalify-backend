@@ -43,7 +43,7 @@ out/
 .DS_Store
 
 ### Env ###
-.env.dev
+.env.prod
 .env.stagging
 .env.prod
-.env
+.env.prod

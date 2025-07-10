@@ -6,7 +6,7 @@ services:
     ports:
       - "8090:8080"
     env_file:
-      - .env
+      - .env.prod
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - DB_URL=jdbc:postgresql://evalify-db:5432/${DB_NAME}
@@ -29,7 +29,7 @@ services:
   evalify-db:
     image: postgres:16
     env_file:
-      - .env
+      - .env.prod
     environment:
         - POSTGRES_DB=${DB_NAME}
         - POSTGRES_USER=${DB_USERNAME}

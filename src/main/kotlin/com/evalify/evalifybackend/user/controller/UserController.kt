@@ -162,6 +162,17 @@ fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
         }
     }
 
+    @GetMapping("/faculty/all")
+    fun getUsersByFaculty(): ResponseEntity<Any> {
+        return try{
+            val faculty = userService.getAllFaculty()
+            ResponseEntity.ok(faculty)
+        } catch (e: Exception){
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body((mapOf("message" to "Failed to retrieve faculty users: ${e.message}")))
+        }
+    }
+
     @GetMapping("/count")
     fun getUserCount(): ResponseEntity<Map<Role, Long>> {
         return try {
