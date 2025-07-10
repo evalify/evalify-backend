@@ -94,18 +94,13 @@ class QuizService(
             }
 
             // Determine students
-            val students =
-                    if (quizDTO.studentIds.isNotEmpty()) {
-                        val foundStudents = userRepository.findAllById(quizDTO.studentIds)
-                        if (foundStudents.size != quizDTO.studentIds.size) {
-                            val foundIds = foundStudents.map { it.id }
+            val students = if(quizDTO.studentIds.isEmpty()) emptyList() else userRepository.findAllById(quizDTO.studentIds)
+                        if (students.size != quizDTO.studentIds.size) {
+                            val foundIds = students.map { it.id }
                             val missingIds = quizDTO.studentIds.filterNot { foundIds.contains(it) }
                             throw NotFoundException("Students not found: $missingIds")
                         }
-                        foundStudents
-                    } else {
-                        batches.flatMap { batch -> batch.students }
-                    }
+
 
             val duration = quizDTO.durationInMinutes.toDuration(DurationUnit.MINUTES)
 
