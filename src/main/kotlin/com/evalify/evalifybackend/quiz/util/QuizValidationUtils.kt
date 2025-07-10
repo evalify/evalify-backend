@@ -24,7 +24,7 @@ object QuizValidationUtils {
         validateQuizTiming(dto.startTime, dto.endTime, dto.durationInMinutes)
         dto.description?.let { validateDescription(it) }
         dto.instructions?.let { validateInstructions(it) }
-        validateQuizCollections(dto.courseIds, dto.batchIds, dto.labIds, dto.studentIds)
+//        validateQuizCollections(dto.courseIds, dto.batchIds, dto.labIds, dto.studentIds)
     }
 
     /** Validates quiz patch data */

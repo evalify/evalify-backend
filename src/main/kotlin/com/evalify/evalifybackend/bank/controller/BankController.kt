@@ -380,7 +380,8 @@ class BankController(
         return ResponseEntity.ok(result)
     }
 
-    @GetMapping("/{bankId}/questions/by-topic")
+    @Transactional
+    @PostMapping("/{bankId}/questions/by-topic")
     fun getBankQuestionsByTopic(
             @PathVariable bankId: UUID,
             @RequestBody topicIds: List<UUID>

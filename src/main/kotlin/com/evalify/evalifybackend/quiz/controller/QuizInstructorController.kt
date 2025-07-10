@@ -44,4 +44,9 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
         val updatedQuiz = quizInstructorService.updateQuiz(quizId, quizUpdateDTO)
         return ResponseEntity.ok(updatedQuiz)
     }
+
+    @GetMapping("/quiz/me")
+    fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {
+        return quizInstructorService.getAllQuizzesForInstructor()
+    }
 }

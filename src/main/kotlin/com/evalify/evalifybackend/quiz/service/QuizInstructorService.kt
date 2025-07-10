@@ -59,4 +59,11 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
         val updatedQuiz = quiz.updateQuiz(quizUpdateDTO)
         return quizRepository.save(updatedQuiz)
     }
+
+    fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {
+        val quizzes = quizRepository.findAll()
+        return quizzes.map { quiz ->
+            mapToQuizPreviewDTO(quiz)
+        }
+    }
 }
