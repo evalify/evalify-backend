@@ -70,21 +70,23 @@ class QuizService(
                         NotFoundException("User with ID $userId not found")
                     }
 
-            val courses = courseRepository.findAllById(quizDTO.courseIds)
+            val courses = if(quizDTO.courseIds.isEmpty()) emptyList() else courseRepository.findAllById(quizDTO.courseIds)
+
             if (courses.size != quizDTO.courseIds.size) {
                 val foundIds = courses.map { it.id }
                 val missingIds = quizDTO.courseIds.filterNot { foundIds.contains(it) }
                 throw NotFoundException("Courses not found: $missingIds")
             }
 
-            val batches = batchRepository.findAllById(quizDTO.batchIds)
+            val batches = if(quizDTO.batchIds.isEmpty()) emptyList() else batchRepository.findAllById(quizDTO.batchIds)
             if (batches.size != quizDTO.batchIds.size) {
                 val foundIds = batches.map { it.id }
                 val missingIds = quizDTO.batchIds.filterNot { foundIds.contains(it) }
                 throw NotFoundException("Batches not found: $missingIds")
             }
 
-            val labs = labRepository.findAllById(quizDTO.labIds)
+
+            val labs = if(quizDTO.labIds.isEmpty()) emptyList() else labRepository.findAllById(quizDTO.labIds)
             if (labs.size != quizDTO.labIds.size) {
                 val foundIds = labs.map { it.id }
                 val missingIds = quizDTO.labIds.filterNot { foundIds.contains(it) }
