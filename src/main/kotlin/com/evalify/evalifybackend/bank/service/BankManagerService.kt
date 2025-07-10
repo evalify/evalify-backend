@@ -233,7 +233,7 @@ class BankManagerService(
                 topicIds: List<UUID>,
                 bankId: UUID,
                 userId: String
-        ): List<BankQuestion> {
+        ): List<BankQuestionsReturnDTO> {
                 logger.info(
                         "Fetching questions by topics for bankId: {} by user: {}",
                         bankId,
@@ -256,9 +256,10 @@ class BankManagerService(
                         bank.bankQuestion.filter { bankQuestion ->
                                 bankQuestion.question.topic.any { it in topics }
                         }
+                val finalResult = result.map { it.question.mapToBankType() }
 
                 logger.debug("Retrieved {} questions by topics for bank: {}", result.size, bankId)
-                return result
+                return finalResult
         }
 
         private fun createQuestion(dto: CreateQuestionDTO, bankId: UUID): BaseQuestion {
