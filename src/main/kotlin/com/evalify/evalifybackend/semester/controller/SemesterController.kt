@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
 import com.evalify.evalifybackend.course.domain.DTO.CreateCourseRequest
 import com.evalify.evalifybackend.semester.domain.DTO.AddOrRemoveCourseDTO
 import com.evalify.evalifybackend.semester.domain.DTO.AssignManagersDTO
+import com.evalify.evalifybackend.semester.domain.DTO.SemesterManagerDTO
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterRequest
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterResponse
 import com.evalify.evalifybackend.semester.service.SemesterService
@@ -17,19 +18,16 @@ import java.util.UUID
 @RequestMapping("/api/semester")
 class SemesterController(val semesterService: SemesterService) {
 
-    @PutMapping("/{semesterId}/assign-manager")
-    fun assignManagers(@RequestBody assignManagersDTO: AssignManagersDTO, @PathVariable semesterId: UUID) {
-        semesterService.assignManagersToSemester(managersId = assignManagersDTO.managersId, semesterId = semesterId)
-    }
-
-    @PutMapping("/{semesterId}/remove-manager")
-    fun removeManagers(@RequestBody assignManagersDTO: AssignManagersDTO, @PathVariable semesterId: UUID) {
-        semesterService.removeManagersFromSemester(managersId = assignManagersDTO.managersId, semesterId = semesterId)
-    }
-
-    @PutMapping("/{semesterId}/add-course")
-    fun addCourseToSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
-        semesterService.addCourseToSemester(semesterId = semesterId, courseId = courseDto.courseId)
+    @GetMapping
+    fun getAllSemesters(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "name") sort_by: String,
+        @RequestParam(defaultValue = "asc") sort_order: String
+    ): ResponseEntity<PaginatedResponse<SemesterResponse>> {
+        return ResponseEntity.ok(
+            semesterService.getAllSemestersPaginated(page, size, sort_by, sort_order)
+        )
     }
 
     @PostMapping
@@ -72,21 +70,14 @@ class SemesterController(val semesterService: SemesterService) {
         }
     }
 
+    @PutMapping("/{semesterId}/add-course")
+    fun addCourseToSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
+        semesterService.addCourseToSemester(semesterId = semesterId, courseId = courseDto.courseId)
+    }
+
     @PutMapping("/{semesterId}/remove-course")
     fun removeCourseFromSemester(@RequestBody courseDto: AddOrRemoveCourseDTO, @PathVariable semesterId: UUID) {
         semesterService.removeCourseFromSemester(semesterId = semesterId, courseId = courseDto.courseId)
-    }
-
-    @GetMapping
-    fun getAllSemesters(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") size: Int,
-        @RequestParam(defaultValue = "name") sort_by: String,
-        @RequestParam(defaultValue = "asc") sort_order: String
-    ): ResponseEntity<PaginatedResponse<SemesterResponse>> {
-        return ResponseEntity.ok(
-            semesterService.getAllSemestersPaginated(page, size, sort_by, sort_order)
-        )
     }
 
     @GetMapping("/search")
@@ -147,6 +138,29 @@ class SemesterController(val semesterService: SemesterService) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
         }
+    }
+
+    @GetMapping("/{id}/managers")
+    fun getSemesterManagers(@PathVariable id: UUID): ResponseEntity<List<SemesterManagerDTO>> {
+        return try {
+            val managers = semesterService.getSemesterManagers(id)
+            ResponseEntity.ok(managers)
+        } catch (e: NotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
+    }
+
+    @PostMapping("/{semesterId}/managers")
+    fun assignManagers(@RequestBody assignManagersDTO: AssignManagersDTO, @PathVariable semesterId: UUID) {
+        semesterService.assignManagersToSemester(managersId = assignManagersDTO.managersId, semesterId = semesterId)
+    }
+
+    @DeleteMapping("/{semesterId}/managers")
+    fun removeManagers(@RequestBody assignManagersDTO: AssignManagersDTO, @PathVariable semesterId: UUID) {
+        semesterService.removeManagersFromSemester(managersId = assignManagersDTO.managersId, semesterId = semesterId)
     }
 
     @GetMapping("/count")
