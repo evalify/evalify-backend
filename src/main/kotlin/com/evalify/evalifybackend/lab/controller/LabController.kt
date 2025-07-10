@@ -1,8 +1,6 @@
 package com.evalify.evalifybackend.lab.controller
 
-import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
-import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.lab.domain.DTO.CreateLabRequest
 import com.evalify.evalifybackend.lab.domain.DTO.LabResponse
 import com.evalify.evalifybackend.lab.domain.DTO.UpdateLabRequest
@@ -38,41 +36,19 @@ class LabController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<LabResponse>> {
-        return try {
-            val result = labService.searchLabsPaginated(query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(result)
-        } catch (e: Exception) {
-            // Return empty result with error message instead of 500
-            val emptyResult = PaginatedResponse(
-                data = emptyList<LabResponse>(),
-                pagination = PaginationInfo(
-                    current_page = page,
-                    per_page = size,
-                    total_pages = 0,
-                    total_count = 0
-                )
-            )
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emptyResult)
-        }
+        val result = labService.searchLabsPaginated(query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(result)
     }
 
     @GetMapping("/{id}")
     fun getLabById(@PathVariable id: UUID): ResponseEntity<LabResponse> {
-        return try {
-            ResponseEntity.ok(labService.getLabById(id))
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        }
+        return ResponseEntity.ok(labService.getLabById(id))
     }
 
     @PostMapping
     fun createLab(@RequestBody createLabRequest: CreateLabRequest): ResponseEntity<LabResponse> {
-        return try {
-            val lab = labService.createLab(createLabRequest)
-            ResponseEntity(lab, HttpStatus.CREATED)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
-        }
+        val lab = labService.createLab(createLabRequest)
+        return ResponseEntity(lab, HttpStatus.CREATED)
     }
 
     @PutMapping("/{id}")
@@ -80,26 +56,14 @@ class LabController(
         @PathVariable id: UUID,
         @RequestBody updateLabRequest: UpdateLabRequest
     ): ResponseEntity<LabResponse> {
-        return try {
-            val lab = labService.updateLab(id, updateLabRequest)
-            ResponseEntity.ok(lab)
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
-        }
+        val lab = labService.updateLab(id, updateLabRequest)
+        return ResponseEntity.ok(lab)
     }
 
     @DeleteMapping("/{id}")
     fun deleteLab(@PathVariable id: UUID): ResponseEntity<LabResponse> {
-        return try {
-            val lab = labService.deleteLab(id)
-            ResponseEntity.ok(lab)
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
-        }
+        val lab = labService.deleteLab(id)
+        return ResponseEntity.ok(lab)
     }
 
     // Legacy endpoints for backwards compatibility

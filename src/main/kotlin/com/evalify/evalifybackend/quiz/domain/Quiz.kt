@@ -46,7 +46,7 @@ class Quiz(
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
 //    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
-    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val section:MutableList<Section> = mutableListOf(),
 
 //    TODO: Add Relations btw Courses, Student, Lab, Class

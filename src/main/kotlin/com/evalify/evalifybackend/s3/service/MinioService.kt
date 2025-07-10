@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.s3.service
 
+import com.evalify.evalifybackend.s3.exception.*
 import io.minio.*
 import io.minio.messages.Item
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,31 +30,43 @@ class MinioService @Autowired constructor(
      * @return The object name (key) in Minio
      */
     fun uploadFile(file: MultipartFile, customName: String? = null): String {
+        // Check if file is empty
+        if (file.isEmpty) {
+            throw EmptyFileException()
+        }
+
         // Validate file type
         if (!isValidFileType(file.contentType)) {
-            throw IllegalArgumentException("File type not allowed: ${file.contentType}")
+            throw InvalidFileTypeException(file.contentType)
         }
 
-        // Generate object name
-        val objectName = if (customName.isNullOrBlank()) {
-            // Default naming with UUID if no custom name provided
-            UUID.randomUUID().toString() + "_" + file.originalFilename?.replace(" ", "_")
-        } else {
-            // Use custom name but check if it already exists
-            generateUniqueObjectName(customName)
+        try {
+            // Generate object name
+            val objectName = if (customName.isNullOrBlank()) {
+                // Default naming with UUID if no custom name provided
+                UUID.randomUUID().toString() + "_" + file.originalFilename?.replace(" ", "_")
+            } else {
+                // Use custom name but check if it already exists
+                generateUniqueObjectName(customName)
+            }
+
+            // Upload the file to Minio
+            minioClient.putObject(
+                PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .stream(file.inputStream, file.size, -1)
+                    .contentType(file.contentType)
+                    .build()
+            )
+
+            return objectName
+        } catch (e: Exception) {
+            when (e) {
+                is EmptyFileException, is InvalidFileTypeException -> throw e
+                else -> throw FileUploadException(e.message ?: "Unknown error occurred", e)
+            }
         }
-
-        // Upload the file to Minio
-        minioClient.putObject(
-            PutObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(objectName)
-                .stream(file.inputStream, file.size, -1)
-                .contentType(file.contentType)
-                .build()
-        )
-
-        return objectName
     }
 
     /**
@@ -100,12 +113,24 @@ class MinioService @Autowired constructor(
      * @param objectName The name of the object to delete
      */
     fun deleteFile(objectName: String) {
-        minioClient.removeObject(
-            RemoveObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(objectName)
-                .build()
-        )
+        try {
+            // Check if object exists before deletion
+            if (!objectExists(objectName)) {
+                throw FileNotFoundException(objectName)
+            }
+
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .build()
+            )
+        } catch (e: Exception) {
+            when (e) {
+                is FileNotFoundException -> throw e
+                else -> throw FileDeletionException(objectName, e)
+            }
+        }
     }
 
     /**
@@ -124,12 +149,24 @@ class MinioService @Autowired constructor(
      * @return The input stream of the file
      */
     fun getFile(objectName: String): InputStream {
-        return minioClient.getObject(
-            GetObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(objectName)
-                .build()
-        )
+        try {
+            // Check if object exists
+            if (!objectExists(objectName)) {
+                throw FileNotFoundException(objectName)
+            }
+
+            return minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .build()
+            )
+        } catch (e: Exception) {
+            when (e) {
+                is FileNotFoundException -> throw e
+                else -> throw FileRetrievalException(objectName, e)
+            }
+        }
     }
 
     /**
@@ -139,13 +176,25 @@ class MinioService @Autowired constructor(
      * @return The pre-signed URL for the object
      */
     fun getObjectUrl(objectName: String, expirySeconds: Int = 7 * 24 * 3600): String {
-        return minioClient.getPresignedObjectUrl(
-            GetPresignedObjectUrlArgs.builder()
-                .bucket(bucketName)
-                .`object`(objectName)
-                .method(io.minio.http.Method.GET)
-                .expiry(expirySeconds)
-                .build()
-        )
+        try {
+            // Check if object exists
+            if (!objectExists(objectName)) {
+                throw FileNotFoundException(objectName)
+            }
+
+            return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .method(io.minio.http.Method.GET)
+                    .expiry(expirySeconds)
+                    .build()
+            )
+        } catch (e: Exception) {
+            when (e) {
+                is FileNotFoundException -> throw e
+                else -> throw UrlGenerationException(objectName, e)
+            }
+        }
     }
 }

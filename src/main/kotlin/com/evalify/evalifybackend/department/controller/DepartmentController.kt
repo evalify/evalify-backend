@@ -30,14 +30,9 @@ class DepartmentController(
         @RequestParam(required = false, defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
-    ): ResponseEntity<Any> {
-        return try {
-            val departments = departmentService.getAllDepartments(page, size, sort_by, sort_order)
-            ResponseEntity.ok(departments)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to fetch departments: ${e.message}"))
-        }
+    ): ResponseEntity<PaginatedResponse<DepartmentResponse>> {
+        val departments = departmentService.getAllDepartments(page, size, sort_by, sort_order)
+        return ResponseEntity.ok(departments)
     }
 
     // Search departments with pagination
@@ -49,18 +44,8 @@ class DepartmentController(
         @RequestParam(required = false) sort_by: String?,
         @RequestParam(required = false) sort_order: String?
     ): ResponseEntity<PaginatedResponse<DepartmentResponse>> {
-        return try {
-            val departments = departmentService.searchDepartments(query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(departments)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(
-                    PaginatedResponse(
-                        data = emptyList(),
-                        pagination = PaginationInfo(0, size, 0, 0)
-                    )
-                )
-        }
+        val departments = departmentService.searchDepartments(query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(departments)
     }
 
     @PostMapping
@@ -91,14 +76,9 @@ class DepartmentController(
 
     // Get a specific department by ID
     @GetMapping("/{departmentId}")
-    fun getDepartmentById(@PathVariable departmentId: UUID): ResponseEntity<Any> {
-        return try {
-            val department = departmentService.getDepartmentById(departmentId)
-            ResponseEntity.ok(department.toDepartmentResponse())
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to "Department not found: ${e.message}"))
-        }
+    fun getDepartmentById(@PathVariable departmentId: UUID): ResponseEntity<DepartmentResponse> {
+        val department = departmentService.getDepartmentById(departmentId)
+        return ResponseEntity.ok(department.toDepartmentResponse())
     }
 
     @GetMapping("/{departmentId}/batches")
@@ -110,13 +90,8 @@ class DepartmentController(
 
     @GetMapping("/count")
     fun getDepartmentCount(): ResponseEntity<Map<String, Long>> {
-        return try {
-            val count = departmentService.getDepartmentCount()
-            ResponseEntity.ok(mapOf("count" to count))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val count = departmentService.getDepartmentCount()
+        return ResponseEntity.ok(mapOf("count" to count))
     }
 
     fun Department.toSimpleDepartmentResponse(): SimpleDepartmentResponse {

@@ -1,10 +1,10 @@
 package com.evalify.evalifybackend.user.controller
 
-import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.domain.dto.CreateUserRequest
 import com.evalify.evalifybackend.user.domain.dto.UpdateUserRequest
+import com.evalify.evalifybackend.user.exception.InvalidRoleException
 import com.evalify.evalifybackend.user.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -24,22 +24,17 @@ class UserController (private val userService: UserService)
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
-        return try {
-            if (role != null) {
-                try {
-                    val roleEnum = Role.valueOf(role.uppercase())
-                    val paginatedUsers = userService.getAllUsersByRole(roleEnum, page, size, sort_by, sort_order)
-                    ResponseEntity.ok(paginatedUsers)
-                } catch (e: IllegalArgumentException) {
-                    ResponseEntity.badRequest().body(mapOf("message" to "Invalid role: $role. Valid roles are: ${Role.values().joinToString(", ")}"))
-                }
-            } else {
-                val paginatedUsers = userService.getAllUsers(page, size, sort_by, sort_order)
-                ResponseEntity.ok(paginatedUsers)
+        if (role != null) {
+            try {
+                val roleEnum = Role.valueOf(role.uppercase())
+                val paginatedUsers = userService.getAllUsersByRole(roleEnum, page, size, sort_by, sort_order)
+                return ResponseEntity.ok(paginatedUsers)
+            } catch (e: IllegalArgumentException) {
+                throw InvalidRoleException("$role. Valid roles are: ${Role.values().joinToString(", ")}")
             }
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to fetch users: ${e.message}"))
+        } else {
+            val paginatedUsers = userService.getAllUsers(page, size, sort_by, sort_order)
+            return ResponseEntity.ok(paginatedUsers)
         }
     }
 
@@ -50,26 +45,14 @@ class UserController (private val userService: UserService)
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String    ): ResponseEntity<Any> {
-        return try {
-            val paginatedUsers = userService.searchUsers(query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(paginatedUsers)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to search users: ${e.message}"))
-        }
+        val paginatedUsers = userService.searchUsers(query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(paginatedUsers)
     }
 
     @PostMapping
     fun createUser(@RequestBody request: CreateUserRequest): ResponseEntity<Any> {
-        return try {
-            val user = userService.createUser(request)
-            ResponseEntity.status(HttpStatus.CREATED).body(user)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to create user: ${e.message}"))
-        }
+        val user = userService.createUser(request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(user)
     }
 
     @PutMapping("/{userId}")
@@ -77,29 +60,15 @@ class UserController (private val userService: UserService)
         @PathVariable userId: String,
         @RequestBody request: UpdateUserRequest
     ): ResponseEntity<Any> {
-        return try {
-            val user = userService.updateUser(userId, request)
-            ResponseEntity.ok(user)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(mapOf("message" to e.message))
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to update user: ${e.message}"))
-        }
+        val user = userService.updateUser(userId, request)
+        return ResponseEntity.ok(user)
     }
 
     @DeleteMapping("/{userId}")
     fun deleteUser(@PathVariable userId: String): ResponseEntity<Any> {
-        return try {
-            userService.deleteUser(userId)
-            ResponseEntity.ok(mapOf("message" to "User deleted successfully"))
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to delete user: ${e.message}"))        }    }
+        userService.deleteUser(userId)
+        return ResponseEntity.ok(mapOf("message" to "User deleted successfully"))
+    }
 
 
     @PostMapping("/bulk")
@@ -109,69 +78,39 @@ class UserController (private val userService: UserService)
             HttpStatus.CREATED
         )
     }    @DeleteMapping("/bulk")
-fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
-    return ResponseEntity(
-        userService.bulkDeleteUsers(users),
-        HttpStatus.OK
-    )
-}
+    fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
+        userService.bulkDeleteUsers(users)
+        return ResponseEntity.ok(mapOf("message" to "Users deleted successfully"))
+    }
     @GetMapping("/{userId}")
     fun getUserById(@PathVariable userId: String): ResponseEntity<Any> {
-        return try {
-            val user = userService.getUserById(userId)
-            ResponseEntity.ok(user)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to fetch user: ${e.message}"))
-        }
+        val user = userService.getUserById(userId)
+        return ResponseEntity.ok(user)
     }
 
     @GetMapping("/students/search")
     fun searchStudents(@RequestParam query: String): ResponseEntity<Any> {
-        return try {
-            val students = userService.searchStudents(query)
-            ResponseEntity.ok(students)
-        } catch (e: Exception) {            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(mapOf("message" to "Failed to search students: ${e.message}"))
-        }
+        val students = userService.searchStudents(query)
+        return ResponseEntity.ok(students)
     }
 
     @GetMapping("/faculty")
     fun getAllFaculty(): ResponseEntity<Any> {
-        return try {
-            val faculty = userService.getAllUsersByRole(Role.FACULTY, 0, Int.MAX_VALUE, "name", "asc")
-            ResponseEntity.ok(faculty)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to fetch faculty: ${e.message}"))
-        }
+        val faculty = userService.getAllUsersByRole(Role.FACULTY, 0, Int.MAX_VALUE, "name", "asc")
+        return ResponseEntity.ok(faculty)
     }
 
     @GetMapping("/faculty/search")
     fun searchFaculty(
         @RequestParam query: String
     ): ResponseEntity<Any> {
-        return try {
-            val faculty = userService.searchFaculty(query)
-            ResponseEntity.ok(faculty)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to search faculty: ${e.message}"))
-        }
+        val faculty = userService.searchFaculty(query)
+        return ResponseEntity.ok(faculty)
     }
 
     @GetMapping("/count")
     fun getUserCount(): ResponseEntity<Map<Role, Long>> {
-        return try {
-            val userCount = userService.getUserCount()
-            ResponseEntity.ok(userCount)
-        } catch (e: Exception) {
-            println("Error fetching user count: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                null
-            )
-        }
+        val userCount = userService.getUserCount()
+        return ResponseEntity.ok(userCount)
     }
 }

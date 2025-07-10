@@ -2,7 +2,14 @@ package com.evalify.evalifybackend.course.service
 import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
 import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.batch.service.toBatchResponse
-import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.course.exception.CourseNotFoundException
+import com.evalify.evalifybackend.course.exception.UserNotFoundException
+import com.evalify.evalifybackend.course.exception.UsersNotFoundException
+import com.evalify.evalifybackend.course.exception.BatchNotFoundException
+import com.evalify.evalifybackend.course.exception.BatchesNotFoundException
+import com.evalify.evalifybackend.course.exception.CourseStudentException
+import com.evalify.evalifybackend.course.exception.CourseInstructorException
+import com.evalify.evalifybackend.course.exception.CourseBatchException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.course.domain.Course
@@ -30,73 +37,190 @@ class CourseService(
     private val batchRepository: BatchRepository
 ) {
     @Transactional
-    fun assignStudents(courseId: UUID, studentId:List<String>){
-        val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Could not find course with id $courseId")
+    fun assignStudents(courseId: UUID, studentId: List<String>) {
+        // Validate input
+        if (studentId.isEmpty()) {
+            throw CourseStudentException("Student ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of students collection to avoid LazyInitializationException
         course.students.size
+        
+        // Validate all student IDs exist
         val users = userRepository.findAllById(studentId)
+        val foundUserIds = users.map { it.id }
+        val missingUserIds = studentId.filter { !foundUserIds.contains(it) }
+        
+        if (missingUserIds.isNotEmpty()) {
+            throw UsersNotFoundException(missingUserIds)
+        }
+        
+        // Check if any students are already assigned
+        val alreadyAssignedUsers = users.filter { user ->
+            course.students.any { it.id == user.id }
+        }
+        
+        if (alreadyAssignedUsers.isNotEmpty()) {
+            throw CourseStudentException("Students ${alreadyAssignedUsers.map { it.name }.joinToString(", ")} are already assigned to this course")
+        }
+        
         course.students.addAll(users)
         courseRepository.save(course)
     }
 
     @Transactional
-    fun removeStudents(courseId: UUID, studentId: List<String>){
-        val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Could not find course with id $courseId")
+    fun removeStudents(courseId: UUID, studentId: List<String>) {
+        // Validate input
+        if (studentId.isEmpty()) {
+            throw CourseStudentException("Student ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of students collection to avoid LazyInitializationException
         course.students.size
+        
+        // Validate all student IDs exist
         val users = userRepository.findAllById(studentId)
+        val foundUserIds = users.map { it.id }
+        val missingUserIds = studentId.filter { !foundUserIds.contains(it) }
+        
+        if (missingUserIds.isNotEmpty()) {
+            throw UsersNotFoundException(missingUserIds)
+        }
+        
         course.students.removeAll(users)
         courseRepository.save(course)
     }
 
     @Transactional
-    fun assignInstructors(courseId: UUID, instructorId:List<String>){
-        val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Could not find course with id $courseId")
+    fun assignInstructors(courseId: UUID, instructorId: List<String>) {
+        // Validate input
+        if (instructorId.isEmpty()) {
+            throw CourseInstructorException("Instructor ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of instructors collection to avoid LazyInitializationException
         course.instructors.size
+        
+        // Validate all instructor IDs exist
         val users = userRepository.findAllById(instructorId)
+        val foundUserIds = users.map { it.id }
+        val missingUserIds = instructorId.filter { !foundUserIds.contains(it) }
+        
+        if (missingUserIds.isNotEmpty()) {
+            throw UsersNotFoundException(missingUserIds)
+        }
+        
+        // Check if any instructors are already assigned
+        val alreadyAssignedUsers = users.filter { user ->
+            course.instructors.any { it.id == user.id }
+        }
+        
+        if (alreadyAssignedUsers.isNotEmpty()) {
+            throw CourseInstructorException("Instructors ${alreadyAssignedUsers.map { it.name }.joinToString(", ")} are already assigned to this course")
+        }
+        
         course.instructors.addAll(users)
         courseRepository.save(course)
     }
 
     @Transactional
-    fun removeInstructors(courseId: UUID, instructorId:List<String>){
-        val course = courseRepository.findById(courseId).orElseThrow{
-            NotFoundException("Could not find course with id $courseId")
+    fun removeInstructors(courseId: UUID, instructorId: List<String>) {
+        // Validate input
+        if (instructorId.isEmpty()) {
+            throw CourseInstructorException("Instructor ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of instructors collection to avoid LazyInitializationException
         course.instructors.size
+        
+        // Validate all instructor IDs exist
         val users = userRepository.findAllById(instructorId)
+        val foundUserIds = users.map { it.id }
+        val missingUserIds = instructorId.filter { !foundUserIds.contains(it) }
+        
+        if (missingUserIds.isNotEmpty()) {
+            throw UsersNotFoundException(missingUserIds)
+        }
+        
         course.instructors.removeAll(users)
         courseRepository.save(course)
     }
 
     @Transactional
-    fun addBatchesToCourse(courseId: UUID, batchId: List<UUID>){
-        val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Could not find course with id $courseId")
+    fun addBatchesToCourse(courseId: UUID, batchId: List<UUID>) {
+        // Validate input
+        if (batchId.isEmpty()) {
+            throw CourseBatchException("Batch ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of batches collection to avoid LazyInitializationException
         course.batches.size
+        
+        // Validate all batch IDs exist
         val batches = batchRepository.findAllById(batchId)
+        val foundBatchIds = batches.map { it.id }
+        val missingBatchIds = batchId.filter { !foundBatchIds.contains(it) }
+        
+        if (missingBatchIds.isNotEmpty()) {
+            throw BatchesNotFoundException(missingBatchIds)
+        }
+        
+        // Check if any batches are already assigned
+        val alreadyAssignedBatches = batches.filter { batch ->
+            course.batches.any { it.id == batch.id }
+        }
+        
+        if (alreadyAssignedBatches.isNotEmpty()) {
+            throw CourseBatchException("Batches ${alreadyAssignedBatches.map { it.name }.joinToString(", ")} are already assigned to this course")
+        }
+        
         course.batches.addAll(batches)
         courseRepository.save(course)
     }
 
     @Transactional
-    fun removeBatchesFromCourse(courseId: UUID, batchId: List<UUID>){
-        val course = courseRepository.findById(courseId).orElseThrow{
-            NotFoundException("Could not find course with id $courseId")
+    fun removeBatchesFromCourse(courseId: UUID, batchId: List<UUID>) {
+        // Validate input
+        if (batchId.isEmpty()) {
+            throw CourseBatchException("Batch ID list cannot be empty")
         }
+
+        val course = courseRepository.findById(courseId).orElseThrow {
+            CourseNotFoundException(courseId)
+        }
+        
         // Force initialization of batches collection to avoid LazyInitializationException
         course.batches.size
+        
+        // Validate all batch IDs exist
         val batches = batchRepository.findAllById(batchId)
+        val foundBatchIds = batches.map { it.id }
+        val missingBatchIds = batchId.filter { !foundBatchIds.contains(it) }
+        
+        if (missingBatchIds.isNotEmpty()) {
+            throw BatchesNotFoundException(missingBatchIds)
+        }
+        
         course.batches.removeAll(batches)
         courseRepository.save(course)
     }
@@ -104,7 +228,7 @@ class CourseService(
     @Transactional(readOnly = true)
     fun getCourseById(courseId: UUID): CourseResponse {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
         return course.toCourseResponse()
     }
@@ -118,7 +242,7 @@ class CourseService(
         sortOrder: String = "asc"
     ): PaginatedResponse<BatchResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of batches collection to avoid LazyInitializationException
@@ -176,7 +300,7 @@ class CourseService(
         sortOrder: String = "asc"
     ): PaginatedResponse<UserResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of students collection to avoid LazyInitializationException
@@ -238,7 +362,7 @@ class CourseService(
         sortOrder: String = "asc"
     ): PaginatedResponse<BatchResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of batches collection to avoid LazyInitializationException
@@ -304,7 +428,7 @@ class CourseService(
         sortOrder: String = "asc"
     ): PaginatedResponse<UserResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of students collection to avoid LazyInitializationException
@@ -366,7 +490,7 @@ class CourseService(
         courseId: UUID
     ): List<UserResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of instructors collection to avoid LazyInitializationException
@@ -386,7 +510,7 @@ class CourseService(
         sortOrder: String = "asc"
     ): PaginatedResponse<UserResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of instructors collection to avoid LazyInitializationException
@@ -440,10 +564,11 @@ class CourseService(
                 total_count = totalElements
             )
         )
-    }    @Transactional(readOnly = true)
+    }
+    @Transactional(readOnly = true)
     fun getUnassignedStudents(courseId: UUID): List<UserResponse> {
         val course = courseRepository.findById(courseId).orElseThrow {
-            NotFoundException("Course with id $courseId not found")
+            CourseNotFoundException(courseId)
         }
 
         // Force initialization of students collection to avoid LazyInitializationException

@@ -1,7 +1,12 @@
 package com.evalify.evalifybackend.lab.service
 
 import com.evalify.evalifybackend.common.logging.logger
-import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.lab.exception.LabNotFoundException
+import com.evalify.evalifybackend.lab.exception.LabAlreadyExistsException
+import com.evalify.evalifybackend.lab.exception.LabValidationException
+import com.evalify.evalifybackend.lab.exception.LabServiceException
+import com.evalify.evalifybackend.lab.exception.LabDeleteException
+import com.evalify.evalifybackend.lab.exception.InvalidLabFieldException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.lab.domain.DTO.CreateLabRequest
@@ -83,40 +88,119 @@ class LabService(
 
     fun getLabById(labId: UUID): LabResponse {
         val lab = labRepository.findById(labId).orElseThrow {
-            NotFoundException("Lab with id $labId not found")
+            LabNotFoundException(labId)
         }
         return lab.toLabResponse()
     }
 
     fun createLab(createLabRequest: CreateLabRequest): LabResponse {
-        val lab = Lab(
-            name = createLabRequest.name,
-            block = createLabRequest.block,
-            ipSubnet = createLabRequest.ipSubnet
-        )
-        val savedLab = labRepository.save(lab)
-        return savedLab.toLabResponse()
+        // Validate input
+        validateLabInput(createLabRequest.name, createLabRequest.block, createLabRequest.ipSubnet)
+        
+        // Check for duplicates
+        checkForDuplicates(createLabRequest.name, createLabRequest.block, createLabRequest.ipSubnet)
+        
+        try {
+            val lab = Lab(
+                name = createLabRequest.name.trim(),
+                block = createLabRequest.block.trim(),
+                ipSubnet = createLabRequest.ipSubnet.trim()
+            )
+            val savedLab = labRepository.save(lab)
+            return savedLab.toLabResponse()
+        } catch (e: Exception) {
+            logger.error("Error creating lab: {}", e.message, e)
+            throw LabServiceException("Failed to create lab: ${e.message}")
+        }
     }
 
     fun updateLab(labId: UUID, updateLabRequest: UpdateLabRequest): LabResponse {
         val existingLab = labRepository.findById(labId).orElseThrow {
-            NotFoundException("Lab with id $labId not found")
+            LabNotFoundException(labId)
         }
 
-        updateLabRequest.name?.let { existingLab.name = it }
-        updateLabRequest.block?.let { existingLab.block = it }
-        updateLabRequest.ipSubnet?.let { existingLab.ipSubnet = it }
+        // Validate and update fields if provided
+        updateLabRequest.name?.let { newName ->
+            if (newName.isBlank()) {
+                throw LabValidationException("Lab name cannot be empty")
+            }
+            val trimmedName = newName.trim()
+            
+            // Check if another lab with this name exists
+            val existingLabWithName = labRepository.findByNameIgnoreCase(trimmedName)
+            if (existingLabWithName != null && existingLabWithName.id != labId) {
+                throw LabAlreadyExistsException("Lab with name '$trimmedName' already exists")
+            }
+            
+            existingLab.name = trimmedName
+        }
+        
+        updateLabRequest.block?.let { newBlock ->
+            if (newBlock.isBlank()) {
+                throw LabValidationException("Lab block cannot be empty")
+            }
+            val trimmedBlock = newBlock.trim()
+            
+            // Check if another lab with this block exists
+            val existingLabWithBlock = labRepository.findByBlockIgnoreCase(trimmedBlock)
+            if (existingLabWithBlock != null && existingLabWithBlock.id != labId) {
+                throw LabAlreadyExistsException("Lab with block '$trimmedBlock' already exists")
+            }
+            
+            existingLab.block = trimmedBlock
+        }
+        
+        updateLabRequest.ipSubnet?.let { newIpSubnet ->
+            if (newIpSubnet.isBlank()) {
+                throw LabValidationException("IP subnet cannot be empty")
+            }
+            val trimmedIpSubnet = newIpSubnet.trim()
+            
+            // Validate IP subnet format
+            if (!isValidIpSubnet(trimmedIpSubnet)) {
+                throw InvalidLabFieldException("ipSubnet", trimmedIpSubnet)
+            }
+            
+            // Check if another lab with this IP subnet exists
+            val existingLabWithIpSubnet = labRepository.findByIpSubnet(trimmedIpSubnet)
+            if (existingLabWithIpSubnet != null && existingLabWithIpSubnet.id != labId) {
+                throw LabAlreadyExistsException("Lab with IP subnet '$trimmedIpSubnet' already exists")
+            }
+            
+            existingLab.ipSubnet = trimmedIpSubnet
+        }
 
-        val updatedLab = labRepository.save(existingLab)
-        return updatedLab.toLabResponse()
+        try {
+            val updatedLab = labRepository.save(existingLab)
+            return updatedLab.toLabResponse()
+        } catch (e: Exception) {
+            logger.error("Error updating lab with id {}: {}", labId, e.message, e)
+            throw LabServiceException("Failed to update lab: ${e.message}")
+        }
     }
 
     fun deleteLab(labId: UUID): LabResponse {
         val lab = labRepository.findById(labId).orElseThrow {
-            NotFoundException("Lab with id $labId not found")
+            LabNotFoundException(labId)
         }
-        labRepository.delete(lab)
-        return lab.toLabResponse()
+        
+        // Check if lab has any associated lab assistants
+        if (lab.labAssistant.isNotEmpty()) {
+            throw LabDeleteException("Cannot delete lab '${lab.name}' because it has ${lab.labAssistant.size} lab assistant(s) assigned to it")
+        }
+        
+        // Check if lab has any associated quizzes
+        if (lab.quiz.isNotEmpty()) {
+            throw LabDeleteException("Cannot delete lab '${lab.name}' because it has ${lab.quiz.size} quiz(zes) assigned to it")
+        }
+        
+        try {
+            labRepository.delete(lab)
+            return lab.toLabResponse()
+        } catch (e: Exception) {
+            logger.error("Error deleting lab with id {}: {}", labId, e.message, e)
+            throw LabServiceException("Failed to delete lab: ${e.message}")
+        }
     }
 
     // Legacy methods for backwards compatibility
@@ -130,6 +214,46 @@ class LabService(
 
     fun getLabCount(): Long {
         return labRepository.count()
+    }
+    
+    // Validation helper methods
+    private fun validateLabInput(name: String, block: String, ipSubnet: String) {
+        if (name.isBlank()) {
+            throw LabValidationException("Lab name cannot be empty")
+        }
+        if (block.isBlank()) {
+            throw LabValidationException("Lab block cannot be empty")
+        }
+        if (ipSubnet.isBlank()) {
+            throw LabValidationException("IP subnet cannot be empty")
+        }
+        if (!isValidIpSubnet(ipSubnet.trim())) {
+            throw InvalidLabFieldException("ipSubnet", ipSubnet.trim())
+        }
+    }
+    
+    private fun checkForDuplicates(name: String, block: String, ipSubnet: String) {
+        val trimmedName = name.trim()
+        val trimmedBlock = block.trim()
+        val trimmedIpSubnet = ipSubnet.trim()
+        
+        labRepository.findByNameIgnoreCase(trimmedName)?.let {
+            throw LabAlreadyExistsException("Lab with name '$trimmedName' already exists")
+        }
+        
+        labRepository.findByBlockIgnoreCase(trimmedBlock)?.let {
+            throw LabAlreadyExistsException("Lab with block '$trimmedBlock' already exists")
+        }
+        
+        labRepository.findByIpSubnet(trimmedIpSubnet)?.let {
+            throw LabAlreadyExistsException("Lab with IP subnet '$trimmedIpSubnet' already exists")
+        }
+    }
+    
+    private fun isValidIpSubnet(ipSubnet: String): Boolean {
+        // Basic IP subnet validation (CIDR notation)
+        val regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(?:[0-9]|[1-2][0-9]|3[0-2])$"
+        return ipSubnet.matches(regex.toRegex())
     }
 }
 

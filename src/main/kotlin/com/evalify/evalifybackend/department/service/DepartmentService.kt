@@ -1,8 +1,11 @@
 package com.evalify.evalifybackend.department.service
 
-
 import com.evalify.evalifybackend.batch.domain.Batch
-import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.department.exception.DepartmentNotFoundException
+import com.evalify.evalifybackend.department.exception.DepartmentAlreadyExistsException
+import com.evalify.evalifybackend.department.exception.DepartmentValidationException
+import com.evalify.evalifybackend.department.exception.DepartmentServiceException
+import com.evalify.evalifybackend.department.exception.DepartmentDeleteException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.department.domain.Department
@@ -110,28 +113,61 @@ class DepartmentService(
     }
 
     fun createDepartment(request: CreateDepartmentRequest): Department {
-        val department = Department(name = request.name)
-        val savedDepartment = departmentRepository.save(department)
-        // Force initialization of batches collection (though it will be empty for new departments)
-        savedDepartment.batches.size
-        return savedDepartment
-    }fun updateDepartment(departmentId: UUID, request: UpdateDepartmentRequest): Department {
-        val department = departmentRepository.findById(departmentId).orElseThrow {
-            NotFoundException("Department with id $departmentId not found")
+        // Validate input
+        if (request.name.isBlank()) {
+            throw DepartmentValidationException("Department name cannot be empty")
         }
         
-        request.name?.let { department.name = it }
+        // Check if department with this name already exists
+        val existingDepartment = departmentRepository.findByNameIgnoreCase(request.name.trim())
+        if (existingDepartment != null) {
+            throw DepartmentAlreadyExistsException(request.name.trim())
+        }
         
-        val savedDepartment = departmentRepository.save(department)
-        // Force initialization of batches collection
-        savedDepartment.batches.size
-        return savedDepartment
+        try {
+            val department = Department(name = request.name.trim())
+            val savedDepartment = departmentRepository.save(department)
+            // Force initialization of batches collection (though it will be empty for new departments)
+            savedDepartment.batches.size
+            return savedDepartment
+        } catch (e: Exception) {
+            throw DepartmentServiceException("Failed to create department: ${e.message}")
+        }
+    }    fun updateDepartment(departmentId: UUID, request: UpdateDepartmentRequest): Department {
+        val department = departmentRepository.findById(departmentId).orElseThrow {
+            DepartmentNotFoundException(departmentId)
+        }
+        
+        // Validate name if provided
+        request.name?.let { newName ->
+            if (newName.isBlank()) {
+                throw DepartmentValidationException("Department name cannot be empty")
+            }
+            
+            // Check if another department with this name already exists
+            val trimmedName = newName.trim()
+            val existingDepartment = departmentRepository.findByNameIgnoreCase(trimmedName)
+            if (existingDepartment != null && existingDepartment.id != departmentId) {
+                throw DepartmentAlreadyExistsException(trimmedName)
+            }
+            
+            department.name = trimmedName
+        }
+        
+        try {
+            val savedDepartment = departmentRepository.save(department)
+            // Force initialization of batches collection
+            savedDepartment.batches.size
+            return savedDepartment
+        } catch (e: Exception) {
+            throw DepartmentServiceException("Failed to update department: ${e.message}")
+        }
     }
 
     @Transactional(readOnly = true)
     fun getDepartmentById(departmentId: UUID): Department {
         val department = departmentRepository.findById(departmentId).orElseThrow {
-            NotFoundException("Department with id $departmentId not found")
+            DepartmentNotFoundException(departmentId)
         }
         // Force initialization of batches collection
         department.batches.size
@@ -140,9 +176,19 @@ class DepartmentService(
 
     fun deleteDepartment(departmentId: UUID) {
         val department = departmentRepository.findById(departmentId).orElseThrow {
-            NotFoundException("Department with id $departmentId not found")
+            DepartmentNotFoundException(departmentId)
         }
-        departmentRepository.delete(department)
+        
+        // Check if department has any batches before deletion
+        if (department.batches.isNotEmpty()) {
+            throw DepartmentDeleteException("Cannot delete department '${department.name}' because it has ${department.batches.size} batch(es) assigned to it")
+        }
+        
+        try {
+            departmentRepository.delete(department)
+        } catch (e: Exception) {
+            throw DepartmentServiceException("Failed to delete department: ${e.message}")
+        }
     }
 
     // Legacy method for backwards compatibility

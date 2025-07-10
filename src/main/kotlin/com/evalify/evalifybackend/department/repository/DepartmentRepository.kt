@@ -21,7 +21,12 @@ interface DepartmentRepository: JpaRepository<Department, UUID> {
     fun findByNameContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<Department>
     
     @Query("SELECT d.id FROM Department d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :query, '%'))")
-    fun findDepartmentIdsByNameContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<UUID>@Query("SELECT DISTINCT d FROM Department d LEFT JOIN FETCH d.batches")
+    fun findDepartmentIdsByNameContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<UUID>
+    
+    @Query("SELECT d FROM Department d WHERE LOWER(d.name) = LOWER(:name)")
+    fun findByNameIgnoreCase(@Param("name") name: String): Department?
+
+    @Query("SELECT DISTINCT d FROM Department d LEFT JOIN FETCH d.batches")
     fun findAllWithBatches(): List<Department>
 
     @Query("SELECT d.id FROM Department d")

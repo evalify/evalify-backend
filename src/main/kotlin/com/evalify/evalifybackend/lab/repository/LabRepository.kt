@@ -18,5 +18,14 @@ interface LabRepository : JpaRepository<Lab, UUID> {
     @Query("SELECT l FROM Lab l WHERE LOWER(l.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(l.block) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(l.ipSubnet) LIKE LOWER(CONCAT('%', :query, '%'))")
     fun findByNameOrBlockOrIpSubnetContainingIgnoreCasePage(@Param("query") query: String, pageable: Pageable): Page<Lab>
 
+    @Query("SELECT l FROM Lab l WHERE LOWER(l.name) = LOWER(:name)")
+    fun findByNameIgnoreCase(@Param("name") name: String): Lab?
+
+    @Query("SELECT l FROM Lab l WHERE LOWER(l.block) = LOWER(:block)")
+    fun findByBlockIgnoreCase(@Param("block") block: String): Lab?
+
+    @Query("SELECT l FROM Lab l WHERE l.ipSubnet = :ipSubnet")
+    fun findByIpSubnet(@Param("ipSubnet") ipSubnet: String): Lab?
+
     override fun findAll(pageable: Pageable): Page<Lab>
 }

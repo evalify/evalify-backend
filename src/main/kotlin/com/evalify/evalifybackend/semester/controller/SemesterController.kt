@@ -1,5 +1,4 @@
 package com.evalify.evalifybackend.semester.controller
-import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
 import com.evalify.evalifybackend.course.domain.DTO.CreateCourseRequest
@@ -32,13 +31,8 @@ class SemesterController(val semesterService: SemesterService) {
 
     @PostMapping
     fun createSemester(@RequestBody semesterRequest: SemesterRequest): ResponseEntity<SemesterResponse> {
-        return try {
-            val createdSemester = semesterService.createSemester(semesterRequest)
-            ResponseEntity(createdSemester, HttpStatus.CREATED)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val createdSemester = semesterService.createSemester(semesterRequest)
+        return ResponseEntity(createdSemester, HttpStatus.CREATED)
     }
 
     @PutMapping("/{semesterId}")
@@ -46,28 +40,14 @@ class SemesterController(val semesterService: SemesterService) {
         @PathVariable semesterId: UUID,
         @RequestBody semesterRequest: SemesterRequest
     ): ResponseEntity<SemesterResponse> {
-        return try {
-            val updatedSemester = semesterService.updateSemester(semesterId, semesterRequest)
-            ResponseEntity(updatedSemester, HttpStatus.OK)
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val updatedSemester = semesterService.updateSemester(semesterId, semesterRequest)
+        return ResponseEntity(updatedSemester, HttpStatus.OK)
     }
 
     @DeleteMapping("/{semesterId}")
     fun deleteSemester(@PathVariable semesterId: UUID): ResponseEntity<Void> {
-        return try {
-            semesterService.deleteSemester(semesterId)
-            ResponseEntity.noContent().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .build()
-        }
+        semesterService.deleteSemester(semesterId)
+        return ResponseEntity.noContent().build()
     }
 
     @PutMapping("/{semesterId}/add-course")
@@ -113,13 +93,8 @@ class SemesterController(val semesterService: SemesterService) {
         @PathVariable id: UUID,
         @RequestBody courseRequest: CreateCourseRequest
     ): ResponseEntity<CourseResponse> {
-        return try {
-                val course = semesterService.createCourseForSemester(id, courseRequest)
-                ResponseEntity(course, HttpStatus.CREATED)
-            } catch (e: Exception) {
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val course = semesterService.createCourseForSemester(id, courseRequest)
+        return ResponseEntity(course, HttpStatus.CREATED)
     }
 
     @DeleteMapping("/{semesterId}/courses/{courseId}")
@@ -127,30 +102,14 @@ class SemesterController(val semesterService: SemesterService) {
         @PathVariable semesterId: UUID,
         @PathVariable courseId: UUID
     ): ResponseEntity<CourseResponse> {
-        return try {
-            val course = semesterService.deleteCourseFromSemester(semesterId, courseId)
-            ResponseEntity(course, HttpStatus.OK)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(null)
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val course = semesterService.deleteCourseFromSemester(semesterId, courseId)
+        return ResponseEntity(course, HttpStatus.OK)
     }
 
     @GetMapping("/{id}/managers")
     fun getSemesterManagers(@PathVariable id: UUID): ResponseEntity<List<SemesterManagerDTO>> {
-        return try {
-            val managers = semesterService.getSemesterManagers(id)
-            ResponseEntity.ok(managers)
-        } catch (e: NotFoundException) {
-            ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val managers = semesterService.getSemesterManagers(id)
+        return ResponseEntity.ok(managers)
     }
 
     @PostMapping("/{semesterId}/managers")
@@ -165,12 +124,7 @@ class SemesterController(val semesterService: SemesterService) {
 
     @GetMapping("/count")
     fun getSemesterCount(): ResponseEntity<Map<String,Long>> {
-        return try {
-            val count = semesterService.getSemesterCount()
-            ResponseEntity.ok(mapOf("count" to count))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val count = semesterService.getSemesterCount()
+        return ResponseEntity.ok(mapOf("count" to count))
     }
 }

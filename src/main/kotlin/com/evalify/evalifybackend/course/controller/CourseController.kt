@@ -1,6 +1,5 @@
 package com.evalify.evalifybackend.course.controller
 import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
-import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.course.domain.DTO.AssignUserDTO
 import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
@@ -31,31 +30,15 @@ class CourseController(
 ) {
     @GetMapping("/{courseId}")
     fun getCourseById(@PathVariable courseId: UUID): ResponseEntity<CourseResponse> {
-        return try {
-            val course = courseService.getCourseById(courseId)
-            ResponseEntity.ok(course)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val course = courseService.getCourseById(courseId)
+        return ResponseEntity.ok(course)
     }
     @GetMapping("/{courseId}/instructors")
     fun getCourseInstructors(
         @PathVariable courseId: UUID
     ): ResponseEntity<List<UserResponse>> {
-        return try {
-            val instructors = courseService.getCourseInstructors(courseId)
-            ResponseEntity.ok(instructors)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val instructors = courseService.getCourseInstructors(courseId)
+        return ResponseEntity.ok(instructors)
     }
 
     @GetMapping("/{courseId}/batches")
@@ -66,16 +49,8 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<BatchResponse>> {
-        return try {
-            val batches = courseService.getCourseBatches(courseId, page, size, sort_by, sort_order)
-            ResponseEntity.ok(batches)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val batches = courseService.getCourseBatches(courseId, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(batches)
     }
 
     @GetMapping("/{courseId}/students")
@@ -86,42 +61,18 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<UserResponse>> {
-        return try {
-            val students = courseService.getCourseStudents(courseId, page, size, sort_by, sort_order)
-            ResponseEntity.ok(students)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val students = courseService.getCourseStudents(courseId, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(students)
     }    @PutMapping("/{courseId}/assign-students")
     fun assignStudentsToCourses(@PathVariable courseId: UUID, @RequestBody studentIds: List<String>): ResponseEntity<Any> {
-        return try {
-            courseService.assignStudents(courseId, studentIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to assign students to course: ${e.message}"))
-        }
+        courseService.assignStudents(courseId, studentIds)
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/{courseId}/students/{studentId}")
     fun removeStudentFromCourse(@PathVariable courseId: UUID, @PathVariable studentId: String): ResponseEntity<Any> {
-        return try {
-            courseService.removeStudents(courseId, listOf(studentId))
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to remove student from course: ${e.message}"))
-        }
+        courseService.removeStudents(courseId, listOf(studentId))
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/{courseId}/students")
@@ -129,44 +80,21 @@ class CourseController(
         @PathVariable courseId: UUID,
         @RequestBody requestBody: Map<String, List<String>>
     ): ResponseEntity<Any> {
-        return try {
-            val studentIds = requestBody["studentIds"] ?: emptyList()
-            courseService.assignStudents(courseId, studentIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to assign students to course: ${e.message}"))        }
+        val studentIds = requestBody["studentIds"] ?: emptyList()
+        courseService.assignStudents(courseId, studentIds)
+        return ResponseEntity.ok().build()
     }
 
     @PutMapping("/{courseId}/assign-instructor")
     fun assignInstructorsToCourses(@PathVariable courseId: UUID, @RequestBody userId: List<String>): ResponseEntity<Any> {
-        return try {
-            courseService.assignInstructors(courseId, userId)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to assign instructors to course: ${e.message}"))
-        }
+        courseService.assignInstructors(courseId, userId)
+        return ResponseEntity.ok().build()
     }
 
     @PutMapping("/{courseId}/remove-instructor")
     fun removeInstructorsFromCourse(@PathVariable courseId: UUID, @RequestBody userId: List<String>): ResponseEntity<Any> {
-        return try {
-            courseService.removeInstructors(courseId, userId)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to remove instructors from course: ${e.message}"))
-        }
+        courseService.removeInstructors(courseId, userId)
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/{courseId}/batches")
@@ -174,57 +102,25 @@ class CourseController(
         @PathVariable courseId: UUID,
         @RequestBody requestBody: Map<String, List<UUID>>
     ): ResponseEntity<Any> {
-        return try {
-            val batchIds = requestBody["batchIds"] ?: emptyList()
-            courseService.addBatchesToCourse(courseId, batchIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to add batches to course: ${e.message}"))
-        }
+        val batchIds = requestBody["batchIds"] ?: emptyList()
+        courseService.addBatchesToCourse(courseId, batchIds)
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/{courseId}/batches/{batchId}")
     fun removeBatchFromCourse(@PathVariable courseId: UUID, @PathVariable batchId: UUID): ResponseEntity<Any> {
-        return try {
-            courseService.removeBatchesFromCourse(courseId, listOf(batchId))
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to remove batch from course: ${e.message}"))
-        }
+        courseService.removeBatchesFromCourse(courseId, listOf(batchId))
+        return ResponseEntity.ok().build()
     }    @PutMapping("/{courseId}/addBatch")
     fun addBatchToCourse(@PathVariable courseId: UUID, @RequestBody batchIds: List<UUID>): ResponseEntity<Any> {
-        return try {
-            courseService.addBatchesToCourse(courseId, batchIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to add batches to course: ${e.message}"))
-        }
+        courseService.addBatchesToCourse(courseId, batchIds)
+        return ResponseEntity.ok().build()
     }
 
     @PutMapping("/{courseId}/removeBatch")
     fun removeBatchesFromCourse(@PathVariable courseId: UUID, @RequestBody batchIds: List<UUID>): ResponseEntity<Any> {
-        return try {
-            courseService.removeBatchesFromCourse(courseId, batchIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to remove batches from course: ${e.message}"))
-        }
+        courseService.removeBatchesFromCourse(courseId, batchIds)
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{courseId}/batches/search")
@@ -236,16 +132,8 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<BatchResponse>> {
-        return try {
-            val batches = courseService.searchCourseBatches(courseId, query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(batches)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val batches = courseService.searchCourseBatches(courseId, query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(batches)
     }
 
     @GetMapping("/{courseId}/students/search")
@@ -257,32 +145,16 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<UserResponse>> {
-        return try {
-            val students = courseService.searchCourseStudents(courseId, query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(students)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val students = courseService.searchCourseStudents(courseId, query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(students)
     }
     
     @GetMapping("/{courseId}/unassigned-students")
     fun getUnassignedStudents(
         @PathVariable courseId: UUID
     ): ResponseEntity<List<UserResponse>> {
-        return try {
-            val students = courseService.getUnassignedStudents(courseId)
-            ResponseEntity.ok(students)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val students = courseService.getUnassignedStudents(courseId)
+        return ResponseEntity.ok(students)
     }
 
     @PostMapping("/{courseId}/instructors")
@@ -290,31 +162,15 @@ class CourseController(
         @PathVariable courseId: UUID,
         @RequestBody requestBody: Map<String, List<String>>
     ): ResponseEntity<Any> {
-        return try {
-            val instructorIds = requestBody["instructorIds"] ?: emptyList()
-            courseService.assignInstructors(courseId, instructorIds)
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to assign instructors to course: ${e.message}"))
-        }
+        val instructorIds = requestBody["instructorIds"] ?: emptyList()
+        courseService.assignInstructors(courseId, instructorIds)
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/{courseId}/instructors/{instructorId}")
     fun removeInstructorFromCourse(@PathVariable courseId: UUID, @PathVariable instructorId: String): ResponseEntity<Any> {
-        return try {
-            courseService.removeInstructors(courseId, listOf(instructorId))
-            ResponseEntity.ok().build()
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("message" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("message" to "Failed to remove instructor from course: ${e.message}"))
-        }
+        courseService.removeInstructors(courseId, listOf(instructorId))
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{courseId}/instructors/search")
@@ -326,16 +182,8 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<PaginatedResponse<UserResponse>> {
-        return try {
-            val instructors = courseService.searchCourseInstructors(courseId, query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(instructors)
-        } catch (e: NotFoundException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val instructors = courseService.searchCourseInstructors(courseId, query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(instructors)
     }
     @PostMapping("/my-courses")
     fun getMyActiveCourses(
@@ -345,23 +193,14 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
-        return try {
-            val userId = request["userId"].toString()
+        val userId = request["userId"].toString()
 
+        val currentUser = userRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("error" to "User not found"))
 
-            val currentUser = userRepository.findById(userId).orElse(null)
-                ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(mapOf("error" to "User not found"))
-
-            val courses = courseService.getCoursesForCurrentUser(currentUser, page, size, sort_by, sort_order)
-            ResponseEntity.ok(courses)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("error" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("error" to "Failed to get courses: ${e.message}"))
-        }
+        val courses = courseService.getCoursesForCurrentUser(currentUser, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(courses)
     }
 
     @PostMapping("/my-courses/search")
@@ -372,25 +211,17 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
-        return try {
-            val userId = request["userId"].toString()
-            val query = request["query"]?.toString()
-                ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(mapOf("error" to "Query parameter is required"))
+        val userId = request["userId"].toString()
+        val query = request["query"]?.toString()
+            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapOf("error" to "Query parameter is required"))
 
-            val currentUser = userRepository.findById(userId).orElse(null)
-                ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(mapOf("error" to "User not found"))
+        val currentUser = userRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("error" to "User not found"))
 
-            val courses = courseService.searchCoursesForCurrentUser(currentUser, query, page, size, sort_by, sort_order)
-            ResponseEntity.ok(courses)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("error" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("error" to "Failed to search courses: ${e.message}"))
-        }
+        val courses = courseService.searchCoursesForCurrentUser(currentUser, query, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(courses)
     }
 
     @PostMapping("/active")
@@ -401,32 +232,19 @@ class CourseController(
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String
     ): ResponseEntity<Any> {
-        return try {
-            val userId = request["userId"].toString()
+        val userId = request["userId"].toString()
 
-            val currentUser = userRepository.findById(userId).orElse(null)
-                ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(mapOf("error" to "User not found"))
+        val currentUser = userRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("error" to "User not found"))
 
-            val courses = courseService.getActiveCoursesForCurrentUser(currentUser, page, size, sort_by, sort_order)
-            ResponseEntity.ok(courses)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("error" to e.message))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("error" to "Failed to get active courses: ${e.message}"))
-        }
+        val courses = courseService.getActiveCoursesForCurrentUser(currentUser, page, size, sort_by, sort_order)
+        return ResponseEntity.ok(courses)
     }
 
     @GetMapping("/count")
     fun getCourseCount(): ResponseEntity<Map<String, Long>> {
-        return try {
-            val count = courseService.getCourseCount()
-            ResponseEntity.ok(mapOf("count" to count))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null)
-        }
+        val count = courseService.getCourseCount()
+        return ResponseEntity.ok(mapOf("count" to count))
     }
 }

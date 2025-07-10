@@ -1,6 +1,5 @@
 package com.evalify.evalifybackend.user.service
 
-import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.user.domain.Role
@@ -8,6 +7,7 @@ import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.domain.dto.CreateUserRequest
 import com.evalify.evalifybackend.user.domain.dto.UpdateUserRequest
 import com.evalify.evalifybackend.user.domain.dto.UserResponse
+import com.evalify.evalifybackend.user.exception.*
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -96,9 +96,20 @@ class UserService(
     }
 
     fun createUser(request: CreateUserRequest): UserResponse {
+        // Validate input
+        if (request.name.isBlank()) {
+            throw UserValidationException("User name cannot be blank")
+        }
+        if (request.email.isBlank()) {
+            throw UserValidationException("User email cannot be blank")
+        }
+        if (request.password.isBlank()) {
+            throw UserValidationException("User password cannot be blank")
+        }
+
         // Check if user already exists
         if (userRepository.existsByEmail(request.email)) {
-            throw IllegalArgumentException("Email already exists")
+            throw UserAlreadyExistsException(request.email)
         }
 
         try {
@@ -114,21 +125,30 @@ class UserService(
 
             val savedUser = userRepository.save(user)
             return savedUser.toUserResponse()
-        } catch (e: IllegalArgumentException) {
-            throw IllegalArgumentException("Invalid role: ${request.role}")
         } catch (e: Exception) {
-            throw RuntimeException("Failed to create user: ${e.message}")
+            when (e) {
+                is UserValidationException, is UserAlreadyExistsException -> throw e
+                else -> throw UserServiceException("Failed to create user", e)
+            }
         }
     }
 
     fun updateUser(userId: String, request: UpdateUserRequest): UserResponse {
+        // Validate input
+        if (request.name.isBlank()) {
+            throw UserValidationException("User name cannot be blank")
+        }
+        if (request.email.isBlank()) {
+            throw UserValidationException("User email cannot be blank")
+        }
+
         val user = userRepository.findById(userId).orElseThrow {
-            NotFoundException("User with id $userId not found")
+            UserNotFoundException(userId)
         }
 
         // Check if email is being changed and if it's already taken by another user
         if (request.email != user.email && userRepository.existsByEmail(request.email)) {
-            throw IllegalArgumentException("Email already exists")
+            throw UserAlreadyExistsException(request.email)
         }
 
         try {
@@ -140,24 +160,48 @@ class UserService(
 
             val updatedUser = userRepository.save(user)
             return updatedUser.toUserResponse()
-        } catch (e: IllegalArgumentException) {
-            throw IllegalArgumentException("Invalid role: ${request.role}")
         } catch (e: Exception) {
-            throw RuntimeException("Failed to update user: ${e.message}")
+            when (e) {
+                is UserNotFoundException, is UserValidationException, is UserAlreadyExistsException -> throw e
+                else -> throw UserServiceException("Failed to update user", e)
+            }
         }
     }    fun deleteUser(userId: String) {
-        val user = userRepository.findById(userId).orElseThrow {
-            NotFoundException("User with id $userId not found")
+        try {
+            val user = userRepository.findById(userId).orElseThrow {
+                UserNotFoundException(userId)
+            }
+            userRepository.delete(user)
+        } catch (e: Exception) {
+            when (e) {
+                is UserNotFoundException -> throw e
+                else -> throw UserServiceException("Failed to delete user", e)
+            }
         }
-        userRepository.delete(user)
     }
 
     fun bulkDeleteUsers(userIds: List<String>) {
-        val users = userRepository.findAllById(userIds)
-        if (users.isEmpty()) {
-            throw NotFoundException("No users found for the provided IDs")
+        if (userIds.isEmpty()) {
+            throw UserValidationException("User IDs list cannot be empty")
         }
-        userRepository.deleteAll(users)
+        
+        try {
+            val users = userRepository.findAllById(userIds)
+            if (users.isEmpty()) {
+                throw UsersNotFoundException(userIds)
+            }
+            if (users.size != userIds.size) {
+                val foundIds = users.map { it.id }
+                val missingIds = userIds.filter { !foundIds.contains(it) }
+                throw UsersNotFoundException(missingIds)
+            }
+            userRepository.deleteAll(users)
+        } catch (e: Exception) {
+            when (e) {
+                is UserValidationException, is UsersNotFoundException -> throw e
+                else -> throw BulkOperationException("Failed to delete users", e)
+            }
+        }
     }
 
     fun createUser(user: User): User{
@@ -166,13 +210,37 @@ class UserService(
 
     fun getUserById(userId: String): UserResponse {
         val user = userRepository.findById(userId).orElseThrow {
-            NotFoundException("User with id $userId not found")
+            UserNotFoundException(userId)
         }
         return user.toUserResponse()
     }
 
     fun createUsers(users: List<User>): List<User> {
-        return userRepository.saveAll(users)
+        if (users.isEmpty()) {
+            throw UserValidationException("Users list cannot be empty")
+        }
+        
+        // Validate each user
+        users.forEach { user ->
+            if (user.name.isBlank()) {
+                throw UserValidationException("User name cannot be blank")
+            }
+            if (user.email.isBlank()) {
+                throw UserValidationException("User email cannot be blank")
+            }
+            if (userRepository.existsByEmail(user.email)) {
+                throw UserAlreadyExistsException(user.email)
+            }
+        }
+        
+        try {
+            return userRepository.saveAll(users)
+        } catch (e: Exception) {
+            when (e) {
+                is UserValidationException, is UserAlreadyExistsException -> throw e
+                else -> throw BulkOperationException("Failed to create users", e)
+            }
+        }
     }
 
     @Transactional(readOnly = true)
