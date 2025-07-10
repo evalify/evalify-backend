@@ -61,16 +61,15 @@ class CacheConfig {
      * Key = UUID (quizId/studentId), HashKey = String (questionId), Value = ResponseDTO
      */
     @Bean
-    fun quizResponseRedisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<UUID, ResponseDTO> {
-        val template = RedisTemplate<UUID, ResponseDTO>()
-        template.setConnectionFactory(connectionFactory)
-
-        template.keySerializer = GenericJackson2JsonRedisSerializer()  // UUID as JSON
-        template.hashKeySerializer = StringRedisSerializer()           // questionId as string
-        template.valueSerializer = GenericJackson2JsonRedisSerializer() // ResponseDTO
+    fun quizResponseRedisTemplate(factory: RedisConnectionFactory): RedisTemplate<String, ResponseDTO> {
+        val template = RedisTemplate<String, ResponseDTO>()
+        template.setConnectionFactory(factory)
+        template.keySerializer = StringRedisSerializer()
+        template.hashKeySerializer = StringRedisSerializer()
+        template.valueSerializer = GenericJackson2JsonRedisSerializer()
         template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
-
         template.afterPropertiesSet()
         return template
     }
+
 }

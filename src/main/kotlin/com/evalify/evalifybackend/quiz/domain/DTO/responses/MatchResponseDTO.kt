@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class MatchResponseDTO(
     override val questionId: UUID,
-    val answer : List<MatchShuffleDTO>? = null
+    val answer : List<MatchPairResponse>? = null
 
     ) : ResponseDTO(
     questionId = questionId

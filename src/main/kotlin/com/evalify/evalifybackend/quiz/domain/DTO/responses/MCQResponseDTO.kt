@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class MCQResponseDTO(
     override val questionId: UUID,
-    val answer : MCQOptionDTO? = null
+    val answer : UUID? = null
 ) : ResponseDTO(
     questionId = questionId
 ) {

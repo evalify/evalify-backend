@@ -28,9 +28,11 @@ class QuizCacheInspectorService(
         val keys = quizResponseRedisTemplate.keys(pattern)
         val result = mutableMapOf<String, List<ResponseDTO>>()
         keys?.forEach { key ->
-            val values = quizResponseRedisTemplate.opsForHash<String, ResponseDTO>().values(key) ?: emptyList()
-            result[key] = values.toList()
+            val values = quizResponseRedisTemplate.opsForHash<Any, Any>().values(key)
+            @Suppress("UNCHECKED_CAST")
+            result[key] = values.mapNotNull { it as? ResponseDTO }
         }
         return result
     }
+
 }

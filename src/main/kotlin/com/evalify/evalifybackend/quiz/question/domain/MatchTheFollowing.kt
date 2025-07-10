@@ -12,13 +12,14 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchShuffleDTO
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.Pair
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import java.util.UUID
 import org.hibernate.annotations.Type
 
-class MatchPair( val leftPair: String, val rightPair: String)
+class MatchPair( val leftPair: Pair, val rightPair: Pair)
 
 @Entity
 @DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
@@ -76,7 +77,7 @@ class MatchTheFollowing(
 
         // zipping the shuffled lists together to form a list of pairs
         val zippedList = left.zip(right)
-        val pairs = zippedList.map { (left, right) -> MatchShuffleDTO(left = left, right = right) }
+        val pairs = zippedList.map { (left, right) -> MatchShuffleDTO(left = left.text, right = right.text) }
 
         return MatchReturnDTO(
                 question = this.question,
