@@ -20,7 +20,6 @@ import java.util.*
     @OneToMany(fetch = FetchType.LAZY,cascade = [CascadeType.ALL], mappedBy = "semester")
     val courses: MutableList<Course> = mutableListOf(),
 
-
     @Column(nullable = true)
     @ManyToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinTable(

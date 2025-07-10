@@ -5,6 +5,7 @@ import com.evalify.evalifybackend.core.pagination.PaginatedResponse
 import com.evalify.evalifybackend.core.pagination.PaginationInfo
 import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
 import com.evalify.evalifybackend.course.repository.CourseRepository
+import com.evalify.evalifybackend.semester.domain.DTO.SemesterManagerDTO
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterRequest
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterResponse
 import com.evalify.evalifybackend.semester.domain.Semester
@@ -222,6 +223,21 @@ class SemesterService
     fun getSemesterCount():Long {
         return semesterRepository.count()
     }
+
+    fun getSemesterManagers(id: UUID): List<SemesterManagerDTO> {
+        val semester = semesterRepository.findById(id).orElseThrow {
+            NotFoundException("Semester with id $id not found")
+        }
+
+        return semester.managers.map {
+            SemesterManagerDTO(
+                name = it.name,
+                id = it.id,
+                profileId = it.profileId
+            )
+        }
+    }
+
 }
 
 fun Semester.toSemesterResponse(): SemesterResponse {
