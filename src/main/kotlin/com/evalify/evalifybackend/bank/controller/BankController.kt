@@ -381,10 +381,10 @@ class BankController(
     }
 
     @Transactional
-    @PostMapping("/{bankId}/questions/by-topic")
+    @GetMapping("/{bankId}/questions/by-topic")
     fun getBankQuestionsByTopic(
             @PathVariable bankId: UUID,
-            @RequestBody topicIds: List<UUID>
+            @RequestParam topicIds: List<UUID>
     ): ResponseEntity<List<BankQuestion>> {
         val userId = getCurrentUserId()
         logger.info("Fetching questions by topics for bank: {} by user: {}", bankId, userId)
