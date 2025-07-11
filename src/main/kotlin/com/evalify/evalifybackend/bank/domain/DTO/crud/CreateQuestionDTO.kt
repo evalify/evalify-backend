@@ -24,13 +24,13 @@ data class CreateQuestionDTO(
 
     val options: List<MCQOption>? = null,
 
-    val driverCode: String,
-    val boilerCode: String,
-    val functionName: String,
-    val returnType: String,
-    val params: List<FunctionParamDTO>,
-    val testcases: List<TestCaseDTO>,
-    val language: List<String>,
+    val driverCode: String? = null,
+    val boilerCode: String? = null,
+    val functionName: String? = null,
+    val returnType: String? = null,
+    val params: List<FunctionParamDTO>? = emptyList(),
+    val testcases: List<TestCaseDTO>? = emptyList(),
+    val language: List<String>? = emptyList(),
     val answer: String? = null,
 
 

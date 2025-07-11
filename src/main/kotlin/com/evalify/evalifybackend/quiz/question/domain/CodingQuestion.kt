@@ -34,8 +34,8 @@ class CodingQuestion(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
-        val driverCode: String,
-        val boilerCode: String,
+        val driverCode: String? = null,
+        val boilerCode: String? = null,
         val functionName: String? = null,
         val returnType: String? = null,
         @Type(JsonBinaryType::class)
@@ -44,7 +44,7 @@ class CodingQuestion(
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
         val testcases: List<TestCaseDTO>,
-        val language: List<String>,
+        val language: List<String>? = emptyList(),
         val answer: String?
 ) :
         BaseQuestion(
