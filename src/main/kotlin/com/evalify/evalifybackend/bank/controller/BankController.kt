@@ -386,7 +386,7 @@ class BankController(
     @GetMapping("/{bankId}/questions/by-topic")
     fun getBankQuestionsByTopic(
             @PathVariable bankId: UUID,
-            @RequestParam topicIds: List<UUID>
+            @RequestParam topicIds: List<UUID>? = emptyList()
     ): ResponseEntity<List<BankQuestionsReturnDTO>> {
         val userId = getCurrentUserId()
         logger.info("Fetching questions by topics for bank: {} by user: {}", bankId, userId)

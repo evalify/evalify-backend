@@ -231,7 +231,7 @@ class BankManagerService(
 
 
         fun getQuestionsByTopic(
-                topicIds: List<UUID>,
+                topicIds: List<UUID>?,
                 bankId: UUID,
                 userId: String
         ): List<BankQuestionsReturnDTO> {
@@ -240,26 +240,25 @@ class BankManagerService(
                         bankId,
                         userId
                 )
-                val topics = topicRepo.findAllById(topicIds)
-                if (topics.size != topicIds.size) {
-                        val foundIds = topics.map { it.id }
-                        val missingIds = topicIds.filterNot { foundIds.contains(it) }
-                        throw NotFoundException("Topics not found: $missingIds")
-                }
-                val bank =
-                        bankRepository.findById(bankId).orElseThrow {
-                                BankNotFoundException(bankId.toString())
-                        }
 
+                val bank = bankRepository.findById(bankId).orElseThrow {
+                        BankNotFoundException(bankId.toString())
+                }
                 BankSecurityUtils.ensureBankAccess(bank, userId)
 
-                val result =
+                val result = if (topicIds.isNullOrEmpty()) {
                         bank.bankQuestion.filter { bankQuestion ->
-                                bankQuestion.question.topic.any { it in topics }
+                                bankQuestion.question.topic.isEmpty()
                         }
+                } else {
+                        val topics = topicRepo.findAllById(topicIds)
+                        bank.bankQuestion.filter { bankQuestion ->
+                                bankQuestion.question.topic.none { it in topics }
+                        }
+                }
                 val finalResult = result.map { it.question.mapToBankType() }
 
-                logger.debug("Retrieved {} questions by topics for bank: {}", result.size, bankId)
+                logger.debug("Retrieved {} questions by topics for bank: {}", finalResult.size, bankId)
                 return finalResult
         }
 
@@ -270,21 +269,15 @@ class BankManagerService(
                         bankRepository.findById(bankId).orElseThrow {
                                 BankNotFoundException(bankId.toString())
                         }
-                val topics =if (dto.topicIds.isNullOrEmpty())
+                val topics =if (!dto.topicIds.isNullOrEmpty())
                 {
-                        topicRepo.findAll()
-
-                }
-                else{
                         topicRepo.findAllById(dto.topicIds)
+
+                }
+                else {
+                        emptyList()
                 }
 
-
-                if (topics.size != dto.topicIds?.size) {
-                        val foundIds = topics.map { it.id }
-                        val missingIds = dto.topicIds?.filterNot { foundIds.contains(it) }
-                        throw NotFoundException("Topics not found: $missingIds")
-                }
 
                 val baseQuestion: BaseQuestion =
                         when (dto.type) {
