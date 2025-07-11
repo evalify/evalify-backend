@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.FileUploadReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -73,7 +74,15 @@ class FileUpload(
                 marks = this.marks,
                 bloomsTaxonomy = this.bloomsTaxonomy,
                 co = this.co,
-                difficulty = this.difficulty
+                difficulty = this.difficulty,
+            questionId = this.id,
+            topics = this.topic.map {
+                    topic ->
+                ReturnTopicDTO(
+                    topic.id,
+                    topic.name
+                )
+            }
         )
     }
 
@@ -90,7 +99,15 @@ class FileUpload(
                 strictness = this.strictness,
                 guidelines = this.guidelines,
                 explanation = this.explanation,
-                type = this.getQuestionType()
+                type = this.getQuestionType(),
+            questionId = this.id,
+            topics = this.topic.map {
+                    topic ->
+                ReturnTopicDTO(
+                    topic.id,
+                    topic.name
+                )
+            }
         )
     }
 

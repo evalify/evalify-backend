@@ -7,6 +7,7 @@ import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.CodingBankReturn
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseType
+import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
@@ -99,6 +100,15 @@ class CodingQuestion(
                         driverCode = this.driverCode,
                         co = this.co,
                         difficulty = this.difficulty,
+                        questionId = this.id,
+                        topics = this.topic.map {
+                                        topic ->
+                                ReturnTopicDTO(
+                                        topic.id,
+                                        topic.name
+                                )
+                        },
+
                         testcases = this.testcases.filter { testcase ->
                                 testcase.tags == TestCaseType.SAMPLE
                         })
@@ -123,7 +133,16 @@ class CodingQuestion(
                         boilerCode = this.boilerCode,
                         testcases = this.testcases,
                         answer = this.answer,
-                        type = this.getQuestionType()
+                        type = this.getQuestionType(),
+                        questionId = this.id,
+                        topics = this.topic.map {
+                                        topic ->
+                                ReturnTopicDTO(
+                                        topic.id,
+                                        topic.name
+                                )
+                        }
+
                 )
         }
 
