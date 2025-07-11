@@ -43,7 +43,7 @@ object BankValidationUtils {
     fun validateQuestionData(dto: CreateQuestionDTO) {
         validateQuestionTitle(dto.question)
         validateQuestionDescription(dto.explanation)
-        validateTopicIds(dto.topicIds)
+
         // Add coding question test case validation
         if (dto.type == QuestionTypes.CODING) {
             validateCodingQuestionTestCases(dto.language, dto.testcases)

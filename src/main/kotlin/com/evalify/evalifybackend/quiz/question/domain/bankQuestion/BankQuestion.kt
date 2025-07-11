@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.quiz.question.domain.bankQuestion
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -22,6 +23,7 @@ class BankQuestion (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID? = null,
+
     @OneToOne
     val question: BaseQuestion,
 

@@ -44,7 +44,7 @@ object QuizValidationUtils {
         validateNegativeMarks(dto.negativeMark, dto.marks)
         dto.explanation?.let { validateExplanation(it) }
         dto.hint?.let { validateHint(it) }
-        validateTopicIds(dto.topicIds)
+        //validateTopicIds(dto.topicIds)
         validateSectionId(dto.sectionId)
     }
 

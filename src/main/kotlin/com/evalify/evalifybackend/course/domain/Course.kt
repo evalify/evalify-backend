@@ -21,6 +21,7 @@ enum class CourseType {
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: UUID? = null,
     val name: String,
+    @Column(columnDefinition = "TEXT")
     val description: String,
     var code: String = "",
     val image: String? = null,

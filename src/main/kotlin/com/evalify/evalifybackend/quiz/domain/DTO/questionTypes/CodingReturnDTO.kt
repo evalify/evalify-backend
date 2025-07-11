@@ -8,9 +8,10 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 
 class CodingReturnDTO(
         val question: String,
-        val functionName: String,
-        val returnType: String,
-        val params: List<FunctionParamDTO>,
+        val functionName: String? = null,
+        val returnType: String? = null,
+        val params: List<FunctionParamDTO>? = emptyList(),
+        val driverCode: String,
         val language: List<String>,
         val testcases: List<TestCaseDTO>,
         override val hint: String?,

@@ -6,6 +6,7 @@ import com.evalify.evalifybackend.lab.domain.Lab
 import com.evalify.evalifybackend.section.domain.Section
 import com.evalify.evalifybackend.user.domain.User
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -28,7 +29,9 @@ class Quiz(
 
     val id: UUID? = null,
     val name: String,
+    @Column(columnDefinition = "TEXT")
     val description: String? = null,
+    @Column(columnDefinition = "TEXT")
     val instructions: String? = null,
     val startTime: Instant,
     val endTime: Instant,

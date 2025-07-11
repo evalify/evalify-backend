@@ -34,13 +34,13 @@ class CodingQuestion(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
-        val driverCode: String?,
-        val boilerCode: String?,
-        val functionName: String,
-        val returnType: String,
+        val driverCode: String,
+        val boilerCode: String,
+        val functionName: String? = null,
+        val returnType: String? = null,
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
-        val params: List<FunctionParamDTO>,
+        val params: List<FunctionParamDTO>? = emptyList(),
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
         val testcases: List<TestCaseDTO>,
@@ -96,6 +96,7 @@ class CodingQuestion(
                         hint = this.hint,
                         marks = this.marks,
                         bloomsTaxonomy = this.bloomsTaxonomy,
+                        driverCode = this.driverCode,
                         co = this.co,
                         difficulty = this.difficulty,
                         testcases = this.testcases.filter { testcase ->

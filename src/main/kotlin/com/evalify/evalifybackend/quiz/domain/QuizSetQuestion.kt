@@ -10,6 +10,7 @@ import jakarta.persistence.Table
 import java.util.UUID
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
+import jakarta.persistence.Column
 import jakarta.persistence.JoinColumn
 
 @Entity

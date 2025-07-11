@@ -13,7 +13,7 @@ import java.util.UUID
 data class CreateQuizQuestionDTO(
     val type: QuestionTypes,
     val question: String,
-    val topicIds: List<UUID>,
+    val topicIds: List<UUID>? = emptyList(),
     val explanation: String?,
     val hint: String?,
     val marks: Int,
@@ -24,8 +24,8 @@ data class CreateQuizQuestionDTO(
 
     val options: List<MCQOption>? = null,
 
-    val driverCode: String? = null,
-    val boilerCode: String? = null,
+    val driverCode: String,
+    val boilerCode: String,
     val functionName: String,
     val returnType: String,
     val params: List<FunctionParamDTO>,

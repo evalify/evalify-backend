@@ -12,6 +12,7 @@ import jakarta.persistence.Table
 import java.util.UUID
 import jakarta.persistence.CascadeType
 import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
+import jakarta.persistence.Column
 
 
 @Entity
@@ -27,6 +28,7 @@ class QuizSet(
     val quiz: Quiz,
 
     @OneToMany(mappedBy = "quizSet", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @Column(columnDefinition = "TEXT")
     val questions: MutableList<QuizSetQuestion> = mutableListOf()
 
 )

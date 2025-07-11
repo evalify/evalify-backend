@@ -164,7 +164,14 @@ open class QuizQuestionService(
     }
 
     fun createQuestion(dto: CreateQuizQuestionDTO): BaseQuestion {
-        val topics = topicRepo.findAllById(dto.topicIds)
+        val topics =if (dto.topicIds.isNullOrEmpty())
+        {
+            topicRepo.findAll()
+
+        }
+        else{
+            topicRepo.findAllById(dto.topicIds)
+        }
 
         val baseQuestion: BaseQuestion = when (dto.type) {
             QuestionTypes.MCQ ->   MCQ(
