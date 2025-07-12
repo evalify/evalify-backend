@@ -87,8 +87,13 @@ class Quiz(
 
     val createdAt: Instant  = Instant.now(),
     var noOfSets : Int = 1,
-
-
+    @ManyToMany
+    @JoinTable(
+        name = "quiz_quizTags",
+        joinColumns = [JoinColumn(name="quiz_id")],
+        inverseJoinColumns = [JoinColumn(name="quizTag_id")]
+    )
+    val quizTags: MutableList<QuizTags> = mutableListOf(),
 
     @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL], orphanRemoval = true)
     val sharedUsers: MutableList<QuizUser> = mutableListOf()
