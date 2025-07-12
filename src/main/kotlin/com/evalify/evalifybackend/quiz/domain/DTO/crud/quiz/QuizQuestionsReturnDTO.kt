@@ -6,5 +6,6 @@ import com.evalify.evalifybackend.section.domain.Section
 data class QuizQuestionsReturnDTO(
     val questions: QuestionsReturnDTO,
     val section : Section
+
 ) {
 }

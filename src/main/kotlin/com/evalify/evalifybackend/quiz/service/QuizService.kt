@@ -15,6 +15,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
+import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.domain.QuizUser
 import com.evalify.evalifybackend.quiz.domain.QuizUserId
 import com.evalify.evalifybackend.quiz.exception.QuizBusinessLogicException
@@ -24,9 +25,11 @@ import com.evalify.evalifybackend.quiz.exception.QuizValidationException
 import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
+import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
 import com.evalify.evalifybackend.quiz.util.CombinationUtils
 import com.evalify.evalifybackend.quiz.util.QuizSecurityUtils
 import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
+import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import java.util.*
@@ -41,13 +44,15 @@ import java.time.Instant
 @Service
 @Transactional
 class QuizService(
-        private val quizRepository: QuizRepository,
-        private val userRepository: UserRepository,
-        private val courseRepository: CourseRepository,
-        private val batchRepository: BatchRepository,
-        private val labRepository: LabRepository,
-        private val quizSetRepository: QuizSetRepository,
-        private val topicRepo: TopicRepo
+    private val quizRepository: QuizRepository,
+    private val userRepository: UserRepository,
+    private val courseRepository: CourseRepository,
+    private val batchRepository: BatchRepository,
+    private val labRepository: LabRepository,
+    private val quizSetRepository: QuizSetRepository,
+    private val topicRepo: TopicRepo,
+    private val quizTagsRepository: QuizTagsRepository,
+    private val semesterRepository: SemesterRepository,
 ) {
 
     private val logger by logger()
@@ -100,6 +105,19 @@ class QuizService(
                             val missingIds = quizDTO.studentIds.filterNot { foundIds.contains(it) }
                             throw NotFoundException("Students not found: $missingIds")
                         }
+
+            val semestersManaged = semesterRepository.findByManagerId(listOf(user))
+            val validTags = semestersManaged.flatMap { it.quizTags }.distinct()
+            // Check if all requested quizTags are valid
+            if (quizDTO.quizTags.isNotEmpty()) {
+                val validTagIds = validTags.mapNotNull { it.id }
+                val invalidTagIds = quizDTO.quizTags.filter { it !in validTagIds }
+                if (invalidTagIds.isNotEmpty()) {
+                    throw NotFoundException("Invalid quiz tags for manager's semesters: $invalidTagIds")
+                }
+            }
+            val quizTags = if (quizDTO.quizTags.isEmpty()) validTags else quizTagsRepository.findAllById(quizDTO.quizTags)
+            
 
 
             val duration = quizDTO.durationInMinutes.toDuration(DurationUnit.MINUTES)
@@ -167,8 +185,20 @@ class QuizService(
             QuizSecurityUtils.ensureOwnership(existingQuiz, userId)
             QuizSecurityUtils.validateQuizState(existingQuiz, "EDIT")
 
+            // QuizTags validation for edit
+            val semestersManaged = semesterRepository.findByManagerId(listOf(userRepository.findById(userId).orElseThrow { NotFoundException("User with ID $userId not found") }))
+            val validTags = semestersManaged.flatMap { it.quizTags }.distinct()
+            if (dto.quizTags != null && dto.quizTags.isNotEmpty()) {
+                val validTagIds = validTags.mapNotNull { it.id }
+                val invalidTagIds = dto.quizTags.filter { it !in validTagIds }
+                if (invalidTagIds.isNotEmpty()) {
+                    throw NotFoundException("Invalid quiz tags for manager's semesters: $invalidTagIds")
+                }
+            }
+            val quizTags = if (dto.quizTags == null || dto.quizTags.isEmpty()) validTags else quizTagsRepository.findAllById(dto.quizTags)
+
             // Create updated quiz
-            val updatedQuiz = patchQuiz(existingQuiz, dto)
+            val updatedQuiz = patchQuiz(existingQuiz, dto, quizTags)
             val savedQuiz = quizRepository.save(updatedQuiz)
 
             logger.info("Successfully updated quiz: {} by user: {}", quizId, userId)
@@ -232,7 +262,7 @@ class QuizService(
         }
     }
 
-    private fun patchQuiz(existing: Quiz, dto: PatchQuizDTO): Quiz {
+    private fun patchQuiz(existing: Quiz, dto: PatchQuizDTO, quizTags: List<QuizTags>): Quiz {
         logger.debug("Applying patch to quiz: {}", existing.id)
 
         try {
@@ -307,7 +337,8 @@ class QuizService(
                     student = updatedStudents,
                     lab = updatedLabs,
                     createdAt = existing.createdAt,
-                    sharedUsers = existing.sharedUsers
+                    sharedUsers = existing.sharedUsers,
+                    quizTags = existing.quizTags.toMutableList().apply { addAll(quizTags) }
             )
         } catch (e: Exception) {
             logger.error("Error while patching quiz: {}", existing.id, e)
@@ -315,15 +346,7 @@ class QuizService(
         }
     }
 
-    fun editQuiz(dto: PatchQuizDTO, quizID: UUID) {
 
-        val quiz =
-                quizRepository.findById(quizID).orElseThrow { NotFoundException("Quiz not found") }
-
-        val patchedQuiz = patchQuiz(existing = quiz, dto = dto)
-
-        quizRepository.save(patchedQuiz)
-    }
 
     fun publishQuiz(quizId: UUID, noSets: Int, dto: SelectionCriteriaDTO) {
         val quiz =

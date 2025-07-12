@@ -37,7 +37,7 @@ import java.util.*
     )
     val quizTags: MutableList<QuizTags> = mutableListOf(),
 
-   @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "batch_id")
     var batch: Batch? = null,
 )

@@ -24,5 +24,7 @@ data class PatchQuizDTO(
     val courseIds: List<UUID>? = null,
     val batchIds: List<UUID>? = null,
     val studentIds: List<String>? = null,
-    val labIds: List<UUID>? = null
-)
+    val labIds: List<UUID>? = null,
+    val quizTags :List<UUID>? = null
+
+    )

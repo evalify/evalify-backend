@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.service.QuizCacheService
@@ -26,10 +27,11 @@ class QuizStudentController(
 
     @GetMapping("/start")
     fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest)
-    : ResponseEntity<List<QuizQuestionsReturnDTO?>>{
+    : ResponseEntity<QuizQuestionReturnDTO?>{
         val requestTime = Instant.now()
         val questions = quizStudentService.getQuizQuestions(studentId = studentId, quizId = quizId, ipAddress = request.remoteAddr,requestTime = requestTime)
-        quizCacheService.storeStudentQuestions(quizId,studentId,questions)
+        val finalQuestions = questions?.questions ?: emptyList()
+        quizCacheService.storeStudentQuestions(quizId,studentId,finalQuestions)
 
         return ResponseEntity.ok(questions)
     }

@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz
 
+import com.evalify.evalifybackend.quiz.domain.QuizTags
 import java.time.Instant
 import java.util.UUID
 
@@ -17,6 +18,7 @@ data class CreateQuizDTO(
     val linearQuiz: Boolean = false,
     val calculator: Boolean = false,
     val autoSubmit: Boolean = false,
+    val quizTags :List<UUID>,
     //val publishResult: Boolean = false,
     //val publishQuiz: Boolean = false,
 

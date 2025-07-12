@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -39,45 +40,61 @@ class QuizStudentService(
         studentId: String,
         ipAddress: String,
         requestTime: Instant
-    ): List<QuizQuestionsReturnDTO> {
+    ): QuizQuestionReturnDTO? {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
         val user = userRepository.findById(studentId)
 
-        if (requestTime.isAfter(quiz.startTime) && requestTime.isBefore(quiz.endTime)) {
-            val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
-                ?: quizStudentRepository.save(
-                    QuizStudent(
-                        quiz = quiz,
-                        student = user.get(),
-                        isSubmitted = false,
-                        startTime = Instant.now(),
-                        duration = quiz.duration,
-                        endTime = null,
-                        ipAddress = mutableListOf(ipAddress)
-                    )
-                )
-
-            if (!quizStudent.ipAddress.contains(ipAddress)) {
-                quizStudent.ipAddress.add(ipAddress)
-                quizStudentRepository.save(quizStudent)
-            }
-
-            val quizSet = quizSetRepository.findByQuiz(quiz)
-            val finalQuestions = distributeQuestions(user, quizSet, quiz.noOfSets)
-
-            return finalQuestions?.map { question ->
-                QuizQuestionsReturnDTO(
-                    questions = question.question.question.mapToType(quiz.shuffleOptions),
-                    section = question.question.section
-                )
-            } ?: emptyList()
+        if (requestTime.isBefore(quiz.startTime)) {
+            return QuizQuestionReturnDTO(
+                quizTags = quiz.quizTags,
+                questions = emptyList(),
+                message = "Quiz has not started yet."
+            )
+        }
+        if (requestTime.isAfter(quiz.endTime)) {
+            return QuizQuestionReturnDTO(
+                quizTags = quiz.quizTags,
+                questions = emptyList(),
+                message = "Quiz has ended."
+            )
         }
 
-        return emptyList()
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+            ?: quizStudentRepository.save(
+                QuizStudent(
+                    quiz = quiz,
+                    student = user.get(),
+                    isSubmitted = false,
+                    startTime = Instant.now(),
+                    duration = quiz.duration,
+                    endTime = null,
+                    ipAddress = mutableListOf(ipAddress)
+                )
+            )
+
+        if (!quizStudent.ipAddress.contains(ipAddress)) {
+            quizStudent.ipAddress.add(ipAddress)
+            quizStudentRepository.save(quizStudent)
+        }
+
+        val quizSet = quizSetRepository.findByQuiz(quiz)
+        val finalQuestions = distributeQuestions(user, quizSet, quiz.noOfSets)
+        val quizTags = quiz.quizTags
+
+        val questions =  finalQuestions?.map { question ->
+            QuizQuestionsReturnDTO(
+                questions = question.question.question.mapToType(quiz.shuffleOptions),
+                section = question.question.section
+            )
+        } ?: emptyList()
+        return QuizQuestionReturnDTO(
+            quizTags = quizTags,
+            questions = questions
+
+        )
     }
-    //TODO() add the logic for distributing the sets serially according to the roll number
 
     fun saveQuestion(quizId: UUID, studentId: String, answer: ResponseDTO) {
         val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
