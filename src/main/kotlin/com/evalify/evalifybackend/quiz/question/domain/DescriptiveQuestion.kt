@@ -53,7 +53,7 @@ class DescriptiveQuestion(
                         id = null,
                         question = question,
                         bank = bank,
-                        topic = topic,
+                        topic = topic.toMutableList(),
                         explanation = explanation,
                         hint = hint,
                         marks = marks,

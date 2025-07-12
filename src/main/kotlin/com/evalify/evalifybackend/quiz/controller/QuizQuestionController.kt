@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.quiz.controller
 
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
+import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsToQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddBankQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddQuestionsResponse
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
@@ -29,15 +30,16 @@ class QuizQuestionController(val questionService: QuizQuestionService,
     fun addBankQuestionsToQuiz(
         @PathVariable quizId: UUID,
         @PathVariable sectionID : UUID,
-        @RequestParam(required = false) topicId : List<UUID>,
-        @RequestParam(required = false) bankIds : List<UUID>,
-        @RequestParam(required = false) difficulty : List<Difficulty>,
-        @RequestParam(required = false) nofQuestions : Int,
-        @RequestParam(required = false) questionType : List<QuestionTypes>,
-        @RequestParam(required = true) userId : String
+        @RequestBody addQuestionToQuizDTO: AddQuestionsToQuizDTO
+//        @RequestParam(required = false) topicId : List<UUID>?,
+//        @RequestParam(required = false) bankIds : List<UUID>?,
+//        @RequestParam(required = false) difficulty : List<Difficulty>?,
+//        @RequestParam(required = false) nofQuestions : Int,
+//        @RequestParam(required = false) questionType : List<QuestionTypes>?,
+//        @RequestParam(required = true) userId : String
     ): ResponseEntity<AddQuestionsResponse> {
-        val response = questionService.addByQuestionByFilters(quizId = quizId,topicId = topicId,difficulty = difficulty,noOfQuestion = nofQuestions,
-            questionTypes = questionType,userId = userId,bankIds = bankIds,sectionId = sectionID)
+        val response = questionService.addByQuestionByFilters(quizId = quizId,topicId = addQuestionToQuizDTO.topicId,difficulty = addQuestionToQuizDTO.difficulty,noOfQuestion = addQuestionToQuizDTO.noOfQuestions,
+            questionTypes = addQuestionToQuizDTO.questionType,userId = addQuestionToQuizDTO.userId,bankIds = addQuestionToQuizDTO.bankId,sectionId = sectionID)
 
         return ResponseEntity.ok(response)
 

@@ -60,7 +60,7 @@ class FillUp(
                         id = null,
                         question = question,
                         bank = bank,
-                        topic = topic,
+                        topic = topic.toMutableList(),
                         explanation = explanation,
                         hint = hint,
                         marks = marks,
@@ -71,7 +71,12 @@ class FillUp(
                         strictMatch = strictMatch,
                         llmEval = llmEval,
                         template = template,
-                        blanks = blanks
+                        blanks = blanks.map { 
+                            blanks(
+                                id = it.id,
+                                answers = it.answers.toList()
+                            )
+                        }
                 )
         return copiedQuestion
     }

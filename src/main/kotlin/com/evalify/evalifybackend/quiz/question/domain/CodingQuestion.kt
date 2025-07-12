@@ -67,7 +67,7 @@ class CodingQuestion(
                                 id = null,
                                 question = question,
                                 bank = bank,
-                                topic = topic,
+                                topic = topic.toMutableList(),
                                 explanation = explanation,
                                 hint = hint,
                                 marks = marks,
@@ -79,9 +79,19 @@ class CodingQuestion(
                                 boilerCode = boilerCode,
                                 functionName = functionName,
                                 returnType = returnType,
-                                params = params,
-                                testcases = testcases,
-                                language = language,
+                                params = params?.map { 
+                                    FunctionParamDTO(it.param, it.type)
+                                } ?: emptyList(),
+                                testcases = testcases.map { 
+                                    TestCaseDTO(
+                                        input = it.input,
+                                        expected = it.expected,
+                                        tags = it.tags,
+                                        isMinimal = it.isMinimal,
+                                        language = it.language
+                                    )
+                                },
+                                language = language?.toList() ?: emptyList(),
                                 answer = answer
                         )
                 return copiedQuestion
