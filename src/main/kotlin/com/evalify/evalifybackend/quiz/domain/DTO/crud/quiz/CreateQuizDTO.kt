@@ -19,6 +19,7 @@ data class CreateQuizDTO(
     val calculator: Boolean = false,
     val autoSubmit: Boolean = false,
     val quizTags :List<UUID>,
+    val password: String? = null,
     //val publishResult: Boolean = false,
     //val publishQuiz: Boolean = false,
 

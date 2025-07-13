@@ -20,6 +20,7 @@ data class PatchQuizDTO(
     val autoSubmit: Boolean? = null,
     val publishResult: Boolean? = null,
     val publishQuiz: Boolean? = null,
+    val password: String? = null,
 
     val courseIds: List<UUID>? = null,
     val batchIds: List<UUID>? = null,

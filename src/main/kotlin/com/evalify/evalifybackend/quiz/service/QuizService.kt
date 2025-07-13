@@ -140,7 +140,8 @@ class QuizService(
                             course = courses.toMutableList(),
                             batch = batches.toMutableList(),
                             student = students.toMutableList(),
-                            lab = labs.toMutableList()
+                            lab = labs.toMutableList(),
+                            password = quizDTO.password,
                     )
 
             // Create quiz user relationship
@@ -338,6 +339,7 @@ class QuizService(
                     lab = updatedLabs,
                     createdAt = existing.createdAt,
                     sharedUsers = existing.sharedUsers,
+                    password = dto.password ?: existing.password,
                     quizTags = existing.quizTags.toMutableList().apply { addAll(quizTags) }
             )
         } catch (e: Exception) {

@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.quiz.service
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
@@ -39,7 +40,8 @@ class QuizStudentService(
         quizId: UUID,
         studentId: String,
         ipAddress: String,
-        requestTime: Instant
+        requestTime: Instant,
+        dto : StartQuizDTO
     ): QuizQuestionReturnDTO? {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
@@ -58,6 +60,13 @@ class QuizStudentService(
                 quizTags = quiz.quizTags,
                 questions = emptyList(),
                 message = "Quiz has ended."
+            )
+        }
+        if(dto.password == quiz.password){
+            return QuizQuestionReturnDTO(
+                quizTags = quiz.quizTags,
+                questions = emptyList(),
+                message = "Wrong password."
             )
         }
 
