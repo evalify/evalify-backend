@@ -18,6 +18,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.filter.DifficultyLevelFilter
+import com.evalify.evalifybackend.quiz.filter.ExistingQuestionFilter
 import com.evalify.evalifybackend.quiz.filter.FilterManager
 import com.evalify.evalifybackend.quiz.filter.QuestionTypeFilter
 import com.evalify.evalifybackend.quiz.filter.TopicFilter
@@ -68,34 +69,22 @@ open class QuizQuestionService(
 
         val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
-
-        // for unique addition to the quiz from the bank questions
-//        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
-
-        //questions from ALL quiz questions in the database (due to unique constraint on bank_question_id)
         val existingQuestionIds = quizQuestionRepository.findAll()
             .mapNotNull { it.bankQuestion?.id }
             .toSet()
 
         var count : Int
 
+        val banks = if (bankIds != null) bankRepository.findAllById(bankIds) else bankRepository.findAll()
 
 
-        val banks = if (bankIds != null) {
-            bankRepository.findAllById(bankIds)
-        } else {
-            bankRepository.findAll()
-        }
+        val topics = if (topicId != null) topicRepo.findAllById(topicId) else topicRepo.findAll()
 
-        val topics = if (topicId != null) {
-            topicRepo.findAllById(topicId)
-        } else {
-            topicRepo.findAll()
-        }
 
         val bankQuestions:List<BankQuestion> = banks.flatMap { bank -> bank.bankQuestion }
         val filterManager = FilterManager()
-            .addFilter(TopicFilter(existingQuestionIds = existingQuestionIds, topics = topics))
+            .addFilter(ExistingQuestionFilter(existingQuestionIds = existingQuestionIds ))
+            .addFilter(TopicFilter( topics = topics))
             .addFilter(DifficultyLevelFilter(difficult=difficulty))
             .addFilter(QuestionTypeFilter(questionTypes = questionTypes))
 

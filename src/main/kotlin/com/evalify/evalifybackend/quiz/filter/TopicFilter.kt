@@ -5,11 +5,10 @@ import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import java.util.UUID
 
 class TopicFilter(
-    val existingQuestionIds: Set<UUID?>,
     val topics:List<Topic>?
 ): QuestionFilter {
 
   override fun filter(questions:List<BankQuestion>): List<BankQuestion> {
-        return if(topics != null) questions.filter { bankQuestion -> bankQuestion.id !in existingQuestionIds && bankQuestion.question.topic.any { it in topics } } else questions
+        return if(topics != null) questions.filter { bankQuestion ->  bankQuestion.question.topic.any { it in topics } } else questions
     }
 }
