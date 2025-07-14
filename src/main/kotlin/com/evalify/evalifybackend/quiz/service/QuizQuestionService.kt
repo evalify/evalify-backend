@@ -70,7 +70,12 @@ open class QuizQuestionService(
 
 
         // for unique addition to the quiz from the bank questions
-        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+//        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+
+        //questions from ALL quiz questions in the database (due to unique constraint on bank_question_id)
+        val existingQuestionIds = quizQuestionRepository.findAll()
+            .mapNotNull { it.bankQuestion?.id }
+            .toSet()
 
         var count : Int
 
@@ -110,8 +115,10 @@ open class QuizQuestionService(
             count = fQuestions.size
         }
 
-        val filteredQuestions = fQuestions.shuffled().take(count)
-        val bankQuestionsId = filteredQuestions.map {bankQuestion -> bankQuestion.id}
+        val filteredQuestions = fQuestions.shuffled()
+            .filter { it.id !in existingQuestionIds } // <-- Add this line
+            .take(count)
+        val bankQuestionsId = filteredQuestions.map { bankQuestion -> bankQuestion.id }
 
         filteredQuestions.forEach { bankQuestion ->
 
@@ -343,7 +350,9 @@ open class QuizQuestionService(
 
         val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
-        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+        val existingQuestionIds: Set<UUID?> = quizQuestionRepository.findAll()
+            .mapNotNull { it.bankQuestion?.id }
+            .toSet()
 
         val finalQuestions : MutableList<BankQuestion> = mutableListOf()
         val bankQuestions = bankQuestionRepository.findAllById(dto.bankQuestionId)

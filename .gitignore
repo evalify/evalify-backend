@@ -45,5 +45,5 @@ out/
 ### Env ###
 .env.prod
 .env.stagging
-.env.prod
-.env.prod
+.env.dev
+.env

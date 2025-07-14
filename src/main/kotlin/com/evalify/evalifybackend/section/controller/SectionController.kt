@@ -26,7 +26,7 @@ class SectionController(
     private val sectionService: SectionService
 ) {
 
-    @PostMapping("/")
+    @PostMapping
     fun createSection(@PathVariable quizId: UUID, @RequestBody dto: CreateSectionDTO): ResponseEntity<Any> {
         return try {
             sectionService.createNewSection(quizId, dto.name)

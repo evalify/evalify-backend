@@ -37,7 +37,7 @@ class QuizQuestion (
     val updateBy: User,
 
     @ManyToOne
-    @JoinColumn(unique = true)
+    @JoinColumn
     val bankQuestion: BankQuestion? = null
 
 )

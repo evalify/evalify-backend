@@ -56,8 +56,8 @@ class Quiz(
     @ManyToMany
     @JoinTable(
         name = "course_quiz",
-        joinColumns = [JoinColumn(name="course_id")],
-        inverseJoinColumns = [JoinColumn(name="quiz_id")]
+        joinColumns = [JoinColumn(name="quiz_id")],
+        inverseJoinColumns = [JoinColumn(name="course_id")]
     )
     val course:MutableList<Course> = mutableListOf(),
 
@@ -72,8 +72,8 @@ class Quiz(
     @ManyToMany
     @JoinTable(
         name = "quiz_lab",
-        joinColumns = [JoinColumn(name="lab_id")],
-        inverseJoinColumns = [JoinColumn(name="quiz_id")]
+        joinColumns = [JoinColumn(name="quiz_id")],
+        inverseJoinColumns = [JoinColumn(name="lab_id")]
     )
     val lab:MutableList<Lab>  = mutableListOf(),
 
