@@ -1,5 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
+import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
@@ -52,4 +54,17 @@ class QuizTagsService(
     fun deleteTags(tagId: UUID) = quizTagsRepository.deleteById(
         tagId
     )
+
+    fun getTags(semesterId: UUID) : List<QuizTagsReturnDTO>{
+        val semester = semesterRepository.findById(semesterId).orElseThrow { NotFoundException("Semester not found for id: $semesterId") }
+        val tags = semester.quizTags
+        return tags.map { tag ->
+            QuizTagsReturnDTO(
+                id = tag.id,
+                name = tag.name,
+                description = tag.description
+            )
+
+        }
+    }
 }

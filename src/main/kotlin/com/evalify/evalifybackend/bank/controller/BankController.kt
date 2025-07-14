@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.bank.controller
 
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.CopyBankQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.EditBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
@@ -315,6 +316,21 @@ class BankController(
 
         logger.info("Successfully unshared bank: {} from {} users", bankId, dto.userID.size)
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{bankId}/copy")
+    fun shareQuestions(
+        @PathVariable bankId : UUID,
+        @RequestBody dto : CopyBankQuestionDTO
+    ): ResponseEntity<Void>{
+        val userId = getCurrentUserId()
+        logger.info("Sharing questions: {} from bank {} to bank {}",dto.questionIds,bankId,dto.bankId)
+        bankService.copyFromBank(bankId,dto,userId)
+
+        logger.info("Successfully copied questions from {} to {}",dto.bankId,bankId)
+        return ResponseEntity.ok().build()
+
+
     }
 
     @GetMapping("/{bankId}/topics")

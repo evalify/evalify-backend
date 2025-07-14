@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.bank.service
 import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.BankUser
 import com.evalify.evalifybackend.bank.domain.BankUserId
+import com.evalify.evalifybackend.bank.domain.DTO.bank.CopyBankQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.CreateBankDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.EditBankDTO
 import com.evalify.evalifybackend.bank.exception.BankAlreadySharedException
@@ -16,6 +17,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
+import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -243,5 +245,58 @@ class BankService(
                     SharedUserDTO(user = simpleUser, tag = bankUser.tags)
                 }
             logger.debug("Retrieved {} shared users for bank: {}", users.size, bankId)
-            return GetSharedUsersDTO(users) }}
+            return GetSharedUsersDTO(users) }
+
+    fun copyFromBank(bankId: UUID, dto: CopyBankQuestionDTO, userId: String) {
+        logger.info("Copying/moving questions from bank: {} to bank: {} by user: {}", bankId, dto.bankId, userId)
+
+        val fromBank = bankRepository.findById(bankId).orElseThrow {
+            BankNotFoundException(bankId.toString())
+        }
+        val toBank = bankRepository.findById(dto.bankId).orElseThrow {
+            BankNotFoundException(dto.bankId.toString())
+        }
+
+        BankSecurityUtils.ensureOwnership(toBank, userId)
+
+        val questionsToCopy = fromBank.bankQuestion.filter { dto.questionIds.contains(it.id) }
+        if (questionsToCopy.isEmpty()) {
+            throw NotFoundException("No questions found to copy/move from bank $bankId with ids ${dto.questionIds}")
+        }
+
+        // Create new question instances with copied data
+        val copiedQuestions = questionsToCopy.map { originalQuestion ->
+            // Copy the base question and immediately set the correct bank and topics
+            val copiedBaseQuestion = with(originalQuestion.question) {
+                copyQuestion().also { copied ->
+                    // Clear the topics list and optionally add back the original topics
+                    copied.topic.clear()
+                    if (dto.createNewTopic) {
+                        copied.topic.addAll(topic)
+                    }
+                }
+            }
+
+            // Create new bank question with the copied base question
+            BankQuestion(
+                id = null,
+                question = copiedBaseQuestion,
+
+            )
+        }
+
+        // Add copied questions to target bank
+        toBank.bankQuestion.addAll(copiedQuestions)
+
+        // If move is true, remove original questions from source bank
+        if (dto.move) {
+            fromBank.bankQuestion.removeIf { dto.questionIds.contains(it.id) }
+            bankRepository.save(fromBank)
+        }
+
+        // Save target bank with new questions
+        bankRepository.save(toBank)
+        logger.info("Successfully copied/moved {} questions from bank {} to bank {}", copiedQuestions.size, bankId, dto.bankId)
+    }
+}
 

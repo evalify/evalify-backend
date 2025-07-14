@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
 import java.util.UUID
@@ -28,10 +29,12 @@ class QuizStudentController(
 ) {
 
     @GetMapping("/start")
-    fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,
-                  @RequestBody dto : StartQuizDTO)
+    fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
     : ResponseEntity<QuizQuestionReturnDTO?>{
         val requestTime = Instant.now()
+        //TODO(To retrieve the questions from the cache if available)
+
+
         val questions = quizStudentService.getQuizQuestions(studentId = studentId, quizId = quizId, ipAddress = request.remoteAddr,requestTime = requestTime,dto = dto)
         val finalQuestions = questions?.questions ?: emptyList()
         quizCacheService.storeStudentQuestions(quizId,studentId,finalQuestions)

@@ -262,7 +262,9 @@ class BankManagerService(
                 return finalResult
         }
 
-        private fun createQuestion(dto: CreateQuestionDTO, bankId: UUID): BaseQuestion {
+
+
+        fun createQuestion(dto: CreateQuestionDTO, bankId: UUID): BaseQuestion {
                 logger.debug("Creating question of type: {} for bank: {}", dto.type, bankId)
 
                 val bank =

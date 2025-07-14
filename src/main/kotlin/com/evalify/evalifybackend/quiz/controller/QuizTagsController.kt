@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.service.QuizTagsService
+import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -9,8 +11,18 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/")
 class QuizTagsController(
-    private val quizTagsService: QuizTagsService
+    private val quizTagsService: QuizTagsService,
+    private val semesterRepository: SemesterRepository
 ) {
+    @GetMapping("semester/{semesterId}/tags")
+    fun getTagsBySemesterId(@PathVariable semesterId: UUID
+    ):ResponseEntity<List<QuizTagsReturnDTO>>{
+        val result = quizTagsService.getTags(semesterId)
+        return ResponseEntity.ok(
+            result
+        )
+
+    }
     @PostMapping("semester/{semesterId}/tags")
     fun createTags(
         @PathVariable semesterId: UUID,
