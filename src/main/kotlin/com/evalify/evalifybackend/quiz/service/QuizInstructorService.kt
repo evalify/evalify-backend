@@ -6,10 +6,12 @@ import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.mapper.updateQuiz
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
+@Transactional
 class QuizInstructorService(val quizRepository: QuizRepository) {
 
     /**
@@ -31,14 +33,27 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
      * @return QuizPreviewDTO object
      */
     private fun mapToQuizPreviewDTO(quiz: Quiz): QuizPreviewDTO {
+        // Initialize lazy collections within the transaction boundary
+        val batchNames = try {
+            quiz.batch.map { it.name }
+        } catch (e: Exception) {
+            emptyList<String>()
+        }
+        
+        val labNames = try {
+            quiz.lab.map { it.name }
+        } catch (e: Exception) {
+            emptyList<String>()
+        }
+        
         return QuizPreviewDTO(
             id = quiz.id,
             name = quiz.name,
             description = quiz.description ?: "",
             startTime = quiz.startTime,
             endTime = quiz.endTime,
-            batches = quiz.batch.map { it.name },
-            labs = quiz.lab.map { it.name },
+            batches = batchNames,
+            labs = labNames,
             duration = quiz.duration,
             publishResult = quiz.publishResult
         )
@@ -48,16 +63,19 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
      * Updates a quiz with the provided data
      * @param quizId The UUID of the quiz to update
      * @param quizUpdateDTO The DTO containing the updated quiz data
-     * @return The updated Quiz entity
+     * @return The updated Quiz preview DTO
      * @throws NotFoundException if the quiz is not found
      */
-    fun updateQuiz(quizId: UUID, quizUpdateDTO: QuizUpdateDTO): Quiz {
+    fun updateQuiz(quizId: UUID, quizUpdateDTO: QuizUpdateDTO): QuizPreviewDTO {
         val quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
 
         val updatedQuiz = quiz.updateQuiz(quizUpdateDTO)
-        return quizRepository.save(updatedQuiz)
+        val savedQuiz = quizRepository.save(updatedQuiz)
+        
+        // Return DTO instead of entity to avoid lazy loading issues
+        return mapToQuizPreviewDTO(savedQuiz)
     }
 
     fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {

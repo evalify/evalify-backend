@@ -1,9 +1,10 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.core.exception.UnauthorizedException
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
-import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.service.QuizInstructorService
+import com.evalify.evalifybackend.security.utils.SecurityUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,6 +28,7 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
      */
     @GetMapping("/course/{courseId}")
     fun getQuizzesByCourseId(@PathVariable courseId: UUID): List<QuizPreviewDTO> {
+        
         return quizInstructorService.getQuizzesByCourseId(courseId)
     }
 
@@ -34,13 +36,13 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
      * Updates a quiz with the provided data
      * @param quizId The UUID of the quiz to update
      * @param quizUpdateDTO The DTO containing the updated quiz data
-     * @return ResponseEntity with the updated Quiz entity
+     * @return ResponseEntity with the updated Quiz preview DTO
      */
     @PutMapping("/{quizId}")
     fun updateQuiz(
         @PathVariable quizId: UUID,
         @RequestBody quizUpdateDTO: QuizUpdateDTO
-    ): ResponseEntity<Quiz> {
+    ): ResponseEntity<QuizPreviewDTO> {
         val updatedQuiz = quizInstructorService.updateQuiz(quizId, quizUpdateDTO)
         return ResponseEntity.ok(updatedQuiz)
     }
@@ -49,4 +51,5 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
     fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {
         return quizInstructorService.getAllQuizzesForInstructor()
     }
+
 }
