@@ -17,14 +17,16 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import org.springframework.web.bind.annotation.RequestMapping
 
-@RestController("/api/quiz/{quizId}/section")
+@RestController()
+@RequestMapping("/api/quiz/{quizId}/section")
 class SectionController(
     private val sectionRepository: SectionRepository,
     private val sectionService: SectionService
 ) {
 
-    @PostMapping("/")
+    @PostMapping
     fun createSection(@PathVariable quizId: UUID, @RequestBody dto: CreateSectionDTO): ResponseEntity<Any> {
         return try {
             sectionService.createNewSection(quizId, dto.name)

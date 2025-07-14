@@ -14,12 +14,12 @@ import java.util.UUID
 
 @Service
 @Transactional
+
 class SectionService(
     private val sectionRepository: SectionRepository,
     private val quizRepository: QuizRepository
 ) {
     private val logger = LoggerFactory.getLogger(SectionService::class.java)
-
     fun createNewSection(quizId : UUID, name : String) {
         try {
             val quiz = quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }

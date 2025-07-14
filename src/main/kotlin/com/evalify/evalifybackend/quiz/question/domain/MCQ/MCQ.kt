@@ -57,7 +57,7 @@ class MCQ(
                         id = null,
                         question = question,
                         bank = bank,
-                        topic = topic,
+                        topic = topic.toMutableList(),
                         explanation = explanation,
                         hint = hint,
                         marks = marks,
@@ -65,7 +65,13 @@ class MCQ(
                         co = co,
                         negativeMark = negativeMark,
                         difficulty = difficulty,
-                        options = options
+                        options = options.map { 
+                            MCQOption(
+                                id = null,
+                                text = it.text,
+                                isCorrect = it.isCorrect
+                            )
+                        }.toMutableList()
                 )
         return copiedQuestion
     }

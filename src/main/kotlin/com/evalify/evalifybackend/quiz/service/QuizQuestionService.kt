@@ -17,6 +17,11 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddQuestionsResponse
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.filter.DifficultyLevelFilter
+import com.evalify.evalifybackend.quiz.filter.ExistingQuestionFilter
+import com.evalify.evalifybackend.quiz.filter.FilterManager
+import com.evalify.evalifybackend.quiz.filter.QuestionTypeFilter
+import com.evalify.evalifybackend.quiz.filter.TopicFilter
 import com.evalify.evalifybackend.quiz.question.domain.CodingQuestion
 import com.evalify.evalifybackend.quiz.question.domain.DescriptiveQuestion
 import com.evalify.evalifybackend.quiz.question.domain.FileUpload
@@ -55,11 +60,6 @@ open class QuizQuestionService(
         questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?,sectionId : UUID
     ): AddQuestionsResponse {
 
-
-        val filteredTopics: MutableList<BankQuestion> = mutableListOf()
-        val filteredLevels: MutableList<BankQuestion> = mutableListOf()
-        val filteredQuestionTypes: MutableList<BankQuestion> = mutableListOf()
-
         val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
@@ -69,68 +69,45 @@ open class QuizQuestionService(
 
         val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
-
-        // for unique addition to the quiz from the bank questions
-        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+        val existingQuestionIds = quizQuestionRepository.findAll()
+            .mapNotNull { it.bankQuestion?.id }
+            .toSet()
 
         var count : Int
 
+        val banks = if (bankIds != null) bankRepository.findAllById(bankIds) else bankRepository.findAll()
 
 
-        val banks = if (bankIds != null) {
-            bankRepository.findAllById(bankIds)
-        } else {
-            bankRepository.findAll()
-        }
-
-        val topics = if (topicId != null) {
-            topicRepo.findAllById(topicId)
-        } else {
-            topicRepo.findAll()
-        }
-        banks.forEach { bank ->
-            val questions = bank.bankQuestion.filter { bankQuestion ->
-                bankQuestion.id !in existingQuestionIds &&
-                        bankQuestion.question.topic.any { it in topics }
-            }
-            filteredTopics.addAll(questions)
-        }
+        val topics = if (topicId != null) topicRepo.findAllById(topicId) else topicRepo.findAll()
 
 
-        if (difficulty != null) {
-            filteredLevels.addAll(filteredTopics.filter { bankQuestion ->
-                bankQuestion.question.difficulty in difficulty
-            })
-        } else {
-            filteredLevels.addAll(filteredTopics)
-        }
+        val bankQuestions:List<BankQuestion> = banks.flatMap { bank -> bank.bankQuestion }
+        val filterManager = FilterManager()
+            .addFilter(ExistingQuestionFilter(existingQuestionIds = existingQuestionIds ))
+            .addFilter(TopicFilter( topics = topics))
+            .addFilter(DifficultyLevelFilter(difficult=difficulty))
+            .addFilter(QuestionTypeFilter(questionTypes = questionTypes))
 
-        if (questionTypes != null) {
+        val fQuestions:List<BankQuestion> = filterManager.applyFilter(bankQuestions)
 
-            filteredQuestionTypes.addAll(filteredLevels.filter { bankQuestion ->
-                bankQuestion.question.getQuestionType() in questionTypes
-            })
-        } else {
-            filteredQuestionTypes.addAll(filteredLevels)
-        }
 
         if(noOfQuestion != null)
         {
             count = noOfQuestion
-            val message = if ((noOfQuestion ) > filteredQuestionTypes.size) {
-                count = filteredQuestionTypes.size
-                "Only ${filteredQuestionTypes.size} questions added. Not enough questions are available."
+            val message = if ((noOfQuestion ) > fQuestions.size) {
+                count = fQuestions.size
+                "Only ${fQuestions.size} questions added. Not enough questions are available."
             } else {
-                "Successfully added ${filteredQuestionTypes.size} questions to quiz."
+                "Successfully added ${fQuestions.size} questions to quiz."
             }
         }else{
-            count = filteredQuestionTypes.size
+            count = fQuestions.size
         }
 
-
-
-        val filteredQuestions = filteredQuestionTypes.shuffled().take(count)
-        val bankQuestionsId = filteredQuestions.map {bankQuestion -> bankQuestion.id}
+        val filteredQuestions = fQuestions.shuffled()
+            .filter { it.id !in existingQuestionIds } // <-- Add this line
+            .take(count)
+        val bankQuestionsId = filteredQuestions.map { bankQuestion -> bankQuestion.id }
 
         filteredQuestions.forEach { bankQuestion ->
 
@@ -362,7 +339,9 @@ open class QuizQuestionService(
 
         val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
-        val existingQuestionIds: Set<UUID?> = section.quizQuestions.map{ it.bankQuestion?.id }.toSet()
+        val existingQuestionIds: Set<UUID?> = quizQuestionRepository.findAll()
+            .mapNotNull { it.bankQuestion?.id }
+            .toSet()
 
         val finalQuestions : MutableList<BankQuestion> = mutableListOf()
         val bankQuestions = bankQuestionRepository.findAllById(dto.bankQuestionId)

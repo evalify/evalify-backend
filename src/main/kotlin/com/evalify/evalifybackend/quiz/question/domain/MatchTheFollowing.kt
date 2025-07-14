@@ -59,7 +59,7 @@ class MatchTheFollowing(
                         id = null,
                         question = question,
                         bank = bank,
-                        topic = topic,
+                        topic = topic.toMutableList(),
                         explanation = explanation,
                         hint = hint,
                         marks = marks,
@@ -67,7 +67,12 @@ class MatchTheFollowing(
                         co = co,
                         negativeMark = negativeMark,
                         difficulty = difficulty,
-                        keys = keys
+                        keys = keys.map { 
+                            MatchPair(
+                                leftPair = Pair(it.leftPair.id, it.leftPair.text),
+                                rightPair = Pair(it.rightPair.id, it.rightPair.text)
+                            )
+                        }.toMutableList()
                 )
         return copiedQuestion
     }
