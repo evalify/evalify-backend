@@ -8,6 +8,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
+import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
@@ -69,6 +70,9 @@ class QuizStudentService(
                 message = "Wrong password."
             )
         }
+        quiz.status = QuizStatus.ACTIVE
+        quizRepository.save(quiz)
+
 
         val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
             ?: quizStudentRepository.save(
@@ -132,6 +136,27 @@ class QuizStudentService(
                 existingResponses.add(newResponse)
             }
         }
+
+        quizStudentRepository.save(quizStudent)
+    }
+
+    fun submitQuiz(quizId: UUID, studentId: String, responses: List<ResponseDTO>) {
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+            ?: throw NotFoundException("Quiz with id $quizId not found")
+
+        val existingResponses = quizStudent.responses
+
+        responses.forEach { newResponse ->
+            val index = existingResponses.indexOfFirst { it.questionId == newResponse.questionId }
+            if (index != -1) {
+                existingResponses[index] = newResponse
+            } else {
+                existingResponses.add(newResponse)
+            }
+        }
+        val quiz = quizStudent.quiz
+        quiz.status = QuizStatus.ENDED
+        quizRepository.save(quiz)
 
         quizStudentRepository.save(quizStudent)
     }

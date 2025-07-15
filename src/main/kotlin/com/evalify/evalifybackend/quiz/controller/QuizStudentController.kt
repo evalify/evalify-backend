@@ -71,10 +71,10 @@ class QuizStudentController(
         if(responses == null)
         {
             val responses = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
-            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+            quizStudentService.submitQuiz(quizId = quizId,studentId = studentId,responses = responses)
         }
         else{
-            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responses)
+            quizStudentService.submitQuiz(quizId = quizId,studentId = studentId,responses = responses)
         }
 
     }

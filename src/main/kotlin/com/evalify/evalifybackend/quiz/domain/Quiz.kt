@@ -21,6 +21,12 @@ import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration
 
+enum class QuizStatus{
+    UPCOMING,
+    ACTIVE,
+    ENDED
+}
+
 @Entity
 @Table(name = "quiz")
 class Quiz(
@@ -46,6 +52,7 @@ class Quiz(
     val autoSubmit: Boolean = false,
     val publishResult: Boolean = false,
     val publishQuiz: Boolean = false,
+    var status : QuizStatus = QuizStatus.UPCOMING,
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
 //    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),
