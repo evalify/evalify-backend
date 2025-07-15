@@ -50,7 +50,7 @@ class Quiz(
     val publishQuiz: Boolean = false,
     val status: QuizStatus = when{
         startTime.isBefore(Instant.now()) -> QuizStatus.UPCOMING
-        endTime.isAfter(Instant.now()) -> QuizStatus.ENDED
+        endTime.isAfter(Instant.now()) -> QuizStatus.COMPLETED
         else -> QuizStatus.ACTIVE
     },
 
