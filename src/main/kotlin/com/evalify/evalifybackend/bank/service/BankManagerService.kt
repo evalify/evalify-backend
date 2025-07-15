@@ -253,7 +253,7 @@ class BankManagerService(
                 } else {
                         val topics = topicRepo.findAllById(topicIds)
                         bank.bankQuestion.filter { bankQuestion ->
-                                bankQuestion.question.topic.none { it in topics }
+                                bankQuestion.question.topic.any { it in topics }
                         }
                 }
                 val finalResult = result.map { it.question.mapToBankType() }
