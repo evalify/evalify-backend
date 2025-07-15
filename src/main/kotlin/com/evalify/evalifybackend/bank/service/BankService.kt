@@ -17,6 +17,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
+import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -25,6 +26,7 @@ import java.util.UUID
 import org.springframework.transaction.annotation.Transactional
 import com.evalify.evalifybackend.quiz.question.repository.BankQuestionRepository
 import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 
 @Service
 @Transactional
@@ -32,7 +34,8 @@ class BankService(
         private val bankRepository: BankRepository,
         private val userRepository: UserRepository,
         private val baseQuestionRepository: QuestionRepository,
-        private val bankQuestionRepository: BankQuestionRepository
+        private val bankQuestionRepository: BankQuestionRepository,
+        private val topicRepository: TopicRepo
 ) {
 
         private val logger by logger()
@@ -273,10 +276,18 @@ class BankService(
             // Copy the base question first
             val copiedBaseQuestion = with(originalQuestion.question) {
                 copyQuestion().also { copied ->
-                    // Clear the topics list and optionally add back the original topics
                     copied.topic.clear()
                     if (dto.createNewTopic) {
-                        copied.topic.addAll(topic)
+                        // Create new topics with same properties but for the target bank
+                        val newTopics = topic.map { originalTopic ->
+                            Topic(
+                                name = originalTopic.name,
+                                bank = toBank
+                            ).let { newTopic ->
+                                topicRepository.save(newTopic)
+                            }
+                        }
+                        copied.topic.addAll(newTopics)
                     }
                 }
             }
