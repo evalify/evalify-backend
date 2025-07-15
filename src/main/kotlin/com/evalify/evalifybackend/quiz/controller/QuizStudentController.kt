@@ -23,7 +23,7 @@ import java.time.Instant
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/student/{studentId}/quiz/{quizId}")
+@RequestMapping("/api/student/{studentId}")
 class QuizStudentController(
     private val quizStudentService: QuizStudentService,
     private val quizCacheService: QuizCacheService,
@@ -57,7 +57,7 @@ class QuizStudentController(
 
         // Store in cache for future use
         val finalQuestions = questions?.questions ?: emptyList()
-        quizCacheService.storeStudentQuestions(quizId, studentId, finalQuestions)
+        quizCacheService.storeStudentQuestions(quizId,studentId,finalQuestions)
 
         return ResponseEntity.ok(questions)
     }
