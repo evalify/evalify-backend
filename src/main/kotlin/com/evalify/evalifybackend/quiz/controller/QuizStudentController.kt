@@ -18,26 +18,46 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.data.redis.core.RedisTemplate
 import java.time.Instant
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/student/{studentId}/quiz/{quizId}")
 class QuizStudentController(
-    val quizStudentService: QuizStudentService,
-    val quizCacheService: QuizCacheService
+    private val quizStudentService: QuizStudentService,
+    private val quizCacheService: QuizCacheService,
+    private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>
 ) {
 
     @GetMapping("/start")
-    fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
-    : ResponseEntity<QuizQuestionReturnDTO?>{
+    fun startQuiz(@PathVariable studentId: String, @PathVariable quizId: UUID, request: HttpServletRequest, @RequestBody dto: StartQuizDTO)
+    : ResponseEntity<QuizQuestionReturnDTO?> {
         val requestTime = Instant.now()
-        //TODO(To retrieve the questions from the cache if available)
+        val key = "quiz:$quizId:student:$studentId:questions"
+        
+        val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
+        
+        if (!cachedQuestions.isNullOrEmpty()) {
+            val questionsList = cachedQuestions.filterNotNull()
+            return ResponseEntity.ok(QuizQuestionReturnDTO(
+                questions = questionsList,
+                quizTags = quizStudentService.getQuizTags(quizId)
+            ))
+        }
 
-
-        val questions = quizStudentService.getQuizQuestions(studentId = studentId, quizId = quizId, ipAddress = request.remoteAddr,requestTime = requestTime,dto = dto)
+        // If not in cache, get from database
+        val questions = quizStudentService.getQuizQuestions(
+            studentId = studentId,
+            quizId = quizId,
+            ipAddress = request.remoteAddr,
+            requestTime = requestTime,
+            dto = dto
+        )
+        
+        // Store in cache for future use
         val finalQuestions = questions?.questions ?: emptyList()
-        quizCacheService.storeStudentQuestions(quizId,studentId,finalQuestions)
+        quizCacheService.storeStudentQuestions(quizId, studentId, finalQuestions)
 
         return ResponseEntity.ok(questions)
     }

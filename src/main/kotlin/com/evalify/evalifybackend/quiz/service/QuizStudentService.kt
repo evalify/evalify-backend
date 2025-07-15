@@ -10,6 +10,7 @@ import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
 import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
+import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
@@ -155,6 +156,12 @@ class QuizStudentService(
 
 
         quizStudentRepository.save(quizStudent)
+    }
+
+    fun getQuizTags(quizId: UUID): List<QuizTags> {
+        val quiz = quizRepository.findById(quizId)
+            .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
+        return quiz.quizTags
     }
 
 

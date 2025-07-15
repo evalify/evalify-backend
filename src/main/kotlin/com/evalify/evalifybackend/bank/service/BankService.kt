@@ -278,7 +278,6 @@ class BankService(
                 copyQuestion().also { copied ->
                     copied.topic.clear()
                     if (dto.createNewTopic) {
-                        // Create new topics with same properties but for the target bank
                         val newTopics = topic.map { originalTopic ->
                             Topic(
                                 name = originalTopic.name,
