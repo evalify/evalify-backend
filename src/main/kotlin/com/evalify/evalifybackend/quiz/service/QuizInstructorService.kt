@@ -9,6 +9,8 @@ import com.evalify.evalifybackend.quiz.mapper.updateQuiz
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.Instant.now
 import java.util.UUID
 
 @Service
@@ -20,13 +22,23 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
      * @param courseId The UUID of the course
      * @return List of QuizPreviewDTO objects
      */
-    fun getQuizzesByCourseId(courseId: UUID,status: QuizStatus): List<QuizPreviewDTO> {
+    fun getQuizzesByCourseId(courseId: String,status: QuizStatus?,userId:String): List<QuizPreviewDTO> {
+        if(courseId == "all") return getAllQuizzesForInstructor(userId)
+
+        val courseId = UUID.fromString(courseId)
         val quizzes = quizRepository.findByCourseId(courseId)
+        if(status != null){
+            return quizzes.filter { it.status == status }.map { quiz ->
+                mapToQuizPreviewDTO(quiz)
+            }
+        }
 
 
         return quizzes.map { quiz ->
             mapToQuizPreviewDTO(quiz)
         }
+
+
     }
 
 
@@ -49,6 +61,11 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
             emptyList<String>()
         }
         val isProtected = !quiz.password.isNullOrEmpty()
+        val status: QuizStatus = when{
+            quiz.startTime.isBefore(Instant.now()) -> QuizStatus.UPCOMING
+            quiz.endTime.isAfter(Instant.now()) -> QuizStatus.COMPLETED
+            else -> QuizStatus.ACTIVE
+        }
         
         return QuizPreviewDTO(
             id = quiz.id,
@@ -60,7 +77,7 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
             labs = labNames,
             duration = quiz.duration,
             publishResult = quiz.publishResult,
-            status = quiz.status,
+            status = status,
             isProtected = isProtected,
             courseCodes = quiz.course.map { it.code }
         )
@@ -85,8 +102,8 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
         return mapToQuizPreviewDTO(savedQuiz)
     }
 
-    fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {
-        val quizzes = quizRepository.findAll()
+    fun getAllQuizzesForInstructor(userId: String): List<QuizPreviewDTO> {
+        val quizzes = quizRepository.findByUserId(userId)
         return quizzes.map { quiz ->
             mapToQuizPreviewDTO(quiz)
         }

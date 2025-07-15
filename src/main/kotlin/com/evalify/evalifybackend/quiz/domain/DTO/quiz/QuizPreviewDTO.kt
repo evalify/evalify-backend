@@ -15,7 +15,7 @@ data class QuizPreviewDTO(
     val labs:List<String>,
     val duration: Duration,
     val publishResult: Boolean,
-    val status: QuizStatus,
+    val status: QuizStatus?,
     val isProtected: Boolean,
     val courseCodes : List<String>
 

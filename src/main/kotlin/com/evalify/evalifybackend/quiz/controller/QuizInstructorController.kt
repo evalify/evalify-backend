@@ -29,9 +29,9 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
      * @return List of QuizPreviewDTO objects
      */
     @GetMapping("/course/{courseId}")
-    fun getQuizzesByCourseId(@PathVariable courseId: UUID,@RequestParam status: QuizStatus): List<QuizPreviewDTO> {
-        
-        return quizInstructorService.getQuizzesByCourseId(courseId,status)
+    fun getQuizzesByCourseId(@PathVariable courseId: String,@RequestParam status: QuizStatus? = null): List<QuizPreviewDTO> {
+        val userId = SecurityUtils.getCurrentUserId() ?: throw UnauthorizedException("You are not authorized to access this resource.")
+        return quizInstructorService.getQuizzesByCourseId(courseId,status,userId)
     }
 
     /**
@@ -51,7 +51,8 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
 
     @GetMapping("/quiz/me")
     fun getAllQuizzesForInstructor(): List<QuizPreviewDTO> {
-        return quizInstructorService.getAllQuizzesForInstructor()
+        val userId = SecurityUtils.getCurrentUserId() ?: throw UnauthorizedException("You are not authorized to access this resource.")
+        return quizInstructorService.getAllQuizzesForInstructor(userId = userId)
     }
 
 }

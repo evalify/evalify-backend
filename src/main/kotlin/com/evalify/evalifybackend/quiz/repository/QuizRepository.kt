@@ -25,5 +25,10 @@ interface QuizRepository: JpaRepository<Quiz, UUID> {
     @Query("SELECT COUNT(q) FROM Quiz q WHERE q.endTime < :date")
     fun countByEndTimeBefore(@Param("date") date: Instant): Long
 
-
+    @Query("""
+        SELECT q FROM Quiz q 
+        JOIN q.sharedUsers qu
+        WHERE qu.user.id = :userId
+    """)
+    fun findByUserId(@Param("userId") userId: String): List<Quiz>
 }
