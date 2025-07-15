@@ -98,7 +98,7 @@ class MMCQ(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return MCQBankReturnDTO(
                 question = this.question,
                 options = this.options,
@@ -109,7 +109,7 @@ class MMCQ(
                 difficulty = this.difficulty,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-            questionId = this.id,
+            questionId = questionId,
             topics = this.topic.map {
                     topic ->
                 ReturnTopicDTO(

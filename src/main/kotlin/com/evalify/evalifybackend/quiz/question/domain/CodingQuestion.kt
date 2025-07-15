@@ -127,7 +127,7 @@ class CodingQuestion(
 
 
 
-        override fun mapToBankType(): BankQuestionsReturnDTO {
+        override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
                 return CodingBankReturnDTO(
                         question = this.question,
                         functionName = this.functionName,
@@ -144,7 +144,7 @@ class CodingQuestion(
                         testcases = this.testcases,
                         answer = this.answer,
                         type = this.getQuestionType(),
-                        questionId = this.id,
+                        questionId = questionId,
                         topics = this.topic.map {
                                         topic ->
                                 ReturnTopicDTO(

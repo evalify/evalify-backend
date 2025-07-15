@@ -88,7 +88,7 @@ class DescriptiveQuestion(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return DescriptiveBankReturnDTO(
                 question = this.question,
                 hint = this.hint,
@@ -102,7 +102,7 @@ class DescriptiveQuestion(
                 explanation = this.explanation,
                 answer = this.answer,
                 type = this.getQuestionType(),
-                questionId = this.id,
+                questionId = questionId,
                 topics = this.topic.map {
                                 topic ->
                         ReturnTopicDTO(

@@ -86,7 +86,7 @@ class TrueFalse(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return TrueFalseBankDTO(
                 question = this.question,
                 answers = this.answer,
@@ -97,7 +97,7 @@ class TrueFalse(
                 difficulty = this.difficulty,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-            questionId = this.id,
+            questionId = questionId,
             topics = this.topic.map {
                     topic ->
                 ReturnTopicDTO(

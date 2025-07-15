@@ -86,7 +86,7 @@ class FileUpload(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
 
         return FileUploadReturnDTO(
                 question = this.question,
@@ -100,7 +100,7 @@ class FileUpload(
                 guidelines = this.guidelines,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-            questionId = this.id,
+            questionId = questionId,
             topics = this.topic.map {
                     topic ->
                 ReturnTopicDTO(

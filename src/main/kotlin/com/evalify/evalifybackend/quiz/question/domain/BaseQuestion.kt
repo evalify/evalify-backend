@@ -89,7 +89,7 @@ abstract class BaseQuestion(
 
     abstract fun mapToType(shuffleOptions: Boolean = false): QuestionsReturnDTO
 
-    abstract fun mapToBankType() : BankQuestionsReturnDTO
+    abstract fun mapToBankType(questionId:UUID?) : BankQuestionsReturnDTO
 
     abstract fun getQuestionType(): QuestionTypes
 

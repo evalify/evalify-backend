@@ -104,7 +104,7 @@ class MatchTheFollowing(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return MatchBankReturnDTO(
                 question = this.question,
                 keys = this.keys,
@@ -115,7 +115,7 @@ class MatchTheFollowing(
                 difficulty = this.difficulty,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-            questionId = this.id,
+            questionId = questionId,
             topics = this.topic.map {
                     topic ->
                 ReturnTopicDTO(

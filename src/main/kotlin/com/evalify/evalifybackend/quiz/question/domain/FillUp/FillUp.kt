@@ -101,7 +101,7 @@ class FillUp(
         )
     }
 
-    override fun mapToBankType(): BankQuestionsReturnDTO {
+    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return FillUpsBankReturnDTO(
                 question = this.question,
                 blanks = this.blanks,
@@ -115,7 +115,7 @@ class FillUp(
                 template = this.template,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-                questionId = this.id,
+                questionId = questionId,
                 topics = this.topic.map {
                         topic ->
                         ReturnTopicDTO(

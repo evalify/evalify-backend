@@ -203,7 +203,7 @@ class BankManagerService(
                 val result =
                         bankQuestions.map { bankQuestion ->
                                 val baseQuestion = bankQuestion.question
-                                baseQuestion.mapToBankType()
+                                baseQuestion.mapToBankType(bankQuestion.id)
                         }
 
                 logger.debug("Retrieved {} questions for bank: {}", result.size, bankId)
@@ -256,7 +256,7 @@ class BankManagerService(
                                 bankQuestion.question.topic.any { it in topics }
                         }
                 }
-                val finalResult = result.map { it.question.mapToBankType() }
+                val finalResult = result.map { it.question.mapToBankType(it.id) }
 
                 logger.debug("Retrieved {} questions by topics for bank: {}", finalResult.size, bankId)
                 return finalResult

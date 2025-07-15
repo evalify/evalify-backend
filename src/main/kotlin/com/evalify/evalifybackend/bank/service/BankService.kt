@@ -23,12 +23,16 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
 import org.springframework.transaction.annotation.Transactional
+import com.evalify.evalifybackend.quiz.question.repository.BankQuestionRepository
+import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 
 @Service
 @Transactional
 class BankService(
         private val bankRepository: BankRepository,
-        private val userRepository: UserRepository
+        private val userRepository: UserRepository,
+        private val baseQuestionRepository: QuestionRepository,
+        private val bankQuestionRepository: BankQuestionRepository
 ) {
 
         private val logger by logger()
@@ -264,9 +268,9 @@ class BankService(
             throw NotFoundException("No questions found to copy/move from bank $bankId with ids ${dto.questionIds}")
         }
 
-        // Create new question instances with copied data
+        // Create and save new question instances with copied data
         val copiedQuestions = questionsToCopy.map { originalQuestion ->
-            // Copy the base question and immediately set the correct bank and topics
+            // Copy the base question first
             val copiedBaseQuestion = with(originalQuestion.question) {
                 copyQuestion().also { copied ->
                     // Clear the topics list and optionally add back the original topics
@@ -277,15 +281,20 @@ class BankService(
                 }
             }
 
-            // Create new bank question with the copied base question
+            // Save the copied base question first
+            val savedBaseQuestion = baseQuestionRepository.save(copiedBaseQuestion)
+
+            // Create and save the new bank question with the saved base question
             BankQuestion(
                 id = null,
-                question = copiedBaseQuestion,
-
-            )
+                question = savedBaseQuestion,
+                updateBy = originalQuestion.updateBy
+            ).also { bankQuestion ->
+                bankQuestionRepository.save(bankQuestion)
+            }
         }
 
-        // Add copied questions to target bank
+        // Add the saved copied questions to target bank
         toBank.bankQuestion.addAll(copiedQuestions)
 
         // If move is true, remove original questions from source bank
