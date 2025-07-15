@@ -70,8 +70,6 @@ class QuizStudentService(
                 message = "Wrong password."
             )
         }
-        quiz.status = QuizStatus.ACTIVE
-        quizRepository.save(quiz)
 
 
         val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
@@ -154,9 +152,7 @@ class QuizStudentService(
                 existingResponses.add(newResponse)
             }
         }
-        val quiz = quizStudent.quiz
-        quiz.status = QuizStatus.ENDED
-        quizRepository.save(quiz)
+
 
         quizStudentRepository.save(quizStudent)
     }

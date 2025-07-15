@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.quiz.controller
 import com.evalify.evalifybackend.core.exception.UnauthorizedException
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
+import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.service.QuizInstructorService
 import com.evalify.evalifybackend.security.utils.SecurityUtils
 import org.springframework.http.ResponseEntity
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
@@ -27,9 +29,9 @@ class QuizInstructorController(private val quizInstructorService: QuizInstructor
      * @return List of QuizPreviewDTO objects
      */
     @GetMapping("/course/{courseId}")
-    fun getQuizzesByCourseId(@PathVariable courseId: UUID): List<QuizPreviewDTO> {
+    fun getQuizzesByCourseId(@PathVariable courseId: UUID,@RequestParam status: QuizStatus): List<QuizPreviewDTO> {
         
-        return quizInstructorService.getQuizzesByCourseId(courseId)
+        return quizInstructorService.getQuizzesByCourseId(courseId,status)
     }
 
     /**

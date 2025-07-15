@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.quiz
 
+import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration
@@ -13,7 +14,10 @@ data class QuizPreviewDTO(
     val batches: List<String>,
     val labs:List<String>,
     val duration: Duration,
-    val publishResult: Boolean
+    val publishResult: Boolean,
+    val status: QuizStatus,
+    val isProtected: Boolean,
+    val courseCodes : List<String>
 
 
 ) {

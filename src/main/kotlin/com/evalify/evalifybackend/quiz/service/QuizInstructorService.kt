@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.mapper.updateQuiz
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import jakarta.transaction.Transactional
@@ -19,13 +20,15 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
      * @param courseId The UUID of the course
      * @return List of QuizPreviewDTO objects
      */
-    fun getQuizzesByCourseId(courseId: UUID): List<QuizPreviewDTO> {
+    fun getQuizzesByCourseId(courseId: UUID,status: QuizStatus): List<QuizPreviewDTO> {
         val quizzes = quizRepository.findByCourseId(courseId)
+
 
         return quizzes.map { quiz ->
             mapToQuizPreviewDTO(quiz)
         }
     }
+
 
     /**
      * Maps a Quiz entity to a QuizPreviewDTO
@@ -45,6 +48,7 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
         } catch (e: Exception) {
             emptyList<String>()
         }
+        val isProtected = !quiz.password.isNullOrEmpty()
         
         return QuizPreviewDTO(
             id = quiz.id,
@@ -55,7 +59,10 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
             batches = batchNames,
             labs = labNames,
             duration = quiz.duration,
-            publishResult = quiz.publishResult
+            publishResult = quiz.publishResult,
+            status = quiz.status,
+            isProtected = isProtected,
+            courseCodes = quiz.course.map { it.code }
         )
     }
 
