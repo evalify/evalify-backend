@@ -21,11 +21,7 @@ import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration
 
-enum class QuizStatus{
-    UPCOMING,
-    ACTIVE,
-    COMPLETED,
-}
+
 
 @Entity
 @Table(name = "quiz")
@@ -54,7 +50,7 @@ class Quiz(
     val publishQuiz: Boolean = false,
     val status: QuizStatus = when{
         startTime.isBefore(Instant.now()) -> QuizStatus.UPCOMING
-        endTime.isAfter(Instant.now()) -> QuizStatus.COMPLETED
+        endTime.isAfter(Instant.now()) -> QuizStatus.ENDED
         else -> QuizStatus.ACTIVE
     },
 
