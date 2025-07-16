@@ -31,4 +31,11 @@ interface QuizRepository: JpaRepository<Quiz, UUID> {
         WHERE qu.user.id = :userId
     """)
     fun findByUserId(@Param("userId") userId: String): List<Quiz>
+
+    @Query("""
+        SELECT q FROM Quiz q 
+        JOIN q.student s
+        WHERE s.id = :studentId
+    """)
+    fun findByStudentId(@Param("studentId") studentId: String): List<Quiz>
 }

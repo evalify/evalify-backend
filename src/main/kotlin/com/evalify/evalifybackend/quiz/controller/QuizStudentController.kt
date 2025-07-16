@@ -31,13 +31,13 @@ class QuizStudentController(
 ) {
 
     @GetMapping("/start")
-    fun startQuiz(@PathVariable studentId: String, @PathVariable quizId: UUID, request: HttpServletRequest, @RequestBody dto: StartQuizDTO)
-    : ResponseEntity<QuizQuestionReturnDTO?> {
+    fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
+    : ResponseEntity<QuizQuestionReturnDTO?>{
         val requestTime = Instant.now()
         val key = "quiz:$quizId:student:$studentId:questions"
-        
+
         val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
-        
+
         if (!cachedQuestions.isNullOrEmpty()) {
             val questionsList = cachedQuestions.filterNotNull()
             return ResponseEntity.ok(QuizQuestionReturnDTO(
@@ -54,7 +54,7 @@ class QuizStudentController(
             requestTime = requestTime,
             dto = dto
         )
-        
+
         // Store in cache for future use
         val finalQuestions = questions?.questions ?: emptyList()
         quizCacheService.storeStudentQuestions(quizId, studentId, finalQuestions)
