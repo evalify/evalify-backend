@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.service
 
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.core.exception.NotFoundException
@@ -10,6 +11,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -29,6 +32,7 @@ import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
 import com.evalify.evalifybackend.quiz.util.CombinationUtils
 import com.evalify.evalifybackend.quiz.util.QuizSecurityUtils
 import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
+import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.usewr.repository.UserRepository
@@ -53,6 +57,7 @@ class QuizService(
     private val topicRepo: TopicRepo,
     private val quizTagsRepository: QuizTagsRepository,
     private val semesterRepository: SemesterRepository,
+    private val sectionRepository: SectionRepository,
 ) {
 
     private val logger by logger()
@@ -544,7 +549,7 @@ class QuizService(
         return PermutationsDTO(validSets.isNotEmpty(), totalPerms.toInt())
     }
 
-    // returns count of total, live, upcoming and completed for all quizzes
+    // returns a count of total, live, upcoming and completed for all quizzes
     fun getQuizCounts(): Map<String, Long> {
         val now = Instant.now() // Use Instant instead of Date
         val totalCount = quizRepository.count()
@@ -561,5 +566,75 @@ class QuizService(
             "upcoming" to upcomingCount,
             "completed" to completedCount
         )
+    }
+
+    fun getQuizQuestions(quizId: UUID, userId: String): List<QuizQuestionsReturnDTO> {
+        logger.info("Fetching quiz questions for quiz: {} by user: {}", quizId, userId)
+
+        val quiz = quizRepository.findById(quizId).orElseThrow { QuizNotFoundException(quizId.toString())
+        }
+        val quizQuestions = quiz.section.flatMap { it.quizQuestions }
+        val result = quizQuestions.map{
+            quizQuestion ->
+            val baseQuestion = quizQuestion.question
+            val finalQuestion = baseQuestion.mapToBankType(quizQuestion.id)
+            QuizQuestionsReturnDTO(
+                question = finalQuestion,
+                sectionId = quizQuestion.section.id
+
+            )
+   }
+        return result
+    }
+
+//    fun getQuizQuestionsByTopic(
+//        topicIds: List<UUID>?,
+//        quizId: UUID,
+//        userId: String
+//    ): List<BankQuestionsReturnDTO> {
+//        logger.info(
+//            "Fetching questions by topics for quizId: {} by user: {}",
+//            quizId,
+//            userId
+//        )
+//
+//       val quiz = quizRepository.findById(quizId).orElseThrow { QuizNotFoundException(quizId.toString()) }
+//
+//        val quizQuestions = quiz.section.flatMap { it.quizQuestions }
+//
+//
+//
+//        val result = if (topicIds.isNullOrEmpty()) {
+//            quizQuestions.filter { quizQuestion ->
+//                quizQuestion.question.topic.isEmpty()
+//            }
+//        } else {
+//            val topics = topicRepo.findAllById(topicIds)
+//            quizQuestions.filter { bankQuestion ->
+//                bankQuestion.question.topic.any { it in topics }
+//            }
+//        }
+//        val finalResult = result.map { it.question.mapToBankType(it.id) }
+//
+//        logger.debug("Retrieved {} questions by topics for quiz: {}", finalResult.size, quizId)
+//        return finalResult
+//    }
+
+    fun getQuizQuestionsBySection(sectionId: UUID, quizId: UUID, userId: String):List<BankQuestionsReturnDTO> {
+        logger.info(
+            "Fetching questions by section for quizId: {} by user: {}",
+            quizId,
+            userId
+        )
+        val section = sectionRepository.findById(sectionId)
+        val quizQuestions = section.map { it.quizQuestions }.orElseThrow { QuizNotFoundException(quizId.toString()) }
+        logger.debug("Retrieved {} questions by section for quiz: {}", quizQuestions.size, quizId)
+        val result = quizQuestions.map{
+                quizQuestion ->
+            val baseQuestion = quizQuestion.question
+            baseQuestion.mapToBankType(quizQuestion.id)
+        }
+        return result
+
     }
 }

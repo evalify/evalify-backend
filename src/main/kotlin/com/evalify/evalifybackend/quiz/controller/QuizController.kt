@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.core.DTO.ErrorResponseDTO
 import com.evalify.evalifybackend.core.exception.UnauthorizedException
@@ -8,6 +9,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
@@ -20,6 +23,7 @@ import com.evalify.evalifybackend.quiz.service.QuizService
 import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
 import com.evalify.evalifybackend.security.utils.SecurityUtils
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import java.time.Instant
 import java.util.UUID
@@ -257,6 +261,39 @@ class QuizController(
         logger.info("Successfully deleted quiz: {} by user: {}", quizId, userId)
         return ResponseEntity.noContent().build()
     }
+
+    @GetMapping("/{quizId}/questions")
+    fun getQuizQuestions(@PathVariable quizId: UUID): ResponseEntity<List<com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO>>{
+        val userId = getCurrentUserId()
+        logger.info("Fetching questions for quiz: {} by user: {}", quizId, userId)
+        val result = quizService.getQuizQuestions(quizId, userId)
+        logger.debug("Successfully retrieved questions for quiz: {} by user: {}", quizId, userId)
+        return ResponseEntity.ok(result)
+    }
+    @GetMapping("/{quizId}/section/{sectionId}/questions")
+    fun getQuizQuestionsBySection(@PathVariable quizId: UUID, @PathVariable sectionId: UUID): ResponseEntity<List<BankQuestionsReturnDTO>> {
+        val userId = getCurrentUserId()
+        logger.info("Fetching questions in the section : {} for quiz: {} by user: {} ",sectionId, quizId, userId)
+        val result = quizService.getQuizQuestionsBySection(sectionId, quizId, userId)
+        logger.debug("Successfully retrieved questions in the section : {} for quiz: {} by user: {}",sectionId, quizId, userId)
+        return ResponseEntity.ok(result)
+
+    }
+
+//    @Transactional
+//    @GetMapping("/{bankId}/questions/by-topic")
+//    fun getQuizQuestionsByTopic(
+//        @PathVariable quizId: UUID,
+//        @RequestParam topicIds: List<UUID>? = emptyList()
+//    ): ResponseEntity<List<BankQuestionsReturnDTO>> {
+//        val userId = getCurrentUserId()
+//        logger.info("Fetching questions by topics for quiz: {} by user: {}", quizId, userId)
+//
+//        val result = quizService.getQuizQuestionsByTopic(topicIds, quizId, userId)
+//
+//        logger.debug("Retrieved {} questions by topics for quiz: {}", result.size, quizId)
+//        return ResponseEntity.ok(result)
+//    }
 
     @PostMapping("/{quizId}/add-student")
     fun addStudent(
