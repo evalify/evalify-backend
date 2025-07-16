@@ -455,8 +455,8 @@ class QuizService(
                 quizRepository.findById(quizId).orElseThrow {
                     NotFoundException("quiz with id $quizId not found")
                 }
-        val student = userRepository.findAllById(studentId)
-        quiz.student.addAll(student)
+        val students = userRepository.findAllById(studentId).filter { student -> student !in quiz.student }
+        quiz.student.addAll(students)
         quizRepository.save(quiz)
     }
 
