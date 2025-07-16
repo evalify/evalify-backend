@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.service
 
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.exception.BankQuestionNotFoundException
 import com.evalify.evalifybackend.bank.util.BankSecurityUtils
@@ -14,7 +15,7 @@ import java.util.UUID
 class BankQuestionService (
     private val bankQuestionRepository: BankQuestionRepository,
 ){
-    fun getBankQuestionById(questionId: UUID, userId: String): BankQuestionDTO {
+    fun getBankQuestionById(questionId: UUID, userId: String): BankQuestionsReturnDTO {
         val bankQuestion = bankQuestionRepository.findById(questionId)
             .orElseThrow { BankQuestionNotFoundException(questionId.toString()) }
 
@@ -26,26 +27,6 @@ class BankQuestionService (
 
         // Use proper access control utility
         BankSecurityUtils.ensureBankAccess(bank, userId)
-
-        return BankQuestionDTO(
-            id = bankQuestion.id,
-            question = bankQuestion.question.question,
-            explanation = bankQuestion.question.explanation,
-            hint = bankQuestion.question.hint,
-            marks = bankQuestion.question.marks,
-            bloomsTaxonomy = bankQuestion.question.bloomsTaxonomy,
-            co = bankQuestion.question.co,
-            negativeMark = bankQuestion.question.negativeMark,
-            difficulty = bankQuestion.question.difficulty,
-            topics = bankQuestion.question.topic.map { topic ->
-                ReturnTopicDTO(
-                    id = topic.id,
-                    name = topic.name,
-                )
-            },
-            questionType = bankQuestion.question.getQuestionType(),
-            updatedAt = bankQuestion.updatedAt,
-            updatedBy = bankQuestion.updateBy?.id
-        )
+        return bankQuestion.question.mapToBankType()
     }
 }

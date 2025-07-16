@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.bank.controller
 
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionDTO
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.exception.BankAccessDeniedException
 import com.evalify.evalifybackend.bank.exception.BankQuestionNotFoundException
 import com.evalify.evalifybackend.bank.service.BankQuestionService
@@ -28,7 +29,7 @@ class BankQuestionController(
     private val logger by logger()
 
     @GetMapping("/{questionId}")
-    fun getBankQuestionById(@PathVariable questionId: UUID): ResponseEntity<BankQuestionDTO> {
+    fun getBankQuestionById(@PathVariable questionId: UUID): ResponseEntity<BankQuestionsReturnDTO> {
         val userId = getCurrentUserId()
         logger.info("Fetching bank question with ID: {} by user: {}", questionId, userId)
         
