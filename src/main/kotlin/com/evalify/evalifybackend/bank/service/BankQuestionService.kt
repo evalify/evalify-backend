@@ -27,6 +27,7 @@ class BankQuestionService (
 
         // Use proper access control utility
         BankSecurityUtils.ensureBankAccess(bank, userId)
-        return bankQuestion.question.mapToBankType()
+
+        return bankQuestion.question.mapToBankType(bankQuestion.question.id)
     }
 }

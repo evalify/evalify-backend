@@ -63,7 +63,7 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
         val isProtected = !quiz.password.isNullOrEmpty()
         val status: QuizStatus = when{
             quiz.startTime.isBefore(Instant.now()) -> QuizStatus.UPCOMING
-            quiz.endTime.isAfter(Instant.now()) -> QuizStatus.ENDED
+            quiz.endTime.isAfter(Instant.now()) -> QuizStatus.COMPLETED
             else -> QuizStatus.ACTIVE
         }
         
