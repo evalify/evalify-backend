@@ -37,11 +37,6 @@ class CodingQuestion(
         difficulty: Difficulty,
         val driverCode: String? = null,
         val boilerCode: String? = null,
-        val functionName: String? = null,
-        val returnType: String? = null,
-        @Type(JsonBinaryType::class)
-        @Column(columnDefinition = "jsonb")
-        val params: List<FunctionParamDTO>? = emptyList(),
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
         val testcases: List<TestCaseDTO>,
@@ -77,11 +72,6 @@ class CodingQuestion(
                                 difficulty = difficulty,
                                 driverCode = driverCode,
                                 boilerCode = boilerCode,
-                                functionName = functionName,
-                                returnType = returnType,
-                                params = params?.map { 
-                                    FunctionParamDTO(it.param, it.type)
-                                } ?: emptyList(),
                                 testcases = testcases.map { 
                                     TestCaseDTO(
                                         input = it.input,
@@ -100,9 +90,6 @@ class CodingQuestion(
         override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
                 return CodingReturnDTO(
                         question = this.question,
-                        functionName = this.functionName,
-                        returnType = this.returnType,
-                        params = this.params,
                         language = this.language,
                         hint = this.hint,
                         marks = this.marks,
@@ -130,9 +117,6 @@ class CodingQuestion(
         override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
                 return CodingBankReturnDTO(
                         question = this.question,
-                        functionName = this.functionName,
-                        returnType = this.returnType,
-                        params = this.params,
                         language = this.language,
                         hint = this.hint,
                         marks = this.marks,
@@ -172,9 +156,6 @@ class CodingQuestion(
                                 difficulty = dto.difficulty ?: this.difficulty,
                                 driverCode = dto.driverCode ?: this.driverCode,
                                 boilerCode = dto.boilerCode ?: this.boilerCode,
-                                functionName = dto.functionName ?: this.functionName,
-                                returnType = dto.returnType ?: this.returnType,
-                                params = dto.params ?: this.params,
                                 testcases = dto.testcases ?: this.testcases,
                                 language = dto.language ?: this.language,
                                 answer = dto.answer ?: this.answer

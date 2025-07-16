@@ -11,10 +11,6 @@ import java.util.UUID
 class CodingReturnDTO(
         val question: String,
         override val questionId : UUID?,
-
-        val functionName: String? = null,
-        val returnType: String? = null,
-        val params: List<FunctionParamDTO>? = emptyList(),
         val driverCode: String? = null,
         val language: List<String>? = emptyList()       ,
         val testcases: List<TestCaseDTO>,

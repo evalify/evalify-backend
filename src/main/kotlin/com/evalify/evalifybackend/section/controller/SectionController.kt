@@ -62,16 +62,17 @@ class SectionController(
         }
     }
 
-    @GetMapping("/")
-    fun getQuizSections(@PathVariable quizId: UUID): ResponseEntity<Any> {
+    @GetMapping("")
+    fun getQuizSections(@PathVariable quizId: UUID): ResponseEntity<List<GetSectionDTO>> {
         return try {
+
             val result = sectionService.getSection(quizId)
             ResponseEntity.ok(result)
         } catch (ex: NotFoundException) {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.message)
         } catch (ex: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error")
-        }
+        } as ResponseEntity<List<GetSectionDTO>>
     }
 
     @GetMapping("/{sectionId}")

@@ -59,13 +59,17 @@ class SectionService(
         }
     }
 
-    fun getSection(quizId: UUID) : GetSectionDTO{
+    fun getSection(quizId: UUID) : List<GetSectionDTO>{
         try {
             val quiz = quizRepository.findById(quizId).orElseThrow{ NotFoundException("Quiz with id $quizId not found!") }
             val section = quiz.section
-            return GetSectionDTO(
-                section = section
-            )
+            return section.map{
+                GetSectionDTO(
+                    id = it.id!!,
+                    name = it.name
+                )
+            }
+
         } catch (ex: Exception) {
             logger.error("Error getting section for quizId=$quizId: ${ex.message}", ex)
             throw ex

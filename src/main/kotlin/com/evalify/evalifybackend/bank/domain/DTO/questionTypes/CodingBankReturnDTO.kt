@@ -12,9 +12,6 @@ import java.util.UUID
 class CodingBankReturnDTO(
     val question:String,
     override val questionId : UUID?,
-    val functionName: String?,
-    val returnType: String?,
-    val params: List<FunctionParamDTO>?,
     val language: List<String>?,
     override val hint: String?,
     override val marks: Int,
