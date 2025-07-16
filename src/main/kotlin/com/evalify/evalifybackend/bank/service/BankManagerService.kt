@@ -351,7 +351,7 @@ class BankManagerService(
 
                                                 testcases =
                                                         dto.testcases?.map {
-                                                                TestCaseDTO(it.input, it.expected,it.tags,it.isMinimal,it.language)
+                                                                TestCaseDTO(it.code,it.tags,it.isMinimal,it.language)
                                                         }
                                                                 ?: listOf(),
                                                 language = dto.language,

@@ -87,7 +87,7 @@ class SectionController(
         }
     }
 
-    @PutMapping("/{sectionId}/move")
+    @PostMapping("/{sectionId}/move")
     fun moveSectionQuestions(@PathVariable sectionId: UUID, @RequestBody dto: MoveSectionQuestionDTO): ResponseEntity<Any> {
         return try {
             sectionService.moveQuestions(sectionId, dto.questions, dto.toSectionId)

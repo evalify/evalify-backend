@@ -199,7 +199,7 @@ open class QuizQuestionService(
                 driverCode = dto.driverCode,
                 boilerCode = dto.boilerCode,
 
-                testcases = dto.testcases?.map { TestCaseDTO(it.input, it.expected,it.tags,it.isMinimal,it.language) } ?: listOf(),
+                testcases = dto.testcases?.map { TestCaseDTO(it.code,it.tags,it.isMinimal,it.language) } ?: listOf(),
                 language = dto.language,
                 answer = dto.answer
             )

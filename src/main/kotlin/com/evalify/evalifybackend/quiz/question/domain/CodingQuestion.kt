@@ -74,8 +74,7 @@ class CodingQuestion(
                                 boilerCode = boilerCode,
                                 testcases = testcases.map { 
                                     TestCaseDTO(
-                                        input = it.input,
-                                        expected = it.expected,
+                                        code = it.code,
                                         tags = it.tags,
                                         isMinimal = it.isMinimal,
                                         language = it.language

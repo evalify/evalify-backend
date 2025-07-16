@@ -6,8 +6,7 @@ enum class TestCaseType {
 }
 
 data class TestCaseDTO(
-    val input: List<Any>,
-    val expected: Any,
+    val code : String,
     val tags : TestCaseType,
     val isMinimal : Boolean,
     val language: String,){
