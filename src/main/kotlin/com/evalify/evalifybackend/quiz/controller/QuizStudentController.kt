@@ -23,7 +23,7 @@ import java.time.Instant
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/student/{studentId}")
+@RequestMapping("/api/student/{studentId}/quiz/{quizId}")
 class QuizStudentController(
     private val quizStudentService: QuizStudentService,
     private val quizCacheService: QuizCacheService,
