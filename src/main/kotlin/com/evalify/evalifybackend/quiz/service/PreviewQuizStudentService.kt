@@ -46,6 +46,7 @@ class PreviewQuizStudentService(
         val filteredQuiz: MutableList<PreviewQuizDTO>? = mutableListOf()
 
         allQuizzes.forEach { quiz ->
+            if(quiz.publishQuiz){
             val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
             if (quiz.status == QuizStatus.COMPLETED && completedQuiz == null) {
                     val previewQuizDTO = PreviewQuizDTO(
@@ -92,7 +93,7 @@ class PreviewQuizStudentService(
                 filteredQuiz?.add(previewQuizDTO)
 
             }
-
+        }
         }
         return if (quizStatus == null) filteredQuiz else filteredQuiz?.filter { quiz -> quiz.status == quizStatus }
 
