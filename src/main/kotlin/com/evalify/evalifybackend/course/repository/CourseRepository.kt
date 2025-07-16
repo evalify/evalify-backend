@@ -18,52 +18,21 @@ interface CourseRepository : JpaRepository<Course, UUID> {
     @Query("SELECT c FROM Course c WHERE c.semester.isActive = true")
     fun findCoursesByActiveSemesters(pageable: Pageable): Page<Course>
 
-    /**
-     * Finds courses in active semesters for a specific instructor.
-     *
-     * @param instructor The instructor to find courses for
-     * @param pageable Pagination information
-     * @return Page of courses the instructor is teaching in active semesters
-     */
-    @Query("SELECT DISTINCT c FROM Course c JOIN c.instructors i WHERE c.semester.isActive = true AND i = :instructor")
+    @Query("SELECT c FROM Course c WHERE c.semester.isActive = true AND :instructor MEMBER OF c.instructors")
     fun findCoursesByActiveSemestersAndInstructor(@Param("instructor") instructor: User, pageable: Pageable): Page<Course>
     @Query("SELECT c FROM Course c WHERE c.semester.isActive = true AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.code) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     fun searchCoursesByActiveSemesters(@Param("query") query: String, pageable: Pageable): Page<Course>
 
-    /**
-     * Searches for courses in active semesters for a specific instructor with search criteria.
-     *
-     * @param instructor The instructor to find courses for
-     * @param query The search string to match against course name, code, or description
-     * @param pageable Pagination information
-     * @return Page of matching courses
-     */
-    @Query("""
-        SELECT DISTINCT c FROM Course c 
-        JOIN c.instructors i 
-        WHERE c.semester.isActive = true 
-        AND i = :instructor 
-        AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) 
-        OR LOWER(c.code) LIKE LOWER(CONCAT('%', :query, '%')) 
-        OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')))
-    """)
+    @Query("SELECT c FROM Course c WHERE c.semester.isActive = true AND :instructor MEMBER OF c.instructors AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.code) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     fun searchCoursesByActiveSemestersAndInstructor(@Param("instructor") instructor: User, @Param("query") query: String, pageable: Pageable): Page<Course>
 
-    /**
-     * Finds courses in active semesters for a specific student.
-     *
-     * @param student The student to find courses for
-     * @param pageable Pagination information
-     * @return Page of courses the student is enrolled in active semesters
-     */
-    @Query("SELECT DISTINCT c FROM Course c JOIN c.students s WHERE c.semester.isActive = true AND s = :student")
+    @Query("SELECT c FROM Course c WHERE c.semester.isActive = true AND :student MEMBER OF c.students")
     fun findCoursesByActiveSemestersAndStudent(@Param("student") student: User, pageable: Pageable): Page<Course>
 
     @EntityGraph(attributePaths = ["quiz"])
     @Query("SELECT DISTINCT c FROM Course c JOIN c.instructors i WHERE i IN :instructors")
     fun findAllByInstructors(@Param("instructors") instructors: List<User>): List<Course>
 
-
-    @Query("SELECT DISTINCT c FROM Course c JOIN c.students s WHERE s = :student")
-    fun findAllByStudent(@Param("student") student: User): List<Course>
+    @Query("SELECT c FROM Course c JOIN c.students s WHERE s = :student")
+    fun findCourseByStudent(@Param("student") student: User): List<Course>
 }

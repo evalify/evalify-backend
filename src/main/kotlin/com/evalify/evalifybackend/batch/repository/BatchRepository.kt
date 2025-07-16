@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.batch.repository
 
 import com.evalify.evalifybackend.batch.domain.Batch
+import com.evalify.evalifybackend.user.domain.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -26,4 +27,7 @@ interface BatchRepository : JpaRepository<Batch, UUID>{
     fun searchByNameOrYearContainingIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<Batch>
 
     override fun findAll(pageable: Pageable): Page<Batch>
+
+    @Query("SELECT b FROM Batch b JOIN b.students s WHERE s = :student")
+    fun findBatchByStudent(@Param("student") student: User): Batch?
 }
