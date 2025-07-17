@@ -7,6 +7,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.service.QuizCacheService
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
+import com.evalify.evalifybackend.security.utils.SecurityUtils.getCurrentUserId
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,7 +24,7 @@ import java.time.Instant
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/student/{studentId}/quiz/{quizId}")
+@RequestMapping("/api/student/quiz/{quizId}")
 class QuizStudentController(
     private val quizStudentService: QuizStudentService,
     private val quizCacheService: QuizCacheService,
@@ -31,8 +32,9 @@ class QuizStudentController(
 ) {
 
     @GetMapping("/start")
-    fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
+    fun startQuiz(@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
     : ResponseEntity<QuizQuestionReturnDTO?>{
+        val studentId = getCurrentUserId()?: throw Exception("You are not authorized to access this resource.")
         val requestTime = Instant.now()
         val key = "quiz:$quizId:student:$studentId:questions"
 
@@ -63,7 +65,9 @@ class QuizStudentController(
     }
 
     @PatchMapping("/update")
-    fun updateQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
+    fun updateQuiz(@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null)
+    {
+        val studentId = getCurrentUserId()?: throw Exception("You are not authorized to access this resource.")
         if(responses == null)
         {
             val responses = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
@@ -75,19 +79,25 @@ class QuizStudentController(
     }
 
     @PatchMapping("/updateCache")
-    fun updateCache(@PathVariable studentId: String,@PathVariable quizId: UUID, answer: ResponseDTO){
+    fun updateCache(@PathVariable quizId: UUID, answer: ResponseDTO){
+        val studentId = getCurrentUserId()?: throw Exception("You are not authorized to access this resource.")
+
         quizCacheService.updateCache(quizId,studentId,answer)
 
     }
 
     @PatchMapping("/save")
-    fun saveQuestion(@PathVariable studentId: String,@PathVariable quizId: UUID,answer:ResponseDTO){
+    fun saveQuestion(@PathVariable quizId: UUID,answer:ResponseDTO){
+        val studentId = getCurrentUserId()?: throw Exception("You are not authorized to access this resource.")
+
         quizStudentService.saveQuestion(quizId,studentId,answer)
 
     }
 
     @PatchMapping("/submit")
-    fun submitQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
+    fun submitQuiz(@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
+        val studentId = getCurrentUserId()?: throw Exception("You are not authorized to access this resource.")
+
         if(responses == null)
         {
             val responses = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)

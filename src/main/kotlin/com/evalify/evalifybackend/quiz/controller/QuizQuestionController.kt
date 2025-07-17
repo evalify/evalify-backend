@@ -58,7 +58,7 @@ class QuizQuestionController(val questionService: QuizQuestionService,
     @PostMapping("/{quizId}/addSelectQuestion/")
     fun addBankQuestionToQuiz(
         @PathVariable quizId: UUID,
-        @RequestParam dto : AddBankQuestionDTO
+        @RequestBody dto : AddBankQuestionDTO
     ):ResponseEntity<quizQuestionAddResponse>{
         val userId = SecurityUtils.getCurrentUserId()
         val response = questionService.addSelectQuestions(quizId,dto, userId)
