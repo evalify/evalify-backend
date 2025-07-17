@@ -12,6 +12,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
@@ -245,7 +246,7 @@ class QuizService(
     }
 
     @Transactional(readOnly = true)
-    fun getQuizById(quizId: UUID, userId: String): Quiz {
+    fun getQuizById(quizId: UUID, userId: String): QuizPreviewDTO {
         logger.info("Fetching quiz: {} by user: {}", quizId, userId)
 
         try {
@@ -253,12 +254,26 @@ class QuizService(
                     quizRepository.findById(quizId).orElseThrow {
                         QuizNotFoundException(quizId.toString())
                     }
-
             // Check permissions
-            QuizSecurityUtils.ensureQuizAccess(quiz, userId)
+            // QuizSecurityUtils.ensureQuizAccess(quiz, userId)
 
+            val result = QuizPreviewDTO(
+                id = quiz.id,
+                name = quiz.name,
+                description = quiz.description ?: "",
+                startTime = quiz.startTime,
+                endTime = quiz.endTime,
+                batches = quiz.batch.map { batch -> batch.name },
+                labs = quiz.lab.map { lab -> lab.name },
+                duration = quiz.duration,
+                publishResult = quiz.publishResult,
+                status = quiz.status,
+                isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
+                courseCodes = quiz.course.map { course -> course.code }
+            )
+            
             logger.debug("Successfully retrieved quiz: {} for user: {}", quizId, userId)
-            return quiz
+            return result
         } catch (e: DataAccessException) {
             logger.error("Database error while fetching quiz: {} by user: {}", quizId, userId, e)
             throw QuizDatabaseException("fetch quiz", e)

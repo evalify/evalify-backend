@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnD
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.exception.*
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
@@ -223,7 +224,7 @@ class QuizController(
     }
 
     @GetMapping("/{quizId}")
-    fun getQuiz(@PathVariable quizId: UUID): ResponseEntity<Any> {
+    fun getQuiz(@PathVariable quizId: UUID): ResponseEntity<QuizPreviewDTO> {
         val userId = getCurrentUserId()
         logger.info("Fetching quiz: {} for user: {}", quizId, userId)
 
