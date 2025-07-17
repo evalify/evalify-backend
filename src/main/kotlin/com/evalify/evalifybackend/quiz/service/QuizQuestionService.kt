@@ -1,8 +1,11 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
+import com.evalify.evalifybackend.bank.exception.BankNotFoundException
+import com.evalify.evalifybackend.bank.exception.BankQuestionNotFoundException
 import com.evalify.evalifybackend.bank.repository.BankRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
@@ -18,6 +21,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.AddQuestionsResponse
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quizQuestionAddResponse
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.exception.QuizQuestionNotFoundException
 import com.evalify.evalifybackend.quiz.filter.DifficultyLevelFilter
 import com.evalify.evalifybackend.quiz.filter.ExistingQuestionFilter
 import com.evalify.evalifybackend.quiz.filter.FilterManager
@@ -44,29 +48,28 @@ import java.util.UUID
 
 @Service
 open class QuizQuestionService(
-    val quizRepository: QuizRepository,
-    val bankRepository: BankRepository,
-    val quizQuestionRepository: QuizQuestionRepository,
-    val questionRepository: QuestionRepository,
-    val userRepository: UserRepository,
-    val topicRepo: TopicRepo,
-    val sectionRepository: SectionRepository,
-    private val bankQuestionRepository: BankQuestionRepository
+    private val quizRepository: QuizRepository,
+    private val bankRepository: BankRepository,
+    private val quizQuestionRepository: QuizQuestionRepository,
+    private val questionRepository: QuestionRepository,
+    private val userRepository: UserRepository,
+    private val topicRepo: TopicRepo,
+    private val sectionRepository: SectionRepository,
+    private val bankQuestionRepository: BankQuestionRepository,
+    private val baseQuestionRepository : QuestionRepository
 ) {
 
 
     @Transactional
     open fun addByQuestionByFilters(
         quizId: UUID, topicId: List<UUID>?, difficulty: List<Difficulty>?, noOfQuestion: Int?,
-        questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?,sectionId : UUID
+        questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?
     ): List<BankQuestionsReturnDTO> {
 
         val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
-        val section = sectionRepository.findById(sectionId).orElseThrow{
-            NotFoundException("Quiz with id $sectionId not found")
-        }
+
 
         val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
@@ -299,7 +302,7 @@ open class QuizQuestionService(
         section.quizQuestions.add(quizQuestion)
         sectionRepository.save(section)
     }
-
+    @Transactional
     fun addSelectQuestions(quizId: UUID, dto: AddBankQuestionDTO,userId:String?) : quizQuestionAddResponse {
 
         if(userId == null) throw RuntimeException("User id cannot be null")
@@ -352,6 +355,57 @@ open class QuizQuestionService(
             message = "Question added successfully",
         )
 }
+    @Transactional
+    fun editQuizQuestion(quizId: UUID, questionId: UUID, patchDTO: PatchQuestionDTO, userId: String?) {
+        if (userId == null) throw RuntimeException("User id cannot be null")
+
+        val user = userRepository.findById(userId).orElseThrow {
+            NotFoundException("User with id $userId not found")
+        }
+
+        val quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow{
+            QuizQuestionNotFoundException(questionId.toString())
+        }
+        val baseQuestion = quizQuestion.question
+        val updatedQuestion = baseQuestion.patchWith(patchDTO)
+            ?: throw IllegalArgumentException("Failed to patch question")
+        val savedBaseQuestion = questionRepository.save(updatedQuestion)
+        val updatedQuizQuestion = QuizQuestion(
+            id = questionId,
+            question = savedBaseQuestion,
+            updateBy = user,
+            updatedAt = java.time.Instant.now(),
+            section = quizQuestion.section
+
+        )
+        baseQuestionRepository.save(savedBaseQuestion)
+        quizQuestionRepository.save(updatedQuizQuestion)
+
+    }
+
+    @Transactional
+    fun deleteQuizQuestion(quizId: UUID, questionId: UUID) {
+
+        val quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow{
+            QuizQuestionNotFoundException(questionId.toString())
+        }
+
+        val quizQuestionId = quizQuestion.id ?: throw RuntimeException("Quiz question id cannot be null")
+
+        val section = quizQuestion.section ?: throw RuntimeException("Section cannot be null")
+        section.quizQuestions.removeIf { it.id == quizQuestionId }
+        sectionRepository.save(section)
+
+        val baseQuestionId = quizQuestion.question.id ?: throw RuntimeException("Base question id cannot be null")
+
+        quizQuestionRepository.deleteById(quizQuestionId)
+        baseQuestionRepository.deleteById(baseQuestionId)
+
+
+
+    }
+
+
 }
 
 

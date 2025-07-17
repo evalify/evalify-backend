@@ -9,7 +9,6 @@ data class AddQuestionsToQuizDTO(
     val bankId:List<UUID>?,
     val difficulty:List<Difficulty>?,
     val noOfQuestions:Int,
-    val questionType:List<QuestionTypes>?,
-    val userId: String
+    val questionType:List<QuestionTypes>?
 ) {
 }

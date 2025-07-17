@@ -16,7 +16,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/semester")
-class SemesterController(val semesterService: SemesterService) {
+class SemesterController(private val semesterService: SemesterService) {
 
     @GetMapping
     fun getAllSemesters(

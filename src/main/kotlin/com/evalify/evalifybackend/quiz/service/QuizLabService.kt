@@ -2,10 +2,12 @@ package com.evalify.evalifybackend.quiz.service
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.lab.repository.LabRepository
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
+@Transactional
 class QuizLabService(private val labRepository:LabRepository, private val quizRepository: QuizRepository) {
     fun assignLabToQuiz(quizId:UUID,labId:List<UUID> ){
         val quiz = quizRepository.findById(quizId).orElseThrow{

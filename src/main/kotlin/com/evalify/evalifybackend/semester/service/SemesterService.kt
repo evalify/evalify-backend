@@ -25,8 +25,8 @@ import kotlin.collections.removeAll
 @Transactional
 class SemesterService
     (
-    val semesterRepository: SemesterRepository,
-    val userRepository: UserRepository,
+    private val semesterRepository: SemesterRepository,
+    private val userRepository: UserRepository,
     private val courseRepository: CourseRepository,
     private val batchRepository: BatchRepository
 ) {

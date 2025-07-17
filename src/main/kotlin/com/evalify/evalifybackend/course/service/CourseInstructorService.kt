@@ -16,9 +16,9 @@ import kotlin.collections.plus
 
 @Service
 class CourseInstructorService(
-    val courseRepository: CourseRepository,
-    val userRepository: UserRepository,
-    val semesterRepository: SemesterRepository
+    private val courseRepository: CourseRepository,
+    private val userRepository: UserRepository,
+    private val semesterRepository: SemesterRepository
 
 ) {
     @Transactional

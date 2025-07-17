@@ -15,7 +15,7 @@ import java.util.UUID
 
 @Service
 @Transactional
-class QuizInstructorService(val quizRepository: QuizRepository) {
+class QuizInstructorService(private val quizRepository: QuizRepository) {
 
     /**
      * Retrieves a list of quizzes for a specific course
@@ -62,8 +62,8 @@ class QuizInstructorService(val quizRepository: QuizRepository) {
         }
         val isProtected = !quiz.password.isNullOrEmpty()
         val status: QuizStatus = when{
-            quiz.startTime.isBefore(Instant.now()) -> QuizStatus.UPCOMING
-            quiz.endTime.isAfter(Instant.now()) -> QuizStatus.COMPLETED
+            quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+            quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
             else -> QuizStatus.ACTIVE
         }
         

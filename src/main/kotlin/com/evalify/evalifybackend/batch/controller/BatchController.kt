@@ -27,7 +27,9 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/batch")
-class BatchController(val batchBankService: BatchBankService, val batchService: BatchService) {
+class BatchController(
+    private val batchBankService: BatchBankService,
+    private val batchService: BatchService) {
     @PutMapping("{batchId}/add-bank")
     fun addBankToBatch(@RequestBody bankDto:UpdateBatchBankDTO,@PathVariable batchId:UUID){
         batchBankService.addBank(batchId = batchId, bankId = bankDto.bank)

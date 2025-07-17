@@ -24,7 +24,7 @@ import kotlin.toString
 @Service
 class UserService(
     @Autowired
-    val userRepository: UserRepository,
+    private val userRepository: UserRepository,
 ) {
     fun getAllUsers(page: Int, size: Int, sortBy: String = "name", sortOrder: String = "asc"): PaginatedResponse<UserResponse> {
         val sort = createSort(sortBy, sortOrder)

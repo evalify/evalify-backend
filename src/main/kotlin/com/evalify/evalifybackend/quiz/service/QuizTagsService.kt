@@ -5,10 +5,12 @@ import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
+@Transactional
 class QuizTagsService(
     private val quizTagsRepository: QuizTagsRepository,
     private val semesterRepository: SemesterRepository

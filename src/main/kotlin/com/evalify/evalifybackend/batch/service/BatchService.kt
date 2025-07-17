@@ -25,6 +25,7 @@ import java.util.UUID
 
 
 @Service
+
 class BatchService(
     private val userRepository: UserRepository,
     private val batchRepository: BatchRepository,
