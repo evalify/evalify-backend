@@ -3,7 +3,6 @@ import com.evalify.evalifybackend.batch.repository.BatchRepository
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.student.PreviewQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.student.QuizStatusDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -14,6 +13,7 @@ import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.usewr.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @Transactional
@@ -22,6 +22,62 @@ class PreviewQuizStudentService(
     private val batchRepository: BatchRepository,
     private val quizStudentRepository: QuizStudentRepository,
     private val quizRepository: QuizRepository, private val userRepository: UserRepository) {
+
+    fun getQuizByCourse(courseId: UUID,studentId: String): List<PreviewQuizDTO> {
+        val course = courseRepository.findById(courseId).orElseThrow { NotFoundException("course with id $courseId not found") }
+        println(course)
+        val  courseQuizzes:MutableList<PreviewQuizDTO> = mutableListOf()
+        course.quiz.forEach { quiz -> if(quiz.publishQuiz){
+            val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
+            if (quiz.status == QuizStatus.COMPLETED && completedQuiz == null) {
+                val previewQuizDTO = PreviewQuizDTO(
+                    id = quiz.id,
+                    quizTags = quiz.quizTags.map { quizTags ->
+                        QuizTagsReturnDTO(
+                            quizTags.id,
+                            quizTags.name,
+                            quizTags.description
+                        )
+                    },
+                    instructions = quiz.instructions,
+                    linearQuiz = quiz.linearQuiz,
+                    protected = quiz.password != null,
+                    name = quiz.name,
+                    description = quiz.description,
+                    startTime = quiz.startTime,
+                    endTime = quiz.endTime,
+                    duration = quiz.duration,
+                    status = QuizStatusDTO.MISSED
+                )
+                courseQuizzes.add(previewQuizDTO)
+
+            } else {
+                val previewQuizDTO = PreviewQuizDTO(
+                    id = quiz.id,
+                    quizTags = quiz.quizTags.map { quizTags ->
+                        QuizTagsReturnDTO(
+                            quizTags.id,
+                            quizTags.name,
+                            quizTags.description
+                        )
+                    },
+                    instructions = quiz.instructions,
+                    linearQuiz = quiz.linearQuiz,
+                    protected = quiz.password != null,
+                    name = quiz.name,
+                    description = quiz.description,
+                    startTime = quiz.startTime,
+                    endTime = quiz.endTime,
+                    duration = quiz.duration,
+                    status = QuizStatusDTO.from(quiz.status.toString())
+                )
+                courseQuizzes.add(previewQuizDTO)
+
+            }
+         }
+        }
+        return courseQuizzes
+    }
 
     fun getStudentQuiz(studentId: String,quizStatus: QuizStatusDTO?): List<PreviewQuizDTO>? {
 
