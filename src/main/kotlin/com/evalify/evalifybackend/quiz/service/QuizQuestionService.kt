@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.service
 
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.repository.BankRepository
@@ -58,7 +59,7 @@ open class QuizQuestionService(
     open fun addByQuestionByFilters(
         quizId: UUID, topicId: List<UUID>?, difficulty: List<Difficulty>?, noOfQuestion: Int?,
         questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?,sectionId : UUID
-    ): AddQuestionsResponse {
+    ): List<BankQuestionsReturnDTO> {
 
         val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
@@ -109,35 +110,10 @@ open class QuizQuestionService(
             .take(count)
         val bankQuestionsId = filteredQuestions.map { bankQuestion -> bankQuestion.id }
 
-        filteredQuestions.forEach { bankQuestion ->
 
-            //Creating a quiz question
-            val dupQuestion = bankQuestion.question.copyQuestion()
-
-            //duplicating a question
-            val duplicatedQuestion = questionRepository.save(dupQuestion)
-
-            //creating a quiz question object
-            val quizQuestions = QuizQuestion(
-                question = duplicatedQuestion,
-                section = section,
-                updateBy = user,
-                bankQuestion = bankQuestion
-            )
-            //saving to quiz question table
-            val savedQuizQuestion = quizQuestionRepository.save(quizQuestions)
-            section.quizQuestions.add(savedQuizQuestion)
+        return filteredQuestions.map{bankQuestion ->
+            bankQuestion.question.mapToBankType(bankQuestion.id)
         }
-
-            sectionRepository.save(section)
-
-        return AddQuestionsResponse(
-            quizId = quiz.id,
-            sectionId = sectionId,
-            addedQuestionCount = filteredQuestions.size,
-            addedBankQuestionIds = bankQuestionsId,
-            message = "Questions added successfully"
-        )
     }
 
     fun createQuestion(dto: CreateQuizQuestionDTO): BaseQuestion {

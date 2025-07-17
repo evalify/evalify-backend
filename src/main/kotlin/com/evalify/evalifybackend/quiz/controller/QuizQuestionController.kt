@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.quiz.controller
 
+import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.quiz.domain.DTO.AddQuestionsToQuizDTO
@@ -37,7 +38,7 @@ class QuizQuestionController(val questionService: QuizQuestionService,
 //        @RequestParam(required = false) nofQuestions : Int,
 //        @RequestParam(required = false) questionType : List<QuestionTypes>?,
 //        @RequestParam(required = true) userId : String
-    ): ResponseEntity<AddQuestionsResponse> {
+    ): ResponseEntity<List<BankQuestionsReturnDTO>> {
         val response = questionService.addByQuestionByFilters(quizId = quizId,topicId = addQuestionToQuizDTO.topicId,difficulty = addQuestionToQuizDTO.difficulty,noOfQuestion = addQuestionToQuizDTO.noOfQuestions,
             questionTypes = addQuestionToQuizDTO.questionType,userId = addQuestionToQuizDTO.userId,bankIds = addQuestionToQuizDTO.bankId,sectionId = sectionID)
 
