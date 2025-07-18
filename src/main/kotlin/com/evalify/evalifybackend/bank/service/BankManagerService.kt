@@ -500,7 +500,7 @@ class BankManagerService(
                         BankQuestionNotFoundException(questionId.toString())
                 }
                 val baseQuestion = bankQuestion.question
-                val updatedQuestion = baseQuestion.patchWith(patchDTO)
+                val updatedQuestion = baseQuestion.patchWith(patchDTO,topicRepo)
                         ?: throw IllegalArgumentException("Failed to patch question")
                 val user =
                         userRepository.findById(userId).orElseThrow {

@@ -21,6 +21,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import java.util.UUID
 import com.evalify.evalifybackend.quiz.question.domain.Topic
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import jakarta.persistence.Column
 
 
@@ -93,7 +94,7 @@ abstract class BaseQuestion(
 
     abstract fun getQuestionType(): QuestionTypes
 
-    abstract fun patchWith(dto : PatchQuestionDTO) : BaseQuestion?
+    abstract fun patchWith(dto : PatchQuestionDTO, topicRepo: TopicRepo) : BaseQuestion?
 }
 
 

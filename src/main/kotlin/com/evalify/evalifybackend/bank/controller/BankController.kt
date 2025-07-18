@@ -437,7 +437,7 @@ class BankController(
         val userId = getCurrentUserId()
         logger.info("Editing question: {} in bank: {} by user: {}", questionId, bankId, userId)
 
-        BankValidationUtils.validateEditQuestionData(bankQuestion)
+        //BankValidationUtils.validateEditQuestionData(bankQuestion)
         bankManagerService.editBankQuestion(bankQuestion, questionId, userId, bankId)
 
         logger.info("Successfully updated question: {} in bank: {}", questionId, bankId)

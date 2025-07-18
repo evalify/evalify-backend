@@ -12,6 +12,7 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.TrueFalseDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -112,21 +113,27 @@ class TrueFalse(
         return QuestionTypes.TRUEFALSE
     }
 
-    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
-        val patchedQuestion =
-                TrueFalse(
-                        id = this.id,
-                        question = dto.question ?: this.question,
-                        bank = this.bank,
-                        topic = dto.topic ?: this.topic,
-                        explanation = dto.explanation ?: this.explanation,
-                        hint = dto.hint ?: this.hint,
-                        marks = dto.marks ?: this.marks,
-                        bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
-                        co = dto.co ?: this.co,
-                        difficulty = dto.difficulty ?: this.difficulty,
-                        answer = dto.trueFalseAnswer ?: this.answer
-                )
+    override fun patchWith(dto: PatchQuestionDTO, topicRepo: TopicRepo): BaseQuestion? {
+        val finalTopics = if (!dto.topic.isNullOrEmpty()) {
+            topicRepo.findAllById(dto.topic)
+        } else {
+            null
+        }
+
+        val patchedQuestion = TrueFalse(
+            id = this.id,
+            question = dto.question ?: this.question,
+            bank = this.bank,
+            topic = finalTopics ?: this.topic,
+            explanation = dto.explanation ?: this.explanation,
+            hint = dto.hint ?: this.hint,
+            marks = dto.marks ?: this.marks,
+            bloomsTaxonomy = dto.bloomsTaxonomy ?: this.bloomsTaxonomy,
+            co = dto.co ?: this.co,
+            difficulty = dto.difficulty ?: this.difficulty,
+            answer = dto.trueFalseAnswer ?: this.answer
+        )
         return patchedQuestion
     }
+
 }

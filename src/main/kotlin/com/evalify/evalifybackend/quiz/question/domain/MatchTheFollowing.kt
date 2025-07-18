@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchShuffleDTO
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.Pair
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
@@ -130,13 +131,18 @@ class MatchTheFollowing(
         return QuestionTypes.MATCH_THE_FOLLOWING
     }
 
-    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+    override fun patchWith(dto: PatchQuestionDTO,topicRepo: TopicRepo): BaseQuestion? {
+        val finalTopics = if (!dto.topic.isNullOrEmpty()) {
+            topicRepo.findAllById(dto.topic)
+        } else {
+            null
+        }
         val patchedQuestion =
                 MatchTheFollowing(
                         id = this.id,
                         question = dto.question ?: this.question,
                         bank = this.bank,
-                        topic = dto.topic ?: this.topic,
+                        topic = finalTopics ?: this.topic,
                         explanation = dto.explanation ?: this.explanation,
                         hint = dto.hint ?: this.hint,
                         marks = dto.marks ?: this.marks,

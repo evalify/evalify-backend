@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.CodingReturnDTO
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -139,13 +140,20 @@ class CodingQuestion(
                 )
         }
 
-        override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+        override fun patchWith(dto: PatchQuestionDTO,topicRepo: TopicRepo): BaseQuestion? {
+                val finalTopics = if (!dto.topic.isNullOrEmpty()) {
+                        topicRepo.findAllById(dto.topic)
+                } else {
+                        null
+                }
+
+
                 val patchedQuestion =
                         CodingQuestion(
                                 id = this.id,
                                 question = dto.question ?: this.question,
                                 bank = this.bank,
-                                topic = dto.topic ?: this.topic,
+                                topic = finalTopics?: this.topic,
                                 explanation = dto.explanation ?: this.explanation,
                                 hint = dto.hint ?: this.hint,
                                 marks = dto.marks ?: this.marks,

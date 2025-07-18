@@ -8,6 +8,7 @@ import com.evalify.evalifybackend.quiz.question.domain.FillUp.blanks
 import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
 import com.evalify.evalifybackend.quiz.question.domain.MatchPair
 import com.evalify.evalifybackend.quiz.question.domain.Topic
+import java.util.UUID
 
 data class PatchQuestionDTO(
     val question: String? = null,
@@ -36,5 +37,5 @@ data class PatchQuestionDTO(
     val guidelines: String? = null,
     val keys: MutableList<MatchPair>? = null,
     val trueFalseAnswer: Boolean? = null,
-    val topic : MutableList<Topic>? = mutableListOf()
+    val topic : List<UUID>? = emptyList()
 )

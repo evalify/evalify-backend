@@ -13,6 +13,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BlanksDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.FillUpsReturnDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -129,12 +130,17 @@ class FillUp(
         return QuestionTypes.FILL_UP
     }
 
-    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+    override fun patchWith(dto: PatchQuestionDTO,topicRepo: TopicRepo): BaseQuestion? {
+            val finalTopics = if (!dto.topic.isNullOrEmpty()) {
+                    topicRepo.findAllById(dto.topic)
+            } else {
+                    null
+            }
         val patchedQuestion =
                 FillUp(
                         id = this.id,
                         bank = this.bank,
-                        topic = dto.topic ?: this.topic,
+                        topic = finalTopics?: this.topic,
                         question = dto.question ?: this.question,
                         explanation = dto.explanation ?: this.explanation,
                         hint = dto.hint ?: this.hint,

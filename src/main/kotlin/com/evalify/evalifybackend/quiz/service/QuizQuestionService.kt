@@ -367,7 +367,7 @@ open class QuizQuestionService(
             QuizQuestionNotFoundException(questionId.toString())
         }
         val baseQuestion = quizQuestion.question
-        val updatedQuestion = baseQuestion.patchWith(patchDTO)
+        val updatedQuestion = baseQuestion.patchWith(patchDTO,topicRepo)
             ?: throw IllegalArgumentException("Failed to patch question")
         val savedBaseQuestion = questionRepository.save(updatedQuestion)
         val updatedQuizQuestion = QuizQuestion(

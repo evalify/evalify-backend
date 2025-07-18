@@ -53,7 +53,7 @@ object BankValidationUtils {
     fun validateEditQuestionData(dto: PatchQuestionDTO) {
         validateQuestionTitle(dto.question)
         validateQuestionDescription(dto.explanation)
-        validateTopicIds(dto.topic?.map { it.id } ?: emptyList())
+        //validateTopicIds(dto.topic?.map { it.id } ?: emptyList())
     }
 
     private fun validateBankName(name: String?) {

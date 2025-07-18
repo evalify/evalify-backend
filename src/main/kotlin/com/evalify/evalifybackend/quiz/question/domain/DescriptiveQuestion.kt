@@ -11,6 +11,7 @@ import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.DescriptiveReturnDTO
+import com.evalify.evalifybackend.topic.repository.TopicRepo
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import java.util.UUID
@@ -116,13 +117,18 @@ class DescriptiveQuestion(
         return QuestionTypes.DESCRIPTIVE
     }
 
-    override fun patchWith(dto: PatchQuestionDTO): BaseQuestion? {
+    override fun patchWith(dto: PatchQuestionDTO,topicRepo: TopicRepo): BaseQuestion? {
+            val finalTopics = if (!dto.topic.isNullOrEmpty()) {
+                    topicRepo.findAllById(dto.topic)
+            } else {
+                    null
+            }
         val patchedQuestion =
                 DescriptiveQuestion(
                         id = this.id,
                         question = dto.question ?: this.question,
                         bank = this.bank,
-                        topic = dto.topic ?: this.topic,
+                        topic = finalTopics ?: this.topic,
                         explanation = dto.explanation ?: this.explanation,
                         hint = dto.hint ?: this.hint,
                         marks = dto.marks ?: this.marks,
