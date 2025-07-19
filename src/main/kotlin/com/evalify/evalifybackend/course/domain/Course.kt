@@ -31,14 +31,34 @@ enum class CourseType {
     @ManyToOne(fetch = FetchType.LAZY)
     val semester: Semester,
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "course_student",
+        joinColumns = [JoinColumn(name="course_id")],
+        inverseJoinColumns = [JoinColumn(name="student_id")]
+    )
     val students: MutableList<User> = mutableListOf(),
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "course_instructor",
+        joinColumns = [JoinColumn(name="course_id")],
+        inverseJoinColumns = [JoinColumn(name="instructor_id")]
+    )
     val instructors: MutableList<User> = mutableListOf(),
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "course_batch",
+        joinColumns = [JoinColumn(name="course_id")],
+        inverseJoinColumns = [JoinColumn(name="batch_id")]
+    )
     val batches: MutableList<Batch> = mutableListOf(),
 
-    @ManyToMany(mappedBy = "course")
+    @ManyToMany
+    @JoinTable(
+        name = "course_quiz",
+        joinColumns = [JoinColumn(name="course_id")],
+        inverseJoinColumns = [JoinColumn(name="quiz_id")]
+    )
      val quiz: List<Quiz> = listOf(),
 
     @ManyToMany

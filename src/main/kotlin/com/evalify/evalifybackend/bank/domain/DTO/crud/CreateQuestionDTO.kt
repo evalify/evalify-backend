@@ -10,7 +10,9 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
 import java.util.UUID
 
-data class CreateQuestionDTO(
+data class
+
+CreateQuestionDTO(
     val type: QuestionTypes,
     val question: String,
     val topicIds: List<UUID>? = emptyList(),

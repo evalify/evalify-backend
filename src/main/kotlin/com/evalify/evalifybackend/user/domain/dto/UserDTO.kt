@@ -32,3 +32,9 @@ data class UpdateUserRequest(
     val phoneNumber: String,
     val isActive: Boolean
 )
+
+data class UserInfo(
+    val id: String?,
+    val name: String,
+    val email: String
+)
