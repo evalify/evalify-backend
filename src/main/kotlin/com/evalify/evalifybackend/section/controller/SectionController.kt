@@ -19,6 +19,19 @@ import org.springframework.web.bind.annotation.RequestBody
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import org.springframework.web.bind.annotation.RequestMapping
 
+/**
+ * Controller managing quiz sections and their organization.
+ *
+ * Use Cases:
+ * - Creating and managing quiz sections
+ * - Organizing questions within sections
+ * - Moving questions between sections
+ * - Section-level configurations and settings
+ * - Managing section structure and hierarchy
+ *
+ * This controller handles the organization and management of quiz sections,
+ * allowing for structured question grouping and organization within quizzes.
+ */
 @RestController()
 @RequestMapping("/api/quiz/{quizId}/section")
 class SectionController(
@@ -26,6 +39,20 @@ class SectionController(
     private val sectionService: SectionService
 ) {
 
+    /**
+     * Creates a new section within a quiz.
+     *
+     * Use Cases:
+     * - Organizing quiz questions into logical groups
+     * - Creating topic-based sections
+     * - Structuring quiz content
+     * - Managing question difficulty progression
+     *
+     * @param quizId UUID of the quiz to add the section to
+     * @param dto CreateSectionDTO containing section details
+     * @return ResponseEntity with creation confirmation
+     * @throws NotFoundException if quiz doesn't exist
+     */
     @PostMapping
     fun createSection(@PathVariable quizId: UUID, @RequestBody dto: CreateSectionDTO): ResponseEntity<Any> {
         return try {
@@ -87,6 +114,20 @@ class SectionController(
         }
     }
 
+    /**
+     * Moves questions between sections within a quiz.
+     *
+     * Use Cases:
+     * - Reorganizing quiz structure
+     * - Adjusting question order
+     * - Managing section content
+     * - Optimizing quiz flow
+     *
+     * @param sectionId UUID of the section containing questions to move
+     * @param dto MoveSectionQuestionDTO containing movement details
+     * @return ResponseEntity with movement confirmation
+     * @throws NotFoundException if section or questions don't exist
+     */
     @PostMapping("/{sectionId}/move")
     fun moveSectionQuestions(@PathVariable sectionId: UUID, @RequestBody dto: MoveSectionQuestionDTO): ResponseEntity<Any> {
         return try {

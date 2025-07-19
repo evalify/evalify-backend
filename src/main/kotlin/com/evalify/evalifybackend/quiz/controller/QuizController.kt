@@ -42,6 +42,22 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * Main controller for quiz management and operations.
+ *
+ * Use Cases:
+ * - Creating and configuring new quizzes
+ * - Managing quiz settings and properties
+ * - Handling quiz permissions and access control
+ * - Managing quiz questions and structure
+ * - Quiz sharing and distribution
+ * - Quiz state management (draft, published, closed)
+ * - Integration with courses and labs
+ *
+ * This controller serves as the primary interface for quiz management,
+ * coordinating between different services for quiz creation, modification,
+ * and administration.
+ */
 @RestController
 @RequestMapping("/api/quiz")
 class QuizController(

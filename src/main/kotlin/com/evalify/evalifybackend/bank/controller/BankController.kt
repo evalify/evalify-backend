@@ -49,6 +49,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * Controller responsible for managing question banks in the evaluation system.
+ *
+ * Use Cases:
+ * - Creating and managing question banks for storing reusable questions
+ * - Organizing questions by topics within banks
+ * - Managing bank access permissions and sharing
+ * - Handling bank-related exceptions and access control
+ *
+ * This controller serves as the main interface for question bank operations,
+ * working with BankService for business logic and BankTopicService for topic management.
+ */
 @RestController
 @RequestMapping("/api/bank")
 class BankController(

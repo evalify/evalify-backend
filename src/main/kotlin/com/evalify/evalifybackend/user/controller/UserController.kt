@@ -16,6 +16,22 @@ import java.util.UUID
 @RequestMapping("/api/user")
 class UserController (private val userService: UserService)
 {
+    /**
+     * Retrieves all users with optional filtering and pagination.
+     *
+     * Use Cases:
+     * - User management and administration
+     * - Role-based user listing
+     * - User search and filtering
+     * - System user overview
+     *
+     * @param role Optional role to filter users by
+     * @param page Page number for pagination (0-based)
+     * @param size Number of items per page
+     * @param sort_by Field to sort results by
+     * @param sort_order Direction of sort (asc/desc)
+     * @return ResponseEntity containing paginated user list
+     */
     @GetMapping
     fun getAllUsers(
         @RequestParam(required = false) role: String?,
@@ -102,6 +118,18 @@ class UserController (private val userService: UserService)
                 .body(mapOf("message" to "Failed to delete user: ${e.message}"))        }    }
 
 
+    /**
+     * Creates multiple users in a single operation.
+     *
+     * Use Cases:
+     * - Batch user creation
+     * - User import from external systems
+     * - Mass enrollment processing
+     * - System initialization
+     *
+     * @param users List of User objects to create
+     * @return ResponseEntity containing the created users
+     */
     @PostMapping("/bulk")
     fun createUsers(@RequestBody users: List<User>): ResponseEntity<List<User>>{
         return ResponseEntity(
@@ -149,6 +177,18 @@ fun deleteUsers(@RequestBody users: List<String>): ResponseEntity<Any> {
         }
     }
 
+    /**
+     * Searches for faculty members based on search criteria.
+     *
+     * Use Cases:
+     * - Faculty lookup
+     * - Course instructor assignment
+     * - Faculty management
+     * - Department organization
+     *
+     * @param query Search string to filter faculty members
+     * @return ResponseEntity containing matching faculty members
+     */
     @GetMapping("/faculty/search")
     fun searchFaculty(
         @RequestParam query: String

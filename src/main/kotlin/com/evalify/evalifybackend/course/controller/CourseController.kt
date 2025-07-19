@@ -22,7 +22,20 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
+/**
+ * Controller managing course-related operations and configurations.
+ * 
+ * Use Cases:
+ * - Course creation and management
+ * - Student enrollment and management
+ * - Course instructor assignment
+ * - Batch management within courses
+ * - Course-specific resource management
+ * - Student-instructor relationship management
+ *
+ * This controller serves as the primary interface for course management,
+ * handling course creation, student enrollment, and related operations.
+ */
 @RestController
 @RequestMapping("/api/course")
 class CourseController(
@@ -42,6 +55,18 @@ class CourseController(
                 .body(null)
         }
     }
+    /**
+     * Retrieves all instructors assigned to a specific course.
+     *
+     * Use Cases:
+     * - Course staff management
+     * - Instructor assignment overview
+     * - Course administration
+     * - Teaching team coordination
+     *
+     * @param courseId The UUID of the course to get instructors for
+     * @return ResponseEntity containing list of course instructors
+     */
     @GetMapping("/{courseId}/instructors")
     fun getCourseInstructors(
         @PathVariable courseId: UUID
@@ -96,7 +121,20 @@ class CourseController(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
         }
-    }    @PutMapping("/{courseId}/assign-students")
+    }    /**
+     * Enrolls multiple students in a course.
+     *
+     * Use Cases:
+     * - Course enrollment management
+     * - Batch student registration
+     * - Class roster updates
+     * - Student access provision
+     *
+     * @param courseId The UUID of the course to enroll students in
+     * @param studentIds List of student IDs to enroll
+     * @return ResponseEntity with enrollment status
+     */
+    @PutMapping("/{courseId}/assign-students")
     fun assignStudentsToCourses(@PathVariable courseId: UUID, @RequestBody studentIds: List<String>): ResponseEntity<Any> {
         return try {
             courseService.assignStudents(courseId, studentIds)

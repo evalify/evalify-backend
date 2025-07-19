@@ -8,12 +8,37 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
+/**
+ * Controller managing quiz tags and categorization.
+ *
+ * Use Cases:
+ * - Managing semester-specific quiz tags
+ * - Creating and updating tag metadata
+ * - Organizing quizzes through tagging
+ * - Tag-based quiz categorization
+ * - Managing tag hierarchies and relationships
+ *
+ * This controller handles the organization and management of quiz tags,
+ * facilitating quiz categorization and organization within semesters.
+ */
 @RestController
 @RequestMapping("/api/")
 class QuizTagsController(
     private val quizTagsService: QuizTagsService,
     private val semesterRepository: SemesterRepository
 ) {
+    /**
+     * Retrieves all tags associated with a specific semester.
+     *
+     * Use Cases:
+     * - Displaying available quiz categories
+     * - Tag-based quiz filtering
+     * - Managing semester organization
+     * - Quiz discovery and navigation
+     *
+     * @param semesterId UUID of the semester to get tags for
+     * @return ResponseEntity with list of QuizTagsReturnDTO
+     */
     @GetMapping("semester/{semesterId}/tags")
     fun getTagsBySemesterId(@PathVariable semesterId: UUID
     ):ResponseEntity<List<QuizTagsReturnDTO>>{
@@ -23,6 +48,21 @@ class QuizTagsController(
         )
 
     }
+    /**
+     * Creates new tags for a specific semester.
+     *
+     * Use Cases:
+     * - Organizing quizzes by topics
+     * - Creating course-specific categorization
+     * - Managing quiz metadata
+     * - Facilitating quiz discovery
+     *
+     * @param semesterId UUID of the semester to create tags for
+     * @param name Name of the new tag
+     * @param description Optional description of the tag
+     * @return ResponseEntity with creation status
+     * @throws Exception if tag creation fails
+     */
     @PostMapping("semester/{semesterId}/tags")
     fun createTags(
         @PathVariable semesterId: UUID,

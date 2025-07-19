@@ -19,6 +19,20 @@ class BlobController @Autowired constructor(
      * @param customName Optional custom name for the file
      * @return The object name (key) and URL in Minio
      */
+    /**
+     * Uploads a file to Minio object storage.
+     *
+     * Use Cases:
+     * - Uploading quiz attachments and resources
+     * - Storing student submission files
+     * - Managing course materials and documents
+     * - Handling media files for questions
+     *
+     * @param file The MultipartFile to be uploaded
+     * @param customName Optional custom name for the stored file
+     * @return ResponseEntity containing the object name and URL in Minio storage
+     * @throws IllegalArgumentException if file validation fails
+     */
     @PostMapping("/upload")
     fun uploadFile(
         @RequestParam("file") file: MultipartFile,
@@ -43,6 +57,18 @@ class BlobController @Autowired constructor(
     /**
      * Delete a file from Minio storage
      * @param objectName The name of the object to delete
+     */
+    /**
+     * Deletes a file from Minio object storage.
+     *
+     * Use Cases:
+     * - Removing outdated quiz resources
+     * - Cleaning up temporary files
+     * - Managing storage space
+     * - Handling file version updates
+     *
+     * @param objectName The unique identifier of the file to be deleted
+     * @return ResponseEntity with success message or error details
      */
     @DeleteMapping("/delete")
     fun deleteFile(@RequestParam("objectName") objectName: String): ResponseEntity<Map<String, String>> {

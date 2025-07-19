@@ -17,7 +17,17 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 /**
- * Controller for instructor-specific quiz operations
+ * Controller handling instructor-specific quiz operations and management.
+ *
+ * Use Cases:
+ * - Managing course-specific quizzes
+ * - Updating quiz configurations and settings
+ * - Viewing and managing quizzes created by the instructor
+ * - Monitoring quiz status and progress
+ * - Course-specific quiz administration
+ *
+ * This controller provides functionality specific to instructors for managing
+ * and monitoring quizzes within their courses.
  */
 @RestController
 @RequestMapping("/api/quiz")

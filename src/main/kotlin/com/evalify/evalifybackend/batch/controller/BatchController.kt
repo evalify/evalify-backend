@@ -30,6 +30,18 @@ import java.util.UUID
 class BatchController(
     private val batchBankService: BatchBankService,
     private val batchService: BatchService) {
+    /**
+     * Associates a question bank with a batch.
+     *
+     * Use Cases:
+     * - Connecting question resources to batches
+     * - Managing batch-specific content
+     * - Resource organization by batch
+     * - Question bank access control
+     *
+     * @param bankDto DTO containing the bank information to add
+     * @param batchId The UUID of the batch to add the bank to
+     */
     @PutMapping("{batchId}/add-bank")
     fun addBankToBatch(@RequestBody bankDto:UpdateBatchBankDTO,@PathVariable batchId:UUID){
         batchBankService.addBank(batchId = batchId, bankId = bankDto.bank)
@@ -53,6 +65,18 @@ class BatchController(
     }
 
 
+    /**
+     * Adds multiple students to a batch.
+     *
+     * Use Cases:
+     * - Batch student enrollment
+     * - Class roster management
+     * - Student group organization
+     * - Access control management
+     *
+     * @param userIds List of student IDs to add to the batch
+     * @param batchId The UUID of the batch to add students to
+     */
     @PutMapping("/{batchId}/add-students")
     fun addStudents(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.addStudentsToBatch(batchId, userIds)
@@ -63,6 +87,18 @@ class BatchController(
         batchService.removeStudentsFromBatch(batchId, userIds)
     }
 
+    /**
+     * Associates multiple semesters with a batch.
+     *
+     * Use Cases:
+     * - Academic term planning
+     * - Curriculum organization
+     * - Semester-batch mapping
+     * - Academic progression tracking
+     *
+     * @param semesterIds List of semester UUIDs to add to the batch
+     * @param batchId The UUID of the batch to associate semesters with
+     */
     @PutMapping("/{batchId}/add-semesters")
     fun addSemesters(@RequestBody semesterIds: List<UUID>, @PathVariable batchId: UUID) {
         batchService.addSemestersToBatches(batchId, semesterIds)
@@ -73,6 +109,18 @@ class BatchController(
         batchService.removeSemestersFromBatch(batchId, semesterIds)
     }
 
+    /**
+     * Assigns managers to a batch.
+     *
+     * Use Cases:
+     * - Batch administration setup
+     * - Management role assignment
+     * - Batch oversight configuration
+     * - Administrative access control
+     *
+     * @param userIds List of manager user IDs to assign
+     * @param batchId The UUID of the batch to assign managers to
+     */
     @PutMapping("/{batchId}/assign-managers")
     fun assignManagers(@RequestBody userIds: List<String>, @PathVariable batchId: UUID) {
         batchService.addManagersToBatch(batchId, userIds)
