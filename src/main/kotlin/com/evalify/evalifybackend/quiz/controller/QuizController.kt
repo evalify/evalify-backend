@@ -295,6 +295,16 @@ class QuizController(
 //        logger.debug("Retrieved {} questions by topics for quiz: {}", result.size, quizId)
 //        return ResponseEntity.ok(result)
 //    }
+    @GetMapping("/{quizId}/questions/{questionId}")
+fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQuestionsReturnDTO>
+{
+    val userId = getCurrentUserId()
+    logger.info("Fetching questions for quiz: {} by user: {}", questionId, userId)
+    val result = quizService.getQuizQuestionById(questionId)
+    logger.info("Successfully retrieved questions for quiz: {} by user: {}", questionId, userId)
+    return ResponseEntity.ok(result)
+
+}
 
     @PostMapping("/{quizId}/add-student")
     fun addStudent(

@@ -7,8 +7,10 @@ import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.lab.repository.LabRepository
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
+import com.evalify.evalifybackend.questions.exception.QuestionNotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.criteria.PermutationsDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.criteria.SelectionCriteriaDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
@@ -27,6 +29,7 @@ import com.evalify.evalifybackend.quiz.exception.QuizDatabaseException
 import com.evalify.evalifybackend.quiz.exception.QuizNotFoundException
 import com.evalify.evalifybackend.quiz.exception.QuizValidationException
 import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
+import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
@@ -59,6 +62,7 @@ class QuizService(
     private val quizTagsRepository: QuizTagsRepository,
     private val semesterRepository: SemesterRepository,
     private val sectionRepository: SectionRepository,
+    private val quizQuestionRepository: QuizQuestionRepository,
 ) {
 
     private val logger by logger()
@@ -650,6 +654,15 @@ class QuizService(
             baseQuestion.mapToBankType(quizQuestion.id)
         }
         return result
+
+    }
+
+    fun getQuizQuestionById(questionId : UUID) : BankQuestionsReturnDTO
+    {
+        val quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow{ QuizNotFoundException(questionId.toString())}
+        val baseQuestion =quizQuestion.question.mapToBankType(questionId)
+
+        return baseQuestion
 
     }
 }
