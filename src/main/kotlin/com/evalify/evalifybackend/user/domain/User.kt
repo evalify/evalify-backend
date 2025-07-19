@@ -23,7 +23,7 @@ class User (
     var profileId: String? = null,
     var password: String? = null,
     var image: String? = null,
-    @Enumerated(EnumType.STRING)
+    //@Enumerated(EnumType.STRING)
     var role: Role,
     var phoneNumber: String,
     var isActive: Boolean = true,

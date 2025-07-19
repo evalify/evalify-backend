@@ -34,7 +34,9 @@ class CourseStudentService(
                 courseName = course.name,
                 courseCode = course.code,
                 noOfQuizzes = course.quiz.size,
-                instructors = instructors
+                instructors = instructors,
+                semesterId = course.semester.id,
+                semesterName = course.semester.name
             )
         }
 

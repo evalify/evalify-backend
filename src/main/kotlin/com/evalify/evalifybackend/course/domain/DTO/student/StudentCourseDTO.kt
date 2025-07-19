@@ -8,5 +8,8 @@ data class StudentCourseDTO(
     val courseName: String,
     val courseCode: String,
     val noOfQuizzes: Int,
-    val instructors: List<UserInfo>
+    val instructors: List<UserInfo>,
+    val semesterId: UUID?,
+    val semesterName: String
+
 )
