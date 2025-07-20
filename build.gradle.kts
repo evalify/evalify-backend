@@ -41,6 +41,9 @@ dependencies {
 
 	//VJson
 	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
+	//keycloak
+	implementation("org.keycloak:keycloak-admin-client:26.0.6")
 }
 
 kotlin {
