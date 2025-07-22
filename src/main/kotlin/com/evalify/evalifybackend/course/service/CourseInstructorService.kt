@@ -33,7 +33,7 @@ class CourseInstructorService(
 
 
         // Find courses where this user is an instructor
-        val instructorCourses: List<Course> = courseRepository.findAllByInstructor(instructor)
+        val instructorCourses: List<Course> = courseRepository.findAllByInstructors(listOf(instructor))
 
         // Find semesters managed by this instructor
         val managerCourses = mutableListOf<Course>()
@@ -70,7 +70,7 @@ class CourseInstructorService(
         val instructor: User = userRepository.findById(instructorId).orElseThrow{ NotFoundException("Instructor with ID $instructorId not found") }
 
         // Find courses where this user is an instructor
-        val instructorCourses: List<Course> = courseRepository.findAllByInstructor(instructor)
+        val instructorCourses: List<Course> = courseRepository.findAllByInstructors(listOf(instructor))
         println(instructorCourses.size)
         println("logging....")
 

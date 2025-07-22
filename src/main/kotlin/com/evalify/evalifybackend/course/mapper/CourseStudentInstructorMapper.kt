@@ -31,7 +31,6 @@ class CourseStudentInstructorMapper {
                     it.name,
                     it.email,
                     it.phoneNumber,
-                    it.isActive,
                     it.image,
                     batch.id
                 )
@@ -45,7 +44,6 @@ class CourseStudentInstructorMapper {
             user.name,
             user.email,
             user.phoneNumber,
-            user.isActive,
             user.image,
             batchId
         )
