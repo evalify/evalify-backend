@@ -39,7 +39,7 @@ import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import java.util.*
 import kotlin.String
 import kotlin.time.DurationUnit

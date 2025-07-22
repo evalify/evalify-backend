@@ -1,11 +1,10 @@
 package com.evalify.evalifybackend.course.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
-import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.course.domain.DTO.CourseSemesterDTO
 import com.evalify.evalifybackend.course.domain.DTO.CourseStudentPreviewDTO
 import com.evalify.evalifybackend.course.repository.CourseRepository
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 

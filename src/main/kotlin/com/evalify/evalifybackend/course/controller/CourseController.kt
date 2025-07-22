@@ -2,13 +2,10 @@ package com.evalify.evalifybackend.course.controller
 import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.core.pagination.PaginatedResponse
-import com.evalify.evalifybackend.course.domain.DTO.AssignUserDTO
 import com.evalify.evalifybackend.course.domain.DTO.CourseResponse
-import com.evalify.evalifybackend.course.domain.DTO.UpdateCourseBatchDTO
-import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.course.service.CourseService
 import com.evalify.evalifybackend.user.domain.dto.UserResponse
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping

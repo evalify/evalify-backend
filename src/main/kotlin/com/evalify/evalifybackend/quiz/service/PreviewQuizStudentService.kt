@@ -10,7 +10,7 @@ import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
 import com.evalify.evalifybackend.user.domain.User
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
