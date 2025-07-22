@@ -41,7 +41,7 @@ import com.evalify.evalifybackend.quiz.question.domain.MatchTheFollowing
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID

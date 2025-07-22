@@ -3,7 +3,7 @@ package com.evalify.evalifybackend.user.service
 import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import io.lettuce.core.KillArgs.Builder.user
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.admin.client.KeycloakBuilder

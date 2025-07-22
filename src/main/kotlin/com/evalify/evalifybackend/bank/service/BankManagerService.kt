@@ -1,11 +1,9 @@
 package com.evalify.evalifybackend.bank.service
 
-import com.evalify.evalifybackend.bank.domain.DTO.AccessDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankDetailsDTO
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.CreateQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
-import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.bank.exception.BankNotFoundException
@@ -35,7 +33,7 @@ import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
 import com.evalify.evalifybackend.quiz.question.repository.BankQuestionRepository
 import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID

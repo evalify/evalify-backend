@@ -10,16 +10,13 @@ import com.evalify.evalifybackend.semester.domain.DTO.SemesterRequest
 import com.evalify.evalifybackend.semester.domain.DTO.SemesterResponse
 import com.evalify.evalifybackend.semester.domain.Semester
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import kotlin.code
-import kotlin.collections.addAll
-import kotlin.collections.removeAll
 
 @Service
 @Transactional

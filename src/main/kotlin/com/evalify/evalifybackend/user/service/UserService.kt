@@ -8,7 +8,7 @@ import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.domain.dto.CreateUserRequest
 import com.evalify.evalifybackend.user.domain.dto.UpdateUserRequest
 import com.evalify.evalifybackend.user.domain.dto.UserResponse
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -17,9 +17,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
 import java.time.Instant
-import java.util.UUID
-import kotlin.random.Random
-import kotlin.toString
 
 @Service
 class UserService(

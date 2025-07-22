@@ -19,7 +19,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
 import com.evalify.evalifybackend.quiz.question.domain.bankQuestion.BankQuestion
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID

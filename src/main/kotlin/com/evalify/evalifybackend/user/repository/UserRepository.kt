@@ -1,14 +1,12 @@
-package com.evalify.evalifybackend.usewr.repository
+package com.evalify.evalifybackend.user.repository
 import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
-import com.evalify.evalifybackend.user.domain.dto.UserResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
-import java.util.UUID
 
 @RepositoryRestResource(path = "user")
 interface UserRepository : JpaRepository<User, String> {

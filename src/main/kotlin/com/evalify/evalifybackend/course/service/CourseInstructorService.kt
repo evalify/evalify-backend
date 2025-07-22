@@ -6,11 +6,9 @@ import com.evalify.evalifybackend.course.domain.DTO.CourseInstructorSemesterDTO
 import com.evalify.evalifybackend.course.repository.CourseRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.user.domain.User
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import java.util.Optional
-import java.util.UUID
 import kotlin.collections.distinctBy
 import kotlin.collections.plus
 

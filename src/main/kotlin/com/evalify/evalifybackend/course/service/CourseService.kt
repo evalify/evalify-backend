@@ -12,16 +12,12 @@ import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.domain.dto.UserResponse
 import com.evalify.evalifybackend.user.service.toUserResponse
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import kotlin.collections.addAll
-import kotlin.collections.removeAll
-import kotlin.div
-import kotlin.text.toInt
 
 @Service
 class CourseService(

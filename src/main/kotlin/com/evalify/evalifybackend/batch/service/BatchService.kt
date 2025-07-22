@@ -14,7 +14,7 @@ import com.evalify.evalifybackend.semester.domain.Semester
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.user.domain.dto.UserResponse
 import com.evalify.evalifybackend.user.service.toUserResponse
-import com.evalify.evalifybackend.usewr.repository.UserRepository
+import com.evalify.evalifybackend.user.repository.UserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
