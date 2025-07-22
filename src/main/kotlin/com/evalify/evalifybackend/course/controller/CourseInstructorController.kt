@@ -2,6 +2,7 @@ package com.evalify.evalifybackend.course.controller
 
 import com.evalify.evalifybackend.core.exception.UnauthorizedException
 import com.evalify.evalifybackend.course.domain.DTO.CourseInstructorPreviewDTO
+import com.evalify.evalifybackend.course.domain.DTO.student.CourseStudentInstructorDTO
 import com.evalify.evalifybackend.course.service.CourseInstructorService
 import com.evalify.evalifybackend.security.utils.SecurityUtils
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,7 +26,7 @@ import java.util.UUID
  * providing endpoints for managing their course assignments and related tasks.
  */
 @RestController
-@RequestMapping("/api/courses/instructors")
+@RequestMapping("/api/courses")
 class CourseInstructorController(
     private val courseInstructorService: CourseInstructorService
 ) {
@@ -41,10 +42,17 @@ class CourseInstructorController(
      * @return List of CourseInstructorPreviewDTO containing course details
      * @throws UnauthorizedException if user is not authenticated
      */
-    @GetMapping()
+    @GetMapping("/instructors")
     fun getCoursesByInstructor(): List<CourseInstructorPreviewDTO> {
         val instructorId = getCurrentUserId()
         return courseInstructorService.getCourseByInstructor(listOf(instructorId))
+    }
+
+    @GetMapping("/students/instructors")
+    fun getCourseInstructors():List<CourseStudentInstructorDTO>{
+        val instructorId = getCurrentUserId()
+        println(instructorId)
+        return courseInstructorService.getCourseStudentsByInstructor(instructorId)
     }
 
     private fun getCurrentUserId(): String {
