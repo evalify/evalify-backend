@@ -1,7 +1,6 @@
-package com.evalify.evalifybackend.user.controller
+package com.evalify.evalifybackend.core.keycloak.controller
 
-import com.evalify.evalifybackend.user.service.KeyCloakUserService
-import com.evalify.evalifybackend.user.service.UserService
+import com.evalify.evalifybackend.core.keycloak.service.KeyCloakUserService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

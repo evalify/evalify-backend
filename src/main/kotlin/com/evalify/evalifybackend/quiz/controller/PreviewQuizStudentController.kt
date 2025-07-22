@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/student")
+@RequestMapping("/api/students")
 class PreviewQuizStudentController(
     private val previewQuizStudentService: PreviewQuizStudentService
 ) {

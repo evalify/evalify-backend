@@ -1,10 +1,9 @@
-package com.evalify.evalifybackend.user.service
+package com.evalify.evalifybackend.core.keycloak.service
 
 import com.evalify.evalifybackend.common.logging.logger
 import com.evalify.evalifybackend.user.domain.Role
 import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.repository.UserRepository
-import io.lettuce.core.KillArgs.Builder.user
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.admin.client.KeycloakBuilder
 import org.springframework.beans.factory.annotation.Value
@@ -44,7 +43,7 @@ class KeyCloakUserService(
                     email = user.email,
                     role = Role.valueOf(groups[0].uppercase()),
                     phoneNumber = "+911234567890"
-                    )
+                )
                 userRepository.save(newUser)
                 logger.info("User ${user.id} created.")
             }
