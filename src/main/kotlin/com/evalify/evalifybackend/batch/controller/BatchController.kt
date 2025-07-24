@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.batch.controller
 
 
+import com.evalify.evalifybackend.batch.domain.Batch
 import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
 import com.evalify.evalifybackend.batch.domain.DTO.SemesterBatchResponse
 import com.evalify.evalifybackend.batch.domain.DTO.UpdateBatchBankDTO
@@ -148,14 +149,17 @@ class BatchController(
 
     @GetMapping
     fun getAllBatches(
+        @RequestParam(required = false, defaultValue = "false") all:Boolean,
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "name") sort_by: String,
         @RequestParam(defaultValue = "asc") sort_order: String?
     ): ResponseEntity<Any> {
         return try {
-            val batches = batchService.getAllBatches(page, size, sort_by, sort_order)
-            ResponseEntity.ok(batches)
+            if(!all) {
+               return ResponseEntity.ok( batchService.getAllBatches(page, size, sort_by, sort_order))
+            }
+           return ResponseEntity.ok(batchService.getAllBatches())
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(mapOf("message" to "Failed to fetch batches: ${e.message}"))

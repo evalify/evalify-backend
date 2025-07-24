@@ -1,6 +1,8 @@
 package com.evalify.evalifybackend.course.service
 
 import com.evalify.evalifybackend.batch.domain.Batch
+import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
+import com.evalify.evalifybackend.batch.service.toBatchResponse
 import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.course.domain.Course
 import com.evalify.evalifybackend.course.domain.DTO.CourseInstructorPreviewDTO
@@ -15,6 +17,7 @@ import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.springframework.stereotype.Service
+import java.util.UUID
 import kotlin.collections.distinctBy
 import kotlin.collections.plus
 
@@ -71,8 +74,6 @@ class CourseInstructorService(
 
         // Find courses where this user is an instructor
         val instructorCourses: List<Course> = courseRepository.findAllByInstructors(listOf(instructor))
-        println(instructorCourses.size)
-        println("logging....")
 
         //CourseStudentInstructorDTO mapper
         val courseStudentInstructorMapper = CourseStudentInstructorMapper()
@@ -81,5 +82,11 @@ class CourseInstructorService(
         val courseStudents:List<CourseStudentInstructorDTO> = instructorCourses.filter { it->it.semester.isActive }.map { it->courseStudentInstructorMapper.toCourseStudentsDTO(course = it) }
         return courseStudents
 
+    }
+
+    fun getCourseBatches(courseId: UUID): List<BatchResponse> {
+        val course = courseRepository.findById(courseId).orElseThrow{ NotFoundException("Course with ID $courseId not found") }
+        val batches = course.batches;
+        return batches.map { it.toBatchResponse() }
     }
 }

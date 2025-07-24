@@ -1,10 +1,12 @@
 package com.evalify.evalifybackend.course.controller
 
+import com.evalify.evalifybackend.batch.domain.DTO.BatchResponse
 import com.evalify.evalifybackend.core.exception.UnauthorizedException
 import com.evalify.evalifybackend.course.domain.DTO.CourseInstructorPreviewDTO
 import com.evalify.evalifybackend.course.domain.DTO.student.CourseStudentInstructorDTO
 import com.evalify.evalifybackend.course.service.CourseInstructorService
 import com.evalify.evalifybackend.security.utils.SecurityUtils
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
@@ -52,6 +54,11 @@ class CourseInstructorController(
     fun getCourseInstructors():List<CourseStudentInstructorDTO>{
         val instructorId = getCurrentUserId()
         return courseInstructorService.getCourseStudentsByInstructor(instructorId)
+    }
+
+    @GetMapping("/{courseId}/batch")
+    fun getCourseInstructorBatch(@PathVariable courseId: UUID):ResponseEntity<List<BatchResponse>> {
+        return ResponseEntity.ok(courseInstructorService.getCourseBatches(courseId))
     }
 
     private fun getCurrentUserId(): String {
