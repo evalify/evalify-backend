@@ -118,7 +118,8 @@ class CourseController(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null)
         }
-    }    /**
+    }
+    /**
      * Enrolls multiple students in a course.
      *
      * Use Cases:

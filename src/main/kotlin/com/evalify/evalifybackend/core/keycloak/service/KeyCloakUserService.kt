@@ -21,7 +21,7 @@ class KeyCloakUserService(
 ) {
     private val logger by logger()
 
-    fun syncUsers(){
+    fun syncUsers():String{
         val keyCloak: Keycloak = KeycloakBuilder.builder()
                                             .serverUrl(serverUrl)
                                             .clientId(clientId)
@@ -31,10 +31,11 @@ class KeyCloakUserService(
                                             .build()
 
         val users = keyCloak.realm(realm).users().list()
-        print(users.size)
+        var count:Int = 0
+
         users.forEach { user ->
             val existingUser = userRepository.findById(user.id).orElse(null)
-            if(existingUser != null) {
+            if(existingUser == null) {
                 val userResource = keyCloak.realm(realm).users().get(user.id)
                 val groups = userResource.groups().map { it.name }
                 val newUser = User(
@@ -42,12 +43,15 @@ class KeyCloakUserService(
                     name = user.username,
                     email = user.email,
                     role = Role.valueOf(groups[0].uppercase()),
-                    phoneNumber = "+911234567890"
+                    phoneNumber = ""
                 )
                 userRepository.save(newUser)
+                count += 1
                 logger.info("User ${user.id} created.")
             }
-            }
-
+        }
+        //closes the keycloak connection
+        keyCloak.close()
+        return "$count users synced"
     }
 }

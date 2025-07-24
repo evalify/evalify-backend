@@ -51,7 +51,6 @@ class CourseInstructorController(
     @GetMapping("/students/instructors")
     fun getCourseInstructors():List<CourseStudentInstructorDTO>{
         val instructorId = getCurrentUserId()
-        println(instructorId)
         return courseInstructorService.getCourseStudentsByInstructor(instructorId)
     }
 
