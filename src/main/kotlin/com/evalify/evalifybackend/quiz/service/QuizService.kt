@@ -179,7 +179,7 @@ class QuizService(
     }
 
     @Transactional
-    fun editQuiz(dto: PatchQuizDTO, quizId: UUID, userId: String): Quiz {
+    fun editQuiz(dto: PatchQuizDTO, quizId: UUID, userId: String): QuizPreviewDTO {
         logger.info("Editing quiz: {} by user: {}", quizId, userId)
 
         try {
@@ -213,7 +213,20 @@ class QuizService(
             val savedQuiz = quizRepository.save(updatedQuiz)
 
             logger.info("Successfully updated quiz: {} by user: {}", quizId, userId)
-            return savedQuiz
+            return QuizPreviewDTO(
+                id = savedQuiz.id,
+                name = savedQuiz.name,
+                description = savedQuiz.description ?: "",
+                startTime = savedQuiz.startTime,
+                endTime = savedQuiz.endTime,
+                batches = savedQuiz.batch.map { batch -> batch.name },
+                labs = savedQuiz.lab.map { lab -> lab.name },
+                duration = savedQuiz.duration,
+                publishResult = savedQuiz.publishResult,
+                status = savedQuiz.status,
+                isProtected = savedQuiz.password != null || savedQuiz.password?.isNotEmpty() == true,
+                courseCodes = savedQuiz.course.map { course -> course.code }
+            )
         } catch (e: DataAccessException) {
             logger.error("Database error while editing quiz: {} by user: {}", quizId, userId, e)
             throw QuizDatabaseException("edit quiz", e)
