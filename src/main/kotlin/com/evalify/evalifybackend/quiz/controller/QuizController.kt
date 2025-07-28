@@ -413,9 +413,38 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
 
     @PostMapping("{quizId}/share")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun shareQuiz(@PathVariable quizID: UUID, @RequestBody shareDTO: ShareQuizDTO) {
+    fun shareQuiz(@PathVariable quizId: UUID, @RequestBody shareDTO: ShareQuizDTO) : ResponseEntity<Void> {
+        val userId = getCurrentUserId()
+        logger.info("Sharing quiz: {} by user: {} with users: {}", quizId, userId, shareDTO.userID)
 
-        quizService.shareQuiz(quizID, shareDTO)
+        quizService.shareQuiz(quizId, shareDTO)
+
+        logger.info("Successfully shared quiz: {} with {} users", quizId, shareDTO.userID.size)
+        return ResponseEntity.ok().build()
+
+    }
+
+    @DeleteMapping("/{quizId}/share")
+    fun unshareBank(
+        @PathVariable quizId: UUID,
+        @Valid @RequestBody dto: ShareQuizDTO
+    ): ResponseEntity<Void> {
+        val userId = getCurrentUserId()
+        logger.info("Unsharing quiz: {} by user: {} from users: {}", quizId, userId, dto.userID)
+
+        quizService.unshareBank(quizId, dto, userId)
+
+        logger.info("Successfully unshared quiz: {} from {} users", quizId, dto.userID.size)
+        return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/quiz/shared")
+    fun getSharedQuizes(): ResponseEntity<List<QuizPreviewDTO>> {
+        val userId = getCurrentUserId()
+        logger.info("Fetching shared quizzes for user: {}", userId)
+        val result = quizService.getSharedQuizzes(userId)
+        logger.debug("Successfully retrieved shared quizzes for user: {}", userId)
+        return ResponseEntity.ok(result)
     }
 
     @PostMapping("{quizId}/publish")

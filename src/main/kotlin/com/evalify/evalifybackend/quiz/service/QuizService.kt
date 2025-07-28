@@ -678,4 +678,61 @@ class QuizService(
         return baseQuestion
 
     }
+
+    fun unshareBank(quizId: UUID, dto: ShareQuizDTO, userId: String) {
+        logger.info(
+            "Unsharing quiz: {} from users: {} by user: {}",
+            quizId,
+            dto.userID,
+            userId
+        )
+
+        val quiz =
+            quizRepository.findById(quizId).orElseThrow {
+                QuizNotFoundException(quizId.toString())
+            }
+
+        QuizSecurityUtils.ensureOwnership(quiz, userId)
+
+        var unsharedCount = 0
+        dto.userID.forEach { userIdToUnshare ->
+            val removed =
+                quiz.sharedUsers.removeIf {
+                    it.user?.id == userIdToUnshare &&
+                            it.tags == SharedTags.SHARED
+                }
+            if (removed) unsharedCount++
+        }
+
+        quizRepository.save(quiz)
+        logger.info("Successfully unshared bank: {} from {} users",quizId, unsharedCount)
+    }
+
+    fun getSharedQuizzes(userId: String) : List<QuizPreviewDTO>{
+        logger.info("Fetching shared quizzes for user: {}", userId)
+        val sharedQuizzes = quizRepository.getSharedQuizzes(userId)
+        val final = sharedQuizzes.map {
+            quiz ->
+
+            QuizPreviewDTO(
+                id = quiz.id,
+                name = quiz.name,
+                description = quiz.description ?: "",
+                startTime = quiz.startTime,
+                endTime = quiz.endTime,
+                batches = quiz.batch.map { batch -> batch.name },
+                labs = quiz.lab.map { lab -> lab.name },
+                duration = quiz.duration,
+                publishResult = quiz.publishResult,
+                status = quiz.status,
+                isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
+                courseCodes = quiz.course.map { course -> course.code }
+            )
+
+        }
+        return final
+    }
+
 }
+
+
