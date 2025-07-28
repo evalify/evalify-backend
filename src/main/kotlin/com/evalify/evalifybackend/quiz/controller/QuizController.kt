@@ -16,6 +16,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.exception.*
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
@@ -456,6 +457,17 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
     ) {
 
         quizService.publishQuiz(quizId, quizSets, dto)
+    }
+
+    @GetMapping("/sharedTo")
+    fun getSharedToQuizzes(@RequestParam userId: String): ResponseEntity<List<SharedQuizPreviewDTO>> {
+        val userId = getCurrentUserId()
+        logger.info("Fetching quizzes shared by the user: {}",userId)
+        val result = quizService.sharedQuizzes(userId)
+        logger.debug("Successfully retrieved quizzes shared by the user: {}",userId)
+        return ResponseEntity.ok(
+                result
+        )
     }
 
     @GetMapping("/{quizId}/combinations")

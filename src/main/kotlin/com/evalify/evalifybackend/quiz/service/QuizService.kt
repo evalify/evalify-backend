@@ -17,6 +17,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDT
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
@@ -731,6 +732,36 @@ class QuizService(
 
         }
         return final
+    }
+
+    fun sharedQuizzes(userId: String): List<SharedQuizPreviewDTO> {
+        logger.info("Fetching shared quizzes for user: {}", userId)
+        val sharedQuizzes = quizRepository.findByOwnerId(userId)
+        
+        return sharedQuizzes.mapNotNull { quiz ->
+            if (quiz.sharedUsers.size > 1) {
+                val sharedUsers = quiz.sharedUsers.filter { it.tags == SharedTags.SHARED }
+                if (sharedUsers.isNotEmpty()) {
+                    val userIds = sharedUsers.mapNotNull { it.user?.id }
+                    SharedQuizPreviewDTO(
+                        id = quiz.id,
+                        name = quiz.name,
+                        description = quiz.description ?: "",
+                        startTime = quiz.startTime,
+                        endTime = quiz.endTime,
+                        batches = quiz.batch.map { batch -> batch.name },
+                        labs = quiz.lab.map { lab -> lab.name },
+                        duration = quiz.duration,
+                        publishResult = quiz.publishResult,
+                        status = quiz.status,
+                        isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
+                        courseCodes = quiz.course.map { course -> course.code },
+                        sharedWith = userIds
+                    )
+                } else null
+            } else null
+        }
+
     }
 
 }

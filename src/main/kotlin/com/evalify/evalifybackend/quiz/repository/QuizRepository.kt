@@ -49,4 +49,12 @@ interface QuizRepository: JpaRepository<Quiz, UUID> {
         ORDER BY q.createdAt DESC
     """)
     fun getSharedQuizzes(@Param("userId") userId: String): List<Quiz>
+
+    @Query("""
+        SELECT q FROM Quiz q 
+        JOIN q.sharedUsers qu
+        WHERE qu.user.id = :userId
+        AND qu.tags = com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags.OWNER
+    """)
+    fun findByOwnerId(@Param("userId") userId: String): List<Quiz>
 }
