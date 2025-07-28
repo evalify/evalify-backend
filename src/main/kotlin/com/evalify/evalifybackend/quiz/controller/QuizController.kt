@@ -425,7 +425,7 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
     }
 
     @DeleteMapping("/{quizId}/share")
-    fun unshareBank(
+    fun unshareQuiz(
         @PathVariable quizId: UUID,
         @Valid @RequestBody dto: ShareQuizDTO
     ): ResponseEntity<Void> {
@@ -438,8 +438,8 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
         return ResponseEntity.ok().build()
     }
 
-    @GetMapping("/quiz/shared")
-    fun getSharedQuizes(): ResponseEntity<List<QuizPreviewDTO>> {
+    @GetMapping("/shared")
+    fun getSharedQuizzes(): ResponseEntity<List<QuizPreviewDTO>> {
         val userId = getCurrentUserId()
         logger.info("Fetching shared quizzes for user: {}", userId)
         val result = quizService.getSharedQuizzes(userId)
