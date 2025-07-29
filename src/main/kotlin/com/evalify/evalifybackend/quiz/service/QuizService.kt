@@ -22,6 +22,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
+import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.domain.QuizUser
 import com.evalify.evalifybackend.quiz.domain.QuizUserId
@@ -212,6 +213,11 @@ class QuizService(
             // Create updated quiz
             val updatedQuiz = patchQuiz(existingQuiz, dto, quizTags)
             val savedQuiz = quizRepository.save(updatedQuiz)
+            val status: QuizStatus = when{
+                savedQuiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                savedQuiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                else -> QuizStatus.ACTIVE
+            }
 
             logger.info("Successfully updated quiz: {} by user: {}", quizId, userId)
             return QuizPreviewDTO(
@@ -224,7 +230,7 @@ class QuizService(
                 labs = savedQuiz.lab.map { lab -> lab.name },
                 duration = savedQuiz.duration,
                 publishResult = savedQuiz.publishResult,
-                status = savedQuiz.status,
+                status = status,
                 isProtected = savedQuiz.password != null || savedQuiz.password?.isNotEmpty() == true,
                 courseCodes = savedQuiz.course.map { course -> course.code }
             )
@@ -274,6 +280,11 @@ class QuizService(
                     }
             // Check permissions
             // QuizSecurityUtils.ensureQuizAccess(quiz, userId)
+            val status: QuizStatus = when{
+                quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                else -> QuizStatus.ACTIVE
+            }
 
             val result = QuizPreviewDTO(
                 id = quiz.id,
@@ -285,7 +296,7 @@ class QuizService(
                 labs = quiz.lab.map { lab -> lab.name },
                 duration = quiz.duration,
                 publishResult = quiz.publishResult,
-                status = quiz.status,
+                status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
                 courseCodes = quiz.course.map { course -> course.code }
             )
@@ -714,6 +725,11 @@ class QuizService(
         val sharedQuizzes = quizRepository.getSharedQuizzes(userId)
         val final = sharedQuizzes.map {
             quiz ->
+            val status: QuizStatus = when{
+                quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                else -> QuizStatus.ACTIVE
+            }
 
             QuizPreviewDTO(
                 id = quiz.id,
@@ -725,7 +741,7 @@ class QuizService(
                 labs = quiz.lab.map { lab -> lab.name },
                 duration = quiz.duration,
                 publishResult = quiz.publishResult,
-                status = quiz.status,
+                status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
                 courseCodes = quiz.course.map { course -> course.code }
             )
@@ -743,6 +759,11 @@ class QuizService(
                 val sharedUsers = quiz.sharedUsers.filter { it.tags == SharedTags.SHARED }
                 if (sharedUsers.isNotEmpty()) {
                     val userIds = sharedUsers.mapNotNull { it.user?.id }
+                    val status: QuizStatus = when{
+                        quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                        quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                        else -> QuizStatus.ACTIVE
+                    }
                     SharedQuizPreviewDTO(
                         id = quiz.id,
                         name = quiz.name,
@@ -753,7 +774,7 @@ class QuizService(
                         labs = quiz.lab.map { lab -> lab.name },
                         duration = quiz.duration,
                         publishResult = quiz.publishResult,
-                        status = quiz.status,
+                        status = status,
                         isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
                         courseCodes = quiz.course.map { course -> course.code },
                         sharedWith = userIds

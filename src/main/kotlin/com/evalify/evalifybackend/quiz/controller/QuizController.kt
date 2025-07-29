@@ -460,7 +460,7 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
     }
 
     @GetMapping("/sharedTo")
-    fun getSharedToQuizzes(@RequestParam userId: String): ResponseEntity<List<SharedQuizPreviewDTO>> {
+    fun getSharedToQuizzes(): ResponseEntity<List<SharedQuizPreviewDTO>> {
         val userId = getCurrentUserId()
         logger.info("Fetching quizzes shared by the user: {}",userId)
         val result = quizService.sharedQuizzes(userId)

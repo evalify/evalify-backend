@@ -13,6 +13,7 @@ import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -29,7 +30,12 @@ class PreviewQuizStudentService(
         val  courseQuizzes:MutableList<PreviewQuizDTO> = mutableListOf()
         course.quiz.forEach { quiz -> if(quiz.publishQuiz){
             val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
-            if (quiz.status == QuizStatus.COMPLETED && completedQuiz == null) {
+            val status: QuizStatus = when{
+                quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                else -> QuizStatus.ACTIVE
+            }
+            if (status == QuizStatus.COMPLETED && completedQuiz == null) {
                 val previewQuizDTO = PreviewQuizDTO(
                     id = quiz.id,
                     quizTags = quiz.quizTags.map { quizTags ->
@@ -52,6 +58,11 @@ class PreviewQuizStudentService(
                 courseQuizzes.add(previewQuizDTO)
 
             } else {
+                val status: QuizStatus = when{
+                    quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                    quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                    else -> QuizStatus.ACTIVE
+                }
                 val previewQuizDTO = PreviewQuizDTO(
                     id = quiz.id,
                     quizTags = quiz.quizTags.map { quizTags ->
@@ -69,7 +80,7 @@ class PreviewQuizStudentService(
                     startTime = quiz.startTime,
                     endTime = quiz.endTime,
                     duration = quiz.duration,
-                    status = QuizStatusDTO.from(quiz.status.toString())
+                    status = QuizStatusDTO.from(status.toString())
                 )
                 courseQuizzes.add(previewQuizDTO)
 
@@ -104,7 +115,12 @@ class PreviewQuizStudentService(
         allQuizzes.forEach { quiz ->
             if(quiz.publishQuiz){
             val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
-            if (quiz.status == QuizStatus.COMPLETED && completedQuiz == null) {
+                val status: QuizStatus = when{
+                    quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                    quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                    else -> QuizStatus.ACTIVE
+                }
+            if (status == QuizStatus.COMPLETED && completedQuiz == null) {
                     val previewQuizDTO = PreviewQuizDTO(
                         id = quiz.id,
                         quizTags = quiz.quizTags.map { quizTags ->
@@ -127,6 +143,11 @@ class PreviewQuizStudentService(
                     filteredQuiz?.add(previewQuizDTO)
 
             } else {
+                val status: QuizStatus = when{
+                    quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                    quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                    else -> QuizStatus.ACTIVE
+                }
                 val previewQuizDTO = PreviewQuizDTO(
                     id = quiz.id,
                     quizTags = quiz.quizTags.map { quizTags ->
@@ -144,7 +165,7 @@ class PreviewQuizStudentService(
                     startTime = quiz.startTime,
                     endTime = quiz.endTime,
                     duration = quiz.duration,
-                    status = QuizStatusDTO.from(quiz.status.toString())
+                    status = QuizStatusDTO.from(status.toString())
                 )
                 filteredQuiz?.add(previewQuizDTO)
 

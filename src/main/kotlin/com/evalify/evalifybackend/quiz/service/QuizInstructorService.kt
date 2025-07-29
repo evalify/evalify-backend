@@ -27,8 +27,15 @@ class QuizInstructorService(private val quizRepository: QuizRepository) {
 
         val courseId = UUID.fromString(courseId)
         val quizzes = quizRepository.findByCourseId(courseId)
+
         if(status != null){
-            return quizzes.filter { it.status == status }.map { quiz ->
+            return quizzes.filter {
+                val quizStatus : QuizStatus = when{
+                    it.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                    it.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                    else -> QuizStatus.ACTIVE
+                }
+                quizStatus == status }.map { quiz ->
                 mapToQuizPreviewDTO(quiz)
             }
         }
