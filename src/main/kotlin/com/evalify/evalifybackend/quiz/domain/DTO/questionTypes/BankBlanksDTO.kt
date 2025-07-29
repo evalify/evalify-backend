@@ -2,13 +2,10 @@ package com.evalify.evalifybackend.quiz.domain.DTO.questionTypes
 
 import java.util.UUID
 
-enum class BlankType{
-    LOWERCASE, UPPERCASE, INTEGER, FLOAT, STRING
-
-}
-
-data class BlanksDTO(
+data class BankBlanksDTO(
     val sNo: Int,
     val id : UUID?,
     val type: BlankType,
-)
+    val answers: List<String>
+) {
+}

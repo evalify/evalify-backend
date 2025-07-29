@@ -10,6 +10,8 @@ import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BankBlanksDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BlankType
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BlanksDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.FillUpsReturnDTO
 import com.evalify.evalifybackend.quiz.question.domain.Topic
@@ -20,8 +22,9 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import java.util.UUID
 import org.hibernate.annotations.Type
+import java.util.UUID.randomUUID
 
-class blanks(val id: String, val answers: List<String>)
+class blanks(val id: UUID? = randomUUID(), val answers: List<String>,val type: BlankType)
 
 @Entity
 @DiscriminatorValue(value = "FILL_UP")
@@ -75,58 +78,62 @@ class FillUp(
                         blanks = blanks.map { 
                             blanks(
                                 id = it.id,
-                                answers = it.answers.toList()
+                                answers = it.answers.toList(),
+                                    type = it.type
                             )
                         }
                 )
         return copiedQuestion
     }
 
-    override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
-        return FillUpsReturnDTO(
-                question = this.question,
-                blankIds = this.blanks.map { blanks -> BlanksDTO(id = blanks.id) },
-                hint = this.hint,
-                marks = this.marks,
-                bloomsTaxonomy = this.bloomsTaxonomy,
-                co = this.co,
-                difficulty = this.difficulty,
-                questionId = this.id,
-                topics = this.topic.map {
-                                topic ->
-                        ReturnTopicDTO(
-                                topic.id,
-                                topic.name
-                        )
-                }
-        )
-    }
+        override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
+                return FillUpsReturnDTO(
+                        question = this.question,
+                        blankIds = this.blanks.mapIndexed { index, blanks ->
+                                BlanksDTO(id = blanks.id, sNo = index + 1, type = blanks.type)
+                        },
+                        hint = this.hint,
+                        marks = this.marks,
+                        bloomsTaxonomy = this.bloomsTaxonomy,
+                        co = this.co,
+                        difficulty = this.difficulty,
+                        questionId = this.id,
+                        topics = this.topic.map { topic ->
+                                ReturnTopicDTO(topic.id, topic.name)
+                        }
+                )
+        }
 
-    override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
-        return FillUpsBankReturnDTO(
-                question = this.question,
-                blanks = this.blanks,
-                hint = this.hint,
-                marks = this.marks,
-                bloomsTaxonomy = this.bloomsTaxonomy,
-                co = this.co,
-                difficulty = this.difficulty,
-                strictMatch = this.strictMatch,
-                llmEval = this.llmEval,
-                template = this.template,
-                explanation = this.explanation,
-                type = this.getQuestionType(),
-                questionId = questionId,
-                topics = this.topic.map {
-                        topic ->
-                        ReturnTopicDTO(
-                                topic.id,
-                                topic.name
-                        )
-                }
-        )
-    }
-    override fun getQuestionType(): QuestionTypes {
+
+        override fun mapToBankType(questionId: UUID?): BankQuestionsReturnDTO {
+                return FillUpsBankReturnDTO(
+                        question = this.question,
+                        blanks = this.blanks.mapIndexed { index, blanks ->
+                                BankBlanksDTO(
+                                        id = blanks.id,
+                                        sNo = index + 1,
+                                        type = blanks.type,
+                                        answers = blanks.answers.toList()
+                                )
+                        },
+                        hint = this.hint,
+                        marks = this.marks,
+                        bloomsTaxonomy = this.bloomsTaxonomy,
+                        co = this.co,
+                        difficulty = this.difficulty,
+                        strictMatch = this.strictMatch,
+                        llmEval = this.llmEval,
+                        template = this.template,
+                        explanation = this.explanation,
+                        type = this.getQuestionType(),
+                        questionId = questionId,
+                        topics = this.topic.map { topic ->
+                                ReturnTopicDTO(topic.id, topic.name)
+                        }
+                )
+        }
+
+        override fun getQuestionType(): QuestionTypes {
         return QuestionTypes.FILL_UP
     }
 

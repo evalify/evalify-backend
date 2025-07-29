@@ -17,6 +17,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.exception.*
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
@@ -412,17 +413,30 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
                 ?: throw UnauthorizedException("User not authenticated")
     }
 
-    @PostMapping("{quizId}/share")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun shareQuiz(@PathVariable quizId: UUID, @RequestBody shareDTO: ShareQuizDTO) : ResponseEntity<Void> {
-        val userId = getCurrentUserId()
-        logger.info("Sharing quiz: {} by user: {} with users: {}", quizId, userId, shareDTO.userID)
+    @PostMapping("/{quizId}/share")
+    @ResponseStatus(HttpStatus.OK)
+    fun shareQuiz(
+        @PathVariable quizId: UUID,
+        @Valid @RequestBody shareDTO: ShareQuizDTO
+    ): ResponseEntity<Map<String, String>> {
+        try {
+            val userId = getCurrentUserId()
+            logger.info("Sharing quiz: {} by user: {} with users: {}", quizId, userId, shareDTO.userID)
 
-        quizService.shareQuiz(quizId, shareDTO)
+            if (shareDTO.userID.isEmpty()) {
+                logger.warn("No users provided to share quiz with")
+                return ResponseEntity.badRequest()
+                    .body(mapOf("message" to "No users provided to share quiz with"))
+            }
 
-        logger.info("Successfully shared quiz: {} with {} users", quizId, shareDTO.userID.size)
-        return ResponseEntity.ok().build()
+            quizService.shareQuiz(quizId, shareDTO)
 
+            logger.info("Successfully shared quiz: {} with {} users", quizId, shareDTO.userID.size)
+            return ResponseEntity.ok(mapOf("message" to "Quiz shared successfully"))
+        } catch (e: Exception) {
+            logger.error("Error sharing quiz {}: {}", quizId, e.message, e)
+            throw e
+        }
     }
 
     @DeleteMapping("/{quizId}/share")
@@ -461,13 +475,30 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
 
     @GetMapping("/sharedTo")
     fun getSharedToQuizzes(): ResponseEntity<List<SharedQuizPreviewDTO>> {
-        val userId = getCurrentUserId()
-        logger.info("Fetching quizzes shared by the user: {}",userId)
-        val result = quizService.sharedQuizzes(userId)
-        logger.debug("Successfully retrieved quizzes shared by the user: {}",userId)
-        return ResponseEntity.ok(
-                result
-        )
+        try {
+            val userId = getCurrentUserId()
+            logger.info("Fetching quizzes shared by the user: {}", userId)
+            
+            val result = quizService.sharedQuizzes(userId)
+            if (result.isEmpty()) {
+                logger.debug("No shared quizzes found for user: {}", userId)
+                return ResponseEntity.ok(emptyList())
+            }
+            
+            logger.debug("Successfully retrieved {} quizzes shared by user: {}", result.size, userId)
+            return ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            logger.error("Error while fetching shared quizzes: {}", e.message, e)
+            throw e
+        }
+    }
+
+    @GetMapping("/{quizId}/users")
+    fun getSharedUsers(@PathVariable quizId : UUID): ResponseEntity<List<SharedUserDTO>> {
+        logger.info("Fetching the shared users of the quiz: {}", quizId)
+        val result = quizService.getSharedUsers(quizId)
+        logger.info("Successfully retrieved shared users of the quiz: {}", result)
+        return ResponseEntity.ok(result)
     }
 
     @GetMapping("/{quizId}/combinations")

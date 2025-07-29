@@ -45,7 +45,7 @@ class QuizStudentController(
             ))
         }
 
-        // If not in cache, get from database
+        // If not in cache, get from a database
         val questions = quizStudentService.getQuizQuestions(
             studentId = studentId,
             quizId = quizId,

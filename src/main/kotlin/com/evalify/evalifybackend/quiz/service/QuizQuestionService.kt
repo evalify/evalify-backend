@@ -198,7 +198,7 @@ open class QuizQuestionService(
                 strictMatch = dto.strictMatch,
                 llmEval = dto.llmEval,
                 template = dto.template,
-                blanks = dto.blanks?.map { blanks(it.id, it.answers) } ?: listOf()
+                blanks = dto.blanks?.map { blanks(answers = it.answers, type = it.type) } ?: listOf()
             )
 
             QuestionTypes.DESCRIPTIVE  -> DescriptiveQuestion(

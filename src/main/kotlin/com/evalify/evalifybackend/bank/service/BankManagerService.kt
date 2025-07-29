@@ -373,7 +373,7 @@ class BankManagerService(
                                                 template = dto.template,
                                                 blanks =
                                                         dto.blanks?.map {
-                                                                blanks(it.id, it.answers)
+                                                                blanks( answers = it.answers, type = it.type )
                                                         }
                                                                 ?: listOf()
                                         )

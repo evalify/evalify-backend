@@ -5,13 +5,14 @@ import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BankBlanksDTO
 import com.evalify.evalifybackend.quiz.question.domain.FillUp.blanks
 import java.util.UUID
 
 class FillUpsBankReturnDTO(
         val question: String,
         override val questionId : UUID?,
-        val blanks: List<blanks>,
+        val blanks: List<BankBlanksDTO>,
         override val hint: String?,
         override val marks: Int,
         override val bloomsTaxonomy: Taxonomy?,

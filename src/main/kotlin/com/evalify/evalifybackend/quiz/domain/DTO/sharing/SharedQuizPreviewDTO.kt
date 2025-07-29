@@ -8,13 +8,6 @@ import kotlin.time.Duration
 data class SharedQuizPreviewDTO(
     val id: UUID?,
     val name: String,
-    val description: String,
-    val startTime: Instant,
-    val endTime:Instant,
-    val batches: List<String>,
-    val labs:List<String>,
-    val duration: Duration,
-    val publishResult: Boolean,
     val status: QuizStatus?,
     val isProtected: Boolean,
     val courseCodes : List<String>,

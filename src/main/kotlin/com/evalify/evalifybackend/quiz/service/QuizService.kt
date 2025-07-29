@@ -19,6 +19,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
@@ -507,25 +509,42 @@ class QuizService(
         quizRepository.deleteById(quizId)
     }
 
+    @Transactional
     fun shareQuiz(quizID: UUID, shareDTO: ShareQuizDTO) {
+        logger.info("Processing share request for quiz: {} with users: {}", quizID, shareDTO.userID)
+        
+        val quiz = quizRepository.findById(quizID).orElseThrow {
+            NotFoundException("Quiz with id $quizID not found")
+        }
 
-        val quiz =
-                quizRepository.findById(quizID).orElseThrow {
-                    NotFoundException("Quiz with id $quizID not found")
-                }
+        val users = userRepository.findAllById(shareDTO.userID)
+        if (users.isEmpty()) {
+            logger.warn("No valid users found to share quiz with")
+            //throw ValidationException("No valid users found", "userID")
+        }
 
-        val user = userRepository.findAllById(shareDTO.userID)
-
-        user.map { u ->
-            val quizUser =
-                    QuizUser(
-                            id = QuizUserId(quizID, u.id),
-                            quiz = quiz,
-                            user = u,
-                            tags = SharedTags.SHARED
-                    )
-            quiz.sharedUsers.add(quizUser)
+        // Create shared users in a transaction
+        users.forEach { user ->
+            // Check if sharing already exists
+            val existingShare = quiz.sharedUsers.find { it.user?.id == user.id }
+            if (existingShare == null) {
+                val quizUser = QuizUser(
+                    id = QuizUserId(quizID, user.id),
+                    quiz = quiz,
+                    user = user,
+                    tags = SharedTags.SHARED
+                )
+                quiz.sharedUsers.add(quizUser)
+            }
+        }
+        
+        // Save all changes in one transaction
+        try {
             quizRepository.save(quiz)
+            logger.info("Successfully shared quiz {} with {} users", quizID, users.size)
+        } catch (e: Exception) {
+            logger.error("Error saving shared quiz state: {}", e.message, e)
+            throw QuizDatabaseException("Error saving shared quiz state", e)
         }
     }
 
@@ -753,7 +772,7 @@ class QuizService(
     fun sharedQuizzes(userId: String): List<SharedQuizPreviewDTO> {
         logger.info("Fetching shared quizzes for user: {}", userId)
         val sharedQuizzes = quizRepository.findByOwnerId(userId)
-        
+
         return sharedQuizzes.mapNotNull { quiz ->
             if (quiz.sharedUsers.size > 1) {
                 val sharedUsers = quiz.sharedUsers.filter { it.tags == SharedTags.SHARED }
@@ -767,13 +786,6 @@ class QuizService(
                     SharedQuizPreviewDTO(
                         id = quiz.id,
                         name = quiz.name,
-                        description = quiz.description ?: "",
-                        startTime = quiz.startTime,
-                        endTime = quiz.endTime,
-                        batches = quiz.batch.map { batch -> batch.name },
-                        labs = quiz.lab.map { lab -> lab.name },
-                        duration = quiz.duration,
-                        publishResult = quiz.publishResult,
                         status = status,
                         isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
                         courseCodes = quiz.course.map { course -> course.code },
@@ -785,6 +797,22 @@ class QuizService(
 
     }
 
+    fun getSharedUsers(quizId: UUID) : List<SharedUserDTO>{
+        val quiz = quizRepository.findById(quizId).orElseThrow{ QuizNotFoundException(quizId.toString())}
+        val final = quiz.sharedUsers.map { users ->
+            val user = SimpleUserDTO(
+                id = users.user?.id,
+                name = users.user?.name,
+                email = users.user?.email,
+                profileId = users.user?.profileId
+            )
+            SharedUserDTO(
+                user = user,
+                tag = users.tags
+            )
+        }
+        return final
+    }
 }
 
 

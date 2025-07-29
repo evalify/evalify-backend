@@ -31,6 +31,8 @@ class QuizStudent(
 
     val violations: MutableList<String>? = mutableListOf(),
 
+    val isViolated: Boolean? = false,
+
     val ipAddress: MutableList<String>,
 
     @ElementCollection
