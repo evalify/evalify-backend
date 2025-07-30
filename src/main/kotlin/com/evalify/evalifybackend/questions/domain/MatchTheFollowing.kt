@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.bank.domain.Bank
 import com.evalify.evalifybackend.bank.domain.DTO.bank.BankQuestionsReturnDTO
 import com.evalify.evalifybackend.bank.domain.DTO.crud.PatchQuestionDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.MatchBankReturnDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.PairDTO
 import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.BaseQuestion
 import com.evalify.evalifybackend.questions.domain.Difficulty
@@ -21,25 +22,35 @@ import jakarta.persistence.Entity
 import java.util.UUID
 import org.hibernate.annotations.Type
 
-class MatchPair( val leftPair: Pair, val rightPair: Pair)
+class MatchPair( val leftPair: UUID, val rightPair: List<UUID>)
+
+
 
 @Entity
 @DiscriminatorValue(value = "MATCH_THE_FOLLOWING")
 class MatchTheFollowing(
-        id: UUID?,
-        question: String = "",
-        bank: Bank?,
-        topic: MutableList<Topic>,
-        explanation: String? = "",
-        hint: String? = "",
-        marks: Int,
-        bloomsTaxonomy: Taxonomy,
-        co: Int,
-        negativeMark: Int? = null,
-        difficulty: Difficulty,
-        @Type(JsonBinaryType::class)
+    id: UUID?,
+    question: String = "",
+    bank: Bank?,
+    topic: MutableList<Topic>,
+    explanation: String? = "",
+    hint: String? = "",
+    marks: Int,
+    bloomsTaxonomy: Taxonomy,
+    co: Int,
+    negativeMark: Int? = null,
+    difficulty: Difficulty,
+    @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
-        val keys: MutableList<MatchPair>
+        val keys: MutableList<PairDTO>? = mutableListOf(),
+
+    @Type(JsonBinaryType::class)
+        @Column(columnDefinition = "jsonb")
+        val values: MutableList<PairDTO>? = mutableListOf(),
+
+    @Type(JsonBinaryType::class)
+        @Column(columnDefinition = "json")
+        val matchPair : MutableList<MatchPair>? = mutableListOf()
 ) :
         BaseQuestion(
                 id = id,
@@ -68,27 +79,24 @@ class MatchTheFollowing(
                         co = co,
                         negativeMark = negativeMark,
                         difficulty = difficulty,
-                        keys = keys.map { 
-                            MatchPair(
-                                leftPair = Pair(it.leftPair.id, it.leftPair.text),
-                                rightPair = Pair(it.rightPair.id, it.rightPair.text)
-                            )
-                        }.toMutableList()
+                        keys = keys,
+                        values = values,
+                        matchPair = matchPair
                 )
         return copiedQuestion
     }
 
     override fun mapToType(shuffleOptions: Boolean): QuestionsReturnDTO {
-        val left = keys.map { it.leftPair }.shuffled()
-        val right = keys.map { it.rightPair }.shuffled()
+        val left = keys?.shuffled()?.toMutableList()
+        val right = values?.shuffled()?.toMutableList()
+
 
         // zipping the shuffled lists together to form a list of pairs
-        val zippedList = left.zip(right)
-        val pairs = zippedList.map { (left, right) -> MatchShuffleDTO(left = left.text, right = right.text) }
+        val pairs = MatchShuffleDTO(left = left,right = right)
 
         return MatchReturnDTO(
                 question = this.question,
-                matchPair = pairs.toMutableList(),
+                keyValues = pairs,
                 hint = this.hint,
                 marks = this.marks,
                 bloomsTaxonomy = this.bloomsTaxonomy,
@@ -108,22 +116,25 @@ class MatchTheFollowing(
     override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return MatchBankReturnDTO(
                 question = this.question,
-                keys = this.keys,
+                questionId = questionId,
                 hint = this.hint,
+                keyValues = MatchShuffleDTO(left = this.keys , right = this.values),
                 marks = this.marks,
                 bloomsTaxonomy = this.bloomsTaxonomy,
                 co = this.co,
                 difficulty = this.difficulty,
                 explanation = this.explanation,
                 type = this.getQuestionType(),
-            questionId = questionId,
+
             topics = this.topic.map {
                     topic ->
                 ReturnTopicDTO(
                     topic.id,
                     topic.name
                 )
-            }
+            },
+            matchPair = this.matchPair
+
         )
     }
 
@@ -150,7 +161,9 @@ class MatchTheFollowing(
                         co = dto.co ?: this.co,
                         difficulty = dto.difficulty ?: this.difficulty,
                         negativeMark = dto.negativeMark ?: this.negativeMark,
-                        keys = dto.keys ?: this.keys
+                        keys = dto.keys ?: this.keys,
+                        values = dto.values ?: this.values,
+                        matchPair = dto.matchPair ?: this.matchPair
                 )
         return patchedQuestion
     }

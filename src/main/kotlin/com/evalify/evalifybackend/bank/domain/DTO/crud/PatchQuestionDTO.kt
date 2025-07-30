@@ -1,9 +1,11 @@
 package com.evalify.evalifybackend.bank.domain.DTO.crud
 
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.PairDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.Pair
 import com.evalify.evalifybackend.quiz.question.domain.FillUp.blanks
 import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
 import com.evalify.evalifybackend.quiz.question.domain.MatchPair
@@ -35,7 +37,9 @@ data class PatchQuestionDTO(
     val expectedAnswer: String? = null,
     val strictness: Float? = null,
     val guidelines: String? = null,
-    val keys: MutableList<MatchPair>? = null,
+    val keys: MutableList<PairDTO>? = null,
+    val values : MutableList<PairDTO>? = null,
+    val matchPair : MutableList<MatchPair>? = null,
     val trueFalseAnswer: Boolean? = null,
     val topic : List<UUID>? = emptyList()
 )

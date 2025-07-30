@@ -248,13 +248,10 @@ open class QuizQuestionService(
                 co = dto.co,
                 negativeMark = dto.negativeMark,
                 difficulty = dto.difficulty,
-                keys = dto.keys?.map {
-                    MatchPair(
+                keys = dto.keys,
+                values = dto.values,
+                matchPair = dto.matchPairs
 
-                        leftPair = it.leftPair,
-                        rightPair = it.rightPair
-                    )
-                }?.toMutableList() ?: mutableListOf()
             )
 
             QuestionTypes.TRUEFALSE  -> TrueFalse(

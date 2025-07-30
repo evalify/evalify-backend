@@ -1,13 +1,15 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.quiz
 
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.BlankDTO
+import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.PairDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.FunctionParamDTO
-import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.MatchPairDTO
 import com.evalify.evalifybackend.bank.domain.DTO.questionTypes.coding.TestCaseDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.Pair
 import com.evalify.evalifybackend.quiz.question.domain.MCQ.MCQOption
+import com.evalify.evalifybackend.quiz.question.domain.MatchPair
 import java.util.UUID
 
 data class CreateQuizQuestionDTO(
@@ -45,7 +47,9 @@ data class CreateQuizQuestionDTO(
     val guidelines: String? = null,
 
 
-    val keys: List<MatchPairDTO>? = null,
+    val keys: MutableList<PairDTO>? = null,
+    val values: MutableList<PairDTO>? = null,
+    val matchPairs: MutableList<MatchPair>? = null,
 
 
     val trueFalseAnswer: Boolean? = null,

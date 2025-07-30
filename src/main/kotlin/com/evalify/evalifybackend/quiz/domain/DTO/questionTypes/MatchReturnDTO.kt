@@ -4,12 +4,13 @@ import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
+import io.micrometer.common.KeyValues
 import java.util.UUID
 
 class MatchReturnDTO(
         val question: String,
         override val hint: String?,
-        val matchPair: MutableList<MatchShuffleDTO>,
+        val keyValues: MatchShuffleDTO,
         override val marks: Int,
         override val bloomsTaxonomy: Taxonomy?,
         override val co: Int,

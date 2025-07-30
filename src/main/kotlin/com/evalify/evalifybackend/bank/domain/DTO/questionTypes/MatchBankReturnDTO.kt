@@ -5,6 +5,8 @@ import com.evalify.evalifybackend.bank.domain.DTO.topic.ReturnTopicDTO
 import com.evalify.evalifybackend.questions.domain.Difficulty
 import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.questions.domain.Taxonomy
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchShuffleDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.Pair
 import com.evalify.evalifybackend.quiz.question.domain.MatchPair
 import java.util.UUID
 
@@ -12,7 +14,8 @@ class MatchBankReturnDTO(
         val question: String,
         override val questionId : UUID?,
         override val hint: String?,
-        val keys: MutableList<MatchPair>,
+        val keyValues:MatchShuffleDTO,
+        val matchPair: MutableList<MatchPair>?,
         override val marks: Int,
         override val bloomsTaxonomy: Taxonomy?,
         override val co: Int,

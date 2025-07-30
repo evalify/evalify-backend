@@ -4,7 +4,7 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 data class Pair(
-    val id: UUID? = randomUUID(),
+    val id: UUID = randomUUID(),
     val text:String
 
     ) {
