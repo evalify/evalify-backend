@@ -23,6 +23,7 @@ data class PatchQuestionDTO(
     val difficulty: Difficulty? = null,
     val options: MutableList<MCQOption>? = null,
     val answer: String? = null,
+    val link: String? = null,
     val driverCode: String? = null,
     val boilerCode: String? = null,
     val functionName: String? = null,

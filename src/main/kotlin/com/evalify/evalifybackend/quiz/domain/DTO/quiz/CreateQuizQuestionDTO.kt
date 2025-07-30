@@ -23,6 +23,7 @@ data class CreateQuizQuestionDTO(
     val co: Int,
     val negativeMark: Int?,
     val difficulty: Difficulty,
+    val link : String? = null,
 
     val options: List<MCQOption>? = null,
 

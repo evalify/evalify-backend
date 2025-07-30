@@ -34,7 +34,7 @@ class TrueFalse(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
-        @Type(JsonBinaryType::class) @Column(columnDefinition = "jsonb") val answer: Boolean,
+        val answer: Boolean,
 ) :
         BaseQuestion(
                 id = id,

@@ -21,7 +21,6 @@ class CodingBankReturnDTO(
     val driverCode: String?,
     val boilerCode: String?,
     val testcases: List<TestCaseDTO>?,
-    val answer: String?,
     val type : QuestionTypes?,
     override val topics: List<ReturnTopicDTO>
 ) : BankQuestionsReturnDTO(

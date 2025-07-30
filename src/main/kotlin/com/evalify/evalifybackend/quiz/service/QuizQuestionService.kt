@@ -180,7 +180,6 @@ open class QuizQuestionService(
 
                 testcases = dto.testcases?.map { TestCaseDTO(it.code,it.tags,it.isMinimal,it.language) } ?: listOf(),
                 language = dto.language,
-                answer = dto.answer
             )
 
             QuestionTypes.FILL_UP -> FillUp(
@@ -197,7 +196,6 @@ open class QuizQuestionService(
                 difficulty = dto.difficulty,
                 strictMatch = dto.strictMatch,
                 llmEval = dto.llmEval,
-                template = dto.template,
                 blanks = dto.blanks?.map { blanks(answers = it.answers, type = it.type) } ?: listOf()
             )
 
@@ -216,7 +214,6 @@ open class QuizQuestionService(
                 expectedAnswer = dto.expectedAnswer,
                 strictness = dto.strictness,
                 guidelines = dto.guidelines,
-                answer = dto.answer
             )
 
             QuestionTypes.FILE_UPLOAD  -> FileUpload(
@@ -231,9 +228,7 @@ open class QuizQuestionService(
                 co = dto.co,
                 negativeMark = dto.negativeMark,
                 difficulty = dto.difficulty,
-                expectedAnswer = dto.expectedAnswer,
-                strictness = dto.strictness,
-                guidelines = dto.guidelines
+                link = dto.link
             )
 
             QuestionTypes.MATCH_THE_FOLLOWING -> MatchTheFollowing(

@@ -30,9 +30,7 @@ class FileUpload(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
-        val expectedAnswer: String?,
-        val strictness: Float?,
-        val guidelines: String?
+    val link: String? = "",
 ) :
         BaseQuestion(
                 id = id,
@@ -61,9 +59,8 @@ class FileUpload(
                         co = co,
                         negativeMark = negativeMark,
                         difficulty = difficulty,
-                        expectedAnswer = expectedAnswer,
-                        strictness = strictness,
-                        guidelines = guidelines,
+                    link = link,
+
                 )
         return copiedQuestion
     }
@@ -96,10 +93,8 @@ class FileUpload(
                 bloomsTaxonomy = this.bloomsTaxonomy,
                 co = this.co,
                 difficulty = this.difficulty,
-                expectedAnswer = this.expectedAnswer,
-                strictness = this.strictness,
-                guidelines = this.guidelines,
-                explanation = this.explanation,
+                link = this.link,
+
                 type = this.getQuestionType(),
             questionId = questionId,
             topics = this.topic.map {
@@ -135,9 +130,7 @@ class FileUpload(
                         co = dto.co ?: this.co,
                         negativeMark = dto.negativeMark ?: this.negativeMark,
                         difficulty = dto.difficulty ?: this.difficulty,
-                        expectedAnswer = dto.expectedAnswer ?: this.expectedAnswer,
-                        strictness = dto.strictness ?: this.strictness,
-                        guidelines = dto.guidelines ?: this.guidelines
+                        link = dto.link?: this.link,
                 )
 
         return patchedQuestion

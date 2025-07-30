@@ -9,6 +9,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BankBlanksDTO
 import com.evalify.evalifybackend.quiz.question.domain.FillUp.blanks
 import java.util.UUID
 
+
 class FillUpsBankReturnDTO(
         val question: String,
         override val questionId : UUID?,
@@ -21,7 +22,6 @@ class FillUpsBankReturnDTO(
         val explanation: String?,
         val strictMatch: Boolean?,
         val llmEval: Boolean?,
-        val template: String?,
         val type: QuestionTypes?,
         override val topics: List<ReturnTopicDTO>
 

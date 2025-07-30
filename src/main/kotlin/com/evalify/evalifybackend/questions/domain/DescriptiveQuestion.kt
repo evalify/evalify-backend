@@ -33,7 +33,6 @@ class DescriptiveQuestion(
         val expectedAnswer: String?,
         val strictness: Float?,
         val guidelines: String?,
-        val answer: String?
 ) :
         BaseQuestion(
                 id = id,
@@ -64,8 +63,7 @@ class DescriptiveQuestion(
                         difficulty = difficulty,
                         expectedAnswer = expectedAnswer,
                         strictness = strictness,
-                        guidelines = guidelines,
-                        answer = answer
+                        guidelines = guidelines
                 )
         return copiedQuestion
     }
@@ -101,7 +99,6 @@ class DescriptiveQuestion(
                 strictness = this.strictness,
                 guidelines = this.guidelines,
                 explanation = this.explanation,
-                answer = this.answer,
                 type = this.getQuestionType(),
                 questionId = questionId,
                 topics = this.topic.map {
@@ -139,7 +136,6 @@ class DescriptiveQuestion(
                         expectedAnswer = dto.expectedAnswer ?: this.expectedAnswer,
                         strictness = dto.strictness ?: this.strictness,
                         guidelines = dto.guidelines ?: this.guidelines,
-                        answer = dto.answer ?: this.answer
                 )
 
         return patchedQuestion

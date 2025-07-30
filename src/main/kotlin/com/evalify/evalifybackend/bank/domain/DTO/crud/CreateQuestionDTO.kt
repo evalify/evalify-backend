@@ -52,6 +52,7 @@ CreateQuestionDTO(
     val keys: MutableList<PairDTO>? = null,
     val values : MutableList<PairDTO>? = null,
     val matchPair : MutableList<MatchPair>? = null,
+    val link: String? = null,
 
 
     val trueFalseAnswer: Boolean? = null

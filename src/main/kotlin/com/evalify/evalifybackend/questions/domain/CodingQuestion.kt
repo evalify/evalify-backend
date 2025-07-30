@@ -36,14 +36,14 @@ class CodingQuestion(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
+        @Column(columnDefinition = "TEXT")
         val driverCode: String? = null,
+        @Column(columnDefinition = "TEXT")
         val boilerCode: String? = null,
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
         val testcases: List<TestCaseDTO>,
-        val language: List<String>? = emptyList(),
-        val answer: String?
-) :
+        val language: List<String>? = emptyList()) :
         BaseQuestion(
                 id = id,
                 question = question,
@@ -81,8 +81,7 @@ class CodingQuestion(
                                         language = it.language
                                     )
                                 },
-                                language = language?.toList() ?: emptyList(),
-                                answer = answer
+                                language = language?.toList() ?: emptyList()
                         )
                 return copiedQuestion
         }
@@ -126,7 +125,6 @@ class CodingQuestion(
                         driverCode = this.driverCode,
                         boilerCode = this.boilerCode,
                         testcases = this.testcases,
-                        answer = this.answer,
                         type = this.getQuestionType(),
                         questionId = questionId,
                         topics = this.topic.map {
@@ -164,9 +162,7 @@ class CodingQuestion(
                                 driverCode = dto.driverCode ?: this.driverCode,
                                 boilerCode = dto.boilerCode ?: this.boilerCode,
                                 testcases = dto.testcases ?: this.testcases,
-                                language = dto.language ?: this.language,
-                                answer = dto.answer ?: this.answer
-                        )
+                                language = dto.language ?: this.language)
                 return patchedQuestion
         }
 

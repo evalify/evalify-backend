@@ -19,7 +19,6 @@ data class DescriptiveBankReturnDTO(
     val expectedAnswer:String?,
     val strictness:Float?,
     val guidelines:String?,
-    val answer : String?,
     val type : QuestionTypes?,
     override val topics: List<ReturnTopicDTO>
 ) : BankQuestionsReturnDTO(

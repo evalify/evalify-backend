@@ -15,10 +15,7 @@ data class FileUploadReturnDTO(
     override val bloomsTaxonomy: Taxonomy?,
     override val co: Int,
     override val difficulty: Difficulty?,
-    val explanation : String?,
-    val expectedAnswer:String?,
-    val strictness:Float?,
-    val guidelines:String?,
+    val link:String?,
     val type : QuestionTypes?,
     override val topics: List<ReturnTopicDTO>
 

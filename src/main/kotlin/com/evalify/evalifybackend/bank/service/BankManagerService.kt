@@ -353,7 +353,6 @@ class BankManagerService(
                                                         }
                                                                 ?: listOf(),
                                                 language = dto.language,
-                                                answer = dto.answer
                                         )
                                 QuestionTypes.FILL_UP ->
                                         FillUp(
@@ -370,7 +369,6 @@ class BankManagerService(
                                                 difficulty = dto.difficulty,
                                                 strictMatch = dto.strictMatch,
                                                 llmEval = dto.llmEval,
-                                                template = dto.template,
                                                 blanks =
                                                         dto.blanks?.map {
                                                                 blanks( answers = it.answers, type = it.type )
@@ -392,8 +390,7 @@ class BankManagerService(
                                                 difficulty = dto.difficulty,
                                                 expectedAnswer = dto.expectedAnswer,
                                                 strictness = dto.strictness,
-                                                guidelines = dto.guidelines,
-                                                answer = dto.answer
+                                                guidelines = dto.guidelines
                                         )
                                 QuestionTypes.FILE_UPLOAD ->
                                         FileUpload(
@@ -408,9 +405,7 @@ class BankManagerService(
                                                 co = dto.co,
                                                 negativeMark = dto.negativeMark,
                                                 difficulty = dto.difficulty,
-                                                expectedAnswer = dto.expectedAnswer,
-                                                strictness = dto.strictness,
-                                                guidelines = dto.guidelines
+                                                link = dto.link
                                         )
                                 QuestionTypes.MATCH_THE_FOLLOWING ->
                                         MatchTheFollowing(

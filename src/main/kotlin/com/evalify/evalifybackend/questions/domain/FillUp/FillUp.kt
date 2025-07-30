@@ -42,7 +42,6 @@ class FillUp(
         difficulty: Difficulty,
         val strictMatch: Boolean?,
         val llmEval: Boolean?,
-        val template: String?,
         @Type(JsonBinaryType::class) @Column(columnDefinition = "jsonb") val blanks: List<blanks>
 ) :
         BaseQuestion(
@@ -74,8 +73,7 @@ class FillUp(
                         difficulty = difficulty,
                         strictMatch = strictMatch,
                         llmEval = llmEval,
-                        template = template,
-                        blanks = blanks.map { 
+                        blanks = blanks.map {
                             blanks(
                                 id = it.id,
                                 answers = it.answers.toList(),
@@ -123,7 +121,6 @@ class FillUp(
                         difficulty = this.difficulty,
                         strictMatch = this.strictMatch,
                         llmEval = this.llmEval,
-                        template = this.template,
                         explanation = this.explanation,
                         type = this.getQuestionType(),
                         questionId = questionId,
@@ -158,7 +155,6 @@ class FillUp(
                         difficulty = dto.difficulty ?: this.difficulty,
                         strictMatch = dto.strictMatch ?: this.strictMatch,
                         llmEval = dto.llmEval ?: this.llmEval,
-                        template = dto.template ?: this.template,
                         blanks = dto.blanks ?: this.blanks
                 )
         return patchedQuestion
