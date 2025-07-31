@@ -180,6 +180,7 @@ open class QuizQuestionService(
 
                 testcases = dto.testcases?.map { TestCaseDTO(it.code,it.tags,it.isMinimal,it.language) } ?: listOf(),
                 language = dto.language,
+                answer = dto.answer,
             )
 
             QuestionTypes.FILL_UP -> FillUp(

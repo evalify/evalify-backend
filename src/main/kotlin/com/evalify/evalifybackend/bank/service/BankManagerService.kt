@@ -353,6 +353,7 @@ class BankManagerService(
                                                         }
                                                                 ?: listOf(),
                                                 language = dto.language,
+                                                answer = dto.answer,
                                         )
                                 QuestionTypes.FILL_UP ->
                                         FillUp(

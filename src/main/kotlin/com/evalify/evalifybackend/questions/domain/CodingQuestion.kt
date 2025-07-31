@@ -43,7 +43,9 @@ class CodingQuestion(
         @Type(JsonBinaryType::class)
         @Column(columnDefinition = "jsonb")
         val testcases: List<TestCaseDTO>,
-        val language: List<String>? = emptyList()) :
+        val language: List<String>? = emptyList(),
+        @Column(columnDefinition = "TEXT")
+        val answer:String? = null) :
         BaseQuestion(
                 id = id,
                 question = question,
