@@ -40,7 +40,7 @@ class QuizStudentService(
         studentId: String,
         ipAddress: String,
         requestTime: Instant,
-        dto : StartQuizDTO
+        password : String? = null,
     ): QuizQuestionReturnDTO? {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
@@ -61,7 +61,7 @@ class QuizStudentService(
                 message = "Quiz has ended."
             )
         }
-        if(dto.password == quiz.password){
+        if(password == quiz.password){
             return QuizQuestionReturnDTO(
                 quizTags = quiz.quizTags,
                 questions = emptyList(),

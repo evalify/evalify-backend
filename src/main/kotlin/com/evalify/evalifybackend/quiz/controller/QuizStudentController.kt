@@ -29,7 +29,7 @@ class QuizStudentController(
     private val quizCacheService: QuizCacheService,
     private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>
 ) {
-    @GetMapping("/start")
+    @PostMapping("/start")
     fun startQuiz(@PathVariable studentId: String,@PathVariable quizId: UUID, request: HttpServletRequest,@RequestBody dto : StartQuizDTO)
     : ResponseEntity<QuizQuestionReturnDTO?>{
         val requestTime = Instant.now()
@@ -51,7 +51,7 @@ class QuizStudentController(
             quizId = quizId,
             ipAddress = request.remoteAddr,
             requestTime = requestTime,
-            dto = dto
+            password = dto.password
         )
 
         // Store in cache for future use

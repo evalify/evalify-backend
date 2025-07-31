@@ -19,6 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+
 
 // This configuration class is responsible for setting up security filters and CORS configuration
 // for the application. It uses Spring Security to manage authentication and authorization.
@@ -142,4 +145,10 @@ class SecurityConfig(@Autowired private val jwtAuthenticationEntryPoint: JwtAuth
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
+}
+
+@Configuration
+class BCryptConfig {
+    @Bean
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 }

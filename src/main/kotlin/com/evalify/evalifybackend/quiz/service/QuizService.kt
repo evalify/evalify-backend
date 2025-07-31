@@ -49,9 +49,11 @@ import kotlin.String
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import org.springframework.dao.DataAccessException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+
 
 @Service
 @Transactional
@@ -67,6 +69,7 @@ class QuizService(
     private val semesterRepository: SemesterRepository,
     private val sectionRepository: SectionRepository,
     private val quizQuestionRepository: QuizQuestionRepository,
+    private val passwordEncoder: PasswordEncoder,
 ) {
 
     private val logger by logger()
@@ -135,6 +138,7 @@ class QuizService(
 
 
             val duration = quizDTO.durationInMinutes.toDuration(DurationUnit.MINUTES)
+            val password = if(quizDTO.password != null && quizDTO.password.isNotEmpty()) passwordEncoder.encode(quizDTO.password) else null
 
             // Create quiz entity
             val quiz =
@@ -155,7 +159,7 @@ class QuizService(
                             batch = batches.toMutableList(),
                             student = students.toMutableList(),
                             lab = labs.toMutableList(),
-                            password = quizDTO.password,
+                            password = password,
                     )
 
             // Create quiz user relationship
