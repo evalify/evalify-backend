@@ -9,6 +9,6 @@ enum class BlankType{
 
 data class BlanksDTO(
     val sNo: Int,
-    val id : UUID?,
+    val id : Int,
     val type: BlankType,
 )

@@ -20,11 +20,16 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import org.checkerframework.common.aliasing.qual.Unique
 import java.util.UUID
 import org.hibernate.annotations.Type
 import java.util.UUID.randomUUID
 
-class blanks(val id: UUID? = randomUUID(), val answers: List<String>,val type: BlankType)
+class blanks(
+
+        val id: Int,
+        val answers: List<String>,
+        val type: BlankType)
 
 @Entity
 @DiscriminatorValue(value = "FILL_UP")

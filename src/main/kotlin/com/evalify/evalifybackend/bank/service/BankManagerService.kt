@@ -371,7 +371,7 @@ class BankManagerService(
                                                 llmEval = dto.llmEval,
                                                 blanks =
                                                         dto.blanks?.map {
-                                                                blanks( answers = it.answers, type = it.type )
+                                                                blanks( answers = it.answers, type = it.type,id = it.id)
                                                         }
                                                                 ?: listOf()
                                         )

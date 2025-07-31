@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class BankBlanksDTO(
     val sNo: Int,
-    val id : UUID?,
+    val id : Int,
     val type: BlankType,
     val answers: List<String>
 ) {

@@ -4,7 +4,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BlankType
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.BlanksDTO
 
 data class BlankDTO(
-     val answers : List<String>,
+     val id : Int,
+    val answers : List<String>,
     val type : BlankType
 ) {
 }
