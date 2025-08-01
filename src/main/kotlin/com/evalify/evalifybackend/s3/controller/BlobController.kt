@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.net.URI
 
 @RestController
 @RequestMapping("/blob")
@@ -56,7 +57,7 @@ class BlobController @Autowired constructor(
 
     /**
      * Delete a file from Minio storage
-     * @param objectName The name of the object to delete
+     * @param url The URL of the object to delete
      */
     /**
      * Deletes a file from Minio object storage.
@@ -71,13 +72,42 @@ class BlobController @Autowired constructor(
      * @return ResponseEntity with success message or error details
      */
     @DeleteMapping("/delete")
-    fun deleteFile(@RequestParam("objectName") objectName: String): ResponseEntity<Map<String, String>> {
+    fun deleteFile(@RequestParam("url") url: String): ResponseEntity<Map<String, String>> {
         return try {
+            val objectName = extractObjectNameFromUrl(url)
             minioService.deleteFile(objectName)
             ResponseEntity.ok(mapOf("message" to "File deleted successfully"))
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapOf("error" to e.message.toString()))
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(mapOf("error" to "Failed to delete file: ${e.message}"))
+        }
+    }
+
+    /**
+     * Extract object name from Minio URL
+     * @param url The full URL of the object
+     * @return The object name (key)
+     */
+    private fun extractObjectNameFromUrl(url: String): String {
+        return try {
+            val uri = URI(url)
+            val path = uri.path
+
+            // Remove the bucket name from the path
+            // Expected format: /bucket-name/object-name
+            val pathParts = path.split("/").filter { it.isNotEmpty() }
+
+            if (pathParts.size < 2) {
+                throw IllegalArgumentException("Invalid URL format: cannot extract object name")
+            }
+
+            // Return everything after the bucket name as the object name
+            pathParts.drop(1).joinToString("/")
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Invalid URL format: ${e.message}")
         }
     }
 }
