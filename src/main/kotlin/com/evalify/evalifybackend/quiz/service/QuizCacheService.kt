@@ -14,7 +14,7 @@ class QuizCacheService(
     private val quizStudentService: QuizStudentService,
     private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>
 ) {
-    fun storeStudentQuestions(quizId: UUID,studentId: String,questions: List<QuizQuestionsReturnDTO>){
+    fun storeStudentQuestions(quizId: UUID,studentId: String?,questions: List<QuizQuestionsReturnDTO>){
         val qId = quizId.toString()
         val key = "quiz:$qId:student:$studentId:questions"
         val listOps = redisTemplate.opsForList()
@@ -27,14 +27,14 @@ class QuizCacheService(
 
     }
 
-    fun updateCache(quizId: UUID,studentId: String,answer: ResponseDTO){
+    fun updateCache(quizId: UUID,studentId: String?,answer: ResponseDTO){
         val qId = quizId.toString()
         val key = "quiz:$qId:student:$studentId:answers"
         redisTemplate.opsForHash<UUID, ResponseDTO>().put(key, answer.questionId,answer)
         //TODO() Set the ttl for this cache
     }
 
-    fun getAllAnswers(quizId: UUID, studentId: String): List<ResponseDTO> {
+    fun getAllAnswers(quizId: UUID, studentId: String?): List<ResponseDTO> {
         val qId = quizId.toString()
         val key = "quiz:$qId:student:$studentId:answers"
         val hashOps = redisTemplate.opsForHash<UUID, ResponseDTO>()

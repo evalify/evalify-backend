@@ -201,7 +201,7 @@ class QuizService(
                     }
 
             // Check permissions
-            QuizSecurityUtils.ensureOwnership(existingQuiz, userId)
+            //QuizSecurityUtils.ensureOwnership(existingQuiz, userId)
             QuizSecurityUtils.validateQuizState(existingQuiz, "EDIT")
 
             // QuizTags validation for edit

@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
@@ -12,9 +13,11 @@ import com.evalify.evalifybackend.quiz.domain.QuizTags
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
+import com.evalify.evalifybackend.section.domain.DTO.GetSectionDTO
 import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -26,7 +29,8 @@ class QuizStudentService(
     private val quizRepository: QuizRepository,
     private val userRepository: UserRepository,
     private val quizStudentRepository: QuizStudentRepository,
-    private val quizSetRepository: QuizSetRepository
+    private val quizSetRepository: QuizSetRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     fun distributeQuestions(user: Optional<User?>, quizSet: List<QuizSet>?, noOfSets: Int): MutableList<QuizSetQuestion>? {
@@ -37,7 +41,7 @@ class QuizStudentService(
 
     fun getQuizQuestions(
         quizId: UUID,
-        studentId: String,
+        studentId: String?,
         ipAddress: String,
         requestTime: Instant,
         password : String? = null,
@@ -45,32 +49,56 @@ class QuizStudentService(
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
-        val user = userRepository.findById(studentId)
+       val user = if(studentId != null){
+            userRepository.findById(studentId)
+        }else{
+            Optional.empty<User?>()
+        }
+
+
 
         if (requestTime.isBefore(quiz.startTime)) {
             return QuizQuestionReturnDTO(
-                quizTags = quiz.quizTags,
+                quizTags = quiz.quizTags.map { tags ->
+                    QuizTagsReturnDTO(
+                        tags.id,
+                        tags.name,
+                        tags.description
+                    )
+                },
                 questions = emptyList(),
                 message = "Quiz has not started yet."
             )
         }
         if (requestTime.isAfter(quiz.endTime)) {
             return QuizQuestionReturnDTO(
-                quizTags = quiz.quizTags,
+                quizTags = quiz.quizTags.map { tags ->
+                    QuizTagsReturnDTO(
+                        tags.id,
+                        tags.name,
+                        tags.description
+                    )
+                },
                 questions = emptyList(),
                 message = "Quiz has ended."
             )
         }
-        if(password == quiz.password){
-            return QuizQuestionReturnDTO(
-                quizTags = quiz.quizTags,
-                questions = emptyList(),
-                message = "Wrong password."
-            )
-        }
+//        if(!passwordEncoder.matches(password,quiz.password)){
+//            return QuizQuestionReturnDTO(
+//                quizTags = quiz.quizTags.map { tags ->
+//                    QuizTagsReturnDTO(
+//                        tags.id,
+//                        tags.name,
+//                        tags.description
+//                    )
+//                },
+//                questions = emptyList(),
+//                message = "Wrong password."
+//            )
+//        }
 
 
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId?.toString() ?: "")
             ?: quizStudentRepository.save(
                 QuizStudent(
                     quiz = quiz,
@@ -89,24 +117,30 @@ class QuizStudentService(
         }
 
         val quizSet = quizSetRepository.findByQuiz(quiz)
-        val finalQuestions = distributeQuestions(user, quizSet, quiz.noOfSets)
+        val finalQuestions = quiz.section.flatMap { it.quizQuestions }
         val quizTags = quiz.quizTags
 
         val questions =  finalQuestions?.map { question ->
             QuizQuestionsReturnDTO(
-                questions = question.question.question.mapToType(quiz.shuffleOptions),
-                section = question.question.section
+                questions = question.question.mapToType(quiz.shuffleOptions),
+                section = GetSectionDTO(id = question.section.id, name = question.section.name )
             )
         } ?: emptyList()
         return QuizQuestionReturnDTO(
-            quizTags = quizTags,
-            questions = questions
+            quizTags = quizTags.map { tags ->
+                QuizTagsReturnDTO(
+                    tags.id,
+                    tags.name,
+                    tags.description
+                )
+            },
+            questions = questions.shuffled()
 
         )
     }
 
-    fun saveQuestion(quizId: UUID, studentId: String, answer: ResponseDTO) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+    fun saveQuestion(quizId: UUID, studentId: String?, answer: ResponseDTO) {
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
             ?: throw NotFoundException("QuizStudent record not found")
         val responses = quizStudent.responses
         val existingIndex = responses.indexOfFirst { it.questionId == answer.questionId }
@@ -118,8 +152,8 @@ class QuizStudentService(
         quizStudentRepository.save(quizStudent)
     }
 
-    fun updateQuiz(quizId: UUID, studentId: String, responses: List<ResponseDTO>) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+    fun updateQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
             ?: throw NotFoundException("Quiz with id $quizId not found")
 
         val existingResponses = quizStudent.responses
@@ -136,8 +170,8 @@ class QuizStudentService(
         quizStudentRepository.save(quizStudent)
     }
 
-    fun submitQuiz(quizId: UUID, studentId: String, responses: List<ResponseDTO>) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId)
+    fun submitQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
             ?: throw NotFoundException("Quiz with id $quizId not found")
 
         val existingResponses = quizStudent.responses
