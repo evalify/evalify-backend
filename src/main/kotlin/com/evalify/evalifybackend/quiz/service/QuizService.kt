@@ -16,6 +16,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.BatchInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.GetQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.LabInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
@@ -47,6 +48,7 @@ import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.semester.repository.SemesterRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
+import com.evalify.evalifybackend.user.domain.dto.UserInfo
 import com.evalify.evalifybackend.user.repository.UserRepository
 import java.util.*
 import kotlin.String
@@ -306,7 +308,7 @@ class QuizService(
     }
 
     @Transactional(readOnly = true)
-    fun getQuizById(quizId: UUID, userId: String): QuizPreviewDTO {
+    fun getQuizById(quizId: UUID, userId: String): GetQuizPreviewDTO {
         logger.info("Fetching quiz: {} by user: {}", quizId, userId)
 
         try {
@@ -322,7 +324,7 @@ class QuizService(
                 else -> QuizStatus.ACTIVE
             }
 
-            val result = QuizPreviewDTO(
+            val result = GetQuizPreviewDTO(
                 id = quiz.id,
                 name = quiz.name,
                 description = quiz.description ?: "",
@@ -356,7 +358,15 @@ class QuizService(
                     courseCode = course.code
                 )
                 },
-                isPublished = quiz.publishQuiz
+                isPublished = quiz.publishQuiz,
+                students = quiz.student.map {
+                    student ->
+                    UserInfo(
+                        id = student.id,
+                        name = student.name,
+                        email = student.email
+                    )
+                }
             )
             
             logger.debug("Successfully retrieved quiz: {} for user: {}", quizId, userId)

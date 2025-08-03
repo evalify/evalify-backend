@@ -1,6 +1,5 @@
 package com.evalify.evalifybackend.user.domain
 
-import com.evalify.evalifybackend.quiz.domain.Quiz
 import jakarta.persistence.*
 import java.sql.Timestamp
 import java.time.Instant
@@ -30,11 +29,5 @@ class User (
     var isActive: Boolean = true,
     var createdAt: Timestamp = Timestamp.from(Instant.now()),
     var lastPasswordChange: Timestamp? = null,
-    @ManyToMany
-    @JoinTable(
-        name = "student_quiz",
-        joinColumns = [JoinColumn(name="student_id")],
-        inverseJoinColumns = [JoinColumn(name="quiz_id")]
-    )
-    val quiz: List<Quiz> = listOf(),
+
 )
