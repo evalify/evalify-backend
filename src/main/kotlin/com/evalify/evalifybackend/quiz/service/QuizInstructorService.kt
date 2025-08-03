@@ -1,7 +1,9 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.BatchInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.LabInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -81,8 +83,23 @@ class QuizInstructorService(private val quizRepository: QuizRepository) {
             description = quiz.description ?: "",
             startTime = quiz.startTime,
             endTime = quiz.endTime,
-            batches = batchNames,
-            labs = labNames,
+            batches = quiz.batch.map{
+                batch ->
+                BatchInfoDTO(
+                    id = batch.id,
+                    name = batch.name
+
+                )
+            },
+            labs = quiz.lab.map{
+                lab ->
+                LabInfoDTO(
+                    id = lab.id,
+                    name = lab.name,
+                    block = lab.block,
+                    ipSubnet = lab.ipSubnet
+                )
+            },
             duration = quiz.duration,
             publishResult = quiz.publishResult,
             status = status,

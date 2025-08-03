@@ -14,7 +14,9 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.BatchInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.LabInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
@@ -238,8 +240,23 @@ class QuizService(
                 description = savedQuiz.description ?: "",
                 startTime = savedQuiz.startTime,
                 endTime = savedQuiz.endTime,
-                batches = savedQuiz.batch.map { batch -> batch.name },
-                labs = savedQuiz.lab.map { lab -> lab.name },
+                batches = savedQuiz.batch.map{
+                        batch ->
+                    BatchInfoDTO(
+                        id = batch.id,
+                        name = batch.name
+
+                    )
+                },
+                labs = savedQuiz.lab.map{
+                        lab ->
+                    LabInfoDTO(
+                        id = lab.id,
+                        name = lab.name,
+                        block = lab.block,
+                        ipSubnet = lab.ipSubnet
+                    )
+                },
                 duration = savedQuiz.duration,
                 publishResult = savedQuiz.publishResult,
                 status = status,
@@ -311,8 +328,23 @@ class QuizService(
                 description = quiz.description ?: "",
                 startTime = quiz.startTime,
                 endTime = quiz.endTime,
-                batches = quiz.batch.map { batch -> batch.name },
-                labs = quiz.lab.map { lab -> lab.name },
+                batches = quiz.batch.map{
+                        batch ->
+                    BatchInfoDTO(
+                        id = batch.id,
+                        name = batch.name
+
+                    )
+                },
+                labs = quiz.lab.map{
+                        lab ->
+                    LabInfoDTO(
+                        id = lab.id,
+                        name = lab.name,
+                        block = lab.block,
+                        ipSubnet = lab.ipSubnet
+                    )
+                },
                 duration = quiz.duration,
                 publishResult = quiz.publishResult,
                 status = status,
@@ -852,8 +884,23 @@ class QuizService(
                 description = quiz.description ?: "",
                 startTime = quiz.startTime,
                 endTime = quiz.endTime,
-                batches = quiz.batch.map { batch -> batch.name },
-                labs = quiz.lab.map { lab -> lab.name },
+                batches = quiz.batch.map{
+                        batch ->
+                    BatchInfoDTO(
+                        id = batch.id,
+                        name = batch.name
+
+                    )
+                },
+                labs = quiz.lab.map{
+                        lab ->
+                    LabInfoDTO(
+                        id = lab.id,
+                        name = lab.name,
+                        block = lab.block,
+                        ipSubnet = lab.ipSubnet
+                    )
+                },
                 duration = quiz.duration,
                 publishResult = quiz.publishResult,
                 status = status,

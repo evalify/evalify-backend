@@ -11,8 +11,8 @@ data class QuizPreviewDTO(
     val description: String,
     val startTime: Instant,
     val endTime:Instant,
-    val batches: List<String>,
-    val labs:List<String>,
+    val batches: List<BatchInfoDTO>,
+    val labs:List<LabInfoDTO>,
     val duration: Duration,
     val publishResult: Boolean,
     val status: QuizStatus?,
@@ -28,4 +28,16 @@ data class CourseInfoDTO(
     val id: UUID?,
     val name: String,
     val courseCode: String
+)
+
+data class BatchInfoDTO(
+    val id: UUID?,
+    val name: String
+)
+
+data class LabInfoDTO(
+    val id: UUID?,
+    val name: String,
+    var block: String,
+    var ipSubnet: String
 )
