@@ -4,6 +4,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
+import com.evalify.evalifybackend.quiz.domain.QuizStudent
 import com.evalify.evalifybackend.quiz.exception.QuizValidationException
 import com.evalify.evalifybackend.quiz.exception.SectionValidationException
 import java.time.Instant
@@ -237,13 +238,15 @@ object QuizValidationUtils {
      * Validates that a quiz can be unpublished
      * @throws QuizValidationException if the quiz has already started or completed
      */
-    fun validateQuizUnpublish(quiz: Quiz) {
+    fun validateQuizUnpublish(quiz: Quiz,student: List<QuizStudent>) {
         if (!quiz.publishQuiz) {
             throw QuizValidationException("Quiz is not published", "publishQuiz")
         }
         
         val now = Instant.now()
-        if (quiz.startTime.isBefore(now)) {
+
+
+        if (student.isNotEmpty()) {
             throw QuizValidationException("Cannot unpublish quiz that has already started or completed", "startTime")
         }
     }

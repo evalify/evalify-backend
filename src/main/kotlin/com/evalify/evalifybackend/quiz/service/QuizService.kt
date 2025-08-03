@@ -36,6 +36,7 @@ import com.evalify.evalifybackend.quiz.question.domain.quizQuestion.QuizQuestion
 import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
+import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
 import com.evalify.evalifybackend.quiz.repository.QuizTagsRepository
 import com.evalify.evalifybackend.quiz.util.CombinationUtils
 import com.evalify.evalifybackend.quiz.util.QuizSecurityUtils
@@ -70,6 +71,7 @@ class QuizService(
     private val sectionRepository: SectionRepository,
     private val quizQuestionRepository: QuizQuestionRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val quizStudentRepository: QuizStudentRepository
 ) {
 
     private val logger by logger()
@@ -241,7 +243,8 @@ class QuizService(
                 publishResult = savedQuiz.publishResult,
                 status = status,
                 isProtected = savedQuiz.password != null || savedQuiz.password?.isNotEmpty() == true,
-                courseCodes = savedQuiz.course.map { course -> course.code }
+                courseCodes = savedQuiz.course.map { course -> course.code },
+                isPublished = savedQuiz.publishQuiz
             )
         } catch (e: DataAccessException) {
             logger.error("Database error while editing quiz: {} by user: {}", quizId, userId, e)
@@ -307,7 +310,8 @@ class QuizService(
                 publishResult = quiz.publishResult,
                 status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
-                courseCodes = quiz.course.map { course -> course.code }
+                courseCodes = quiz.course.map { course -> course.code },
+                isPublished = quiz.publishQuiz
             )
             
             logger.debug("Successfully retrieved quiz: {} for user: {}", quizId, userId)
@@ -416,9 +420,10 @@ class QuizService(
             val quiz = quizRepository.findById(quizId).orElseThrow { 
                 NotFoundException("Quiz with id $quizId not found") 
             }
+            val student = quizStudentRepository.findByQuizId(quizId)
 
             // Validate that quiz can be unpublished
-            QuizValidationUtils.validateQuizUnpublish(quiz)
+            QuizValidationUtils.validateQuizUnpublish(quiz,student)
 
             // Create unpublished version of quiz
             val unpublishedQuiz = Quiz(
@@ -840,7 +845,8 @@ class QuizService(
                 publishResult = quiz.publishResult,
                 status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
-                courseCodes = quiz.course.map { course -> course.code }
+                courseCodes = quiz.course.map { course -> course.code },
+                isPublished = quiz.publishQuiz
             )
 
         }

@@ -86,7 +86,8 @@ class QuizInstructorService(private val quizRepository: QuizRepository) {
             publishResult = quiz.publishResult,
             status = status,
             isProtected = isProtected,
-            courseCodes = quiz.course.map { it.code }
+            courseCodes = quiz.course.map { it.code },
+            isPublished = quiz.publishQuiz
         )
     }
 

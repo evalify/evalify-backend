@@ -10,4 +10,6 @@ import java.util.UUID
 @Repository
 interface QuizStudentRepository : JpaRepository<QuizStudent, UUID>{
     fun findByQuizIdAndStudentId( quizId: UUID?, userId: String): QuizStudent?
+
+    fun findByQuizId(quizId: UUID): List<QuizStudent>
 }

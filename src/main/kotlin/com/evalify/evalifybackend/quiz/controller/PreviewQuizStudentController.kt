@@ -27,7 +27,7 @@ class PreviewQuizStudentController(
     @GetMapping("/course/{courseId}/quiz")
     fun getQuizByCourse(@PathVariable courseId: UUID): List<PreviewQuizDTO> {
         val studentId = getCurrentUserId()
-        println(studentId)
+        //println(studentId)
         return previewQuizStudentService.getQuizByCourse(studentId =studentId ,courseId=courseId)
     }
 
