@@ -16,10 +16,12 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.BatchInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.GetQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.GetQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.LabInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizTagDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
@@ -973,6 +975,98 @@ class QuizService(
         }
         return final
     }
-}
+
+    fun getSharedUsersForQuiz(quizId: UUID) : List<SharedUserDTO> {
+        val quiz = quizRepository.findById(quizId).orElseThrow{ QuizNotFoundException(quizId.toString())}
+
+        val sharedUsers = quiz.sharedUsers.filter { it.tags == SharedTags.SHARED }
+        val final = sharedUsers.map { users ->
+            val user = SimpleUserDTO(
+                id = users.user?.id,
+                name = users.user?.name,
+                email = users.user?.email,
+                profileId = users.user?.profileId
+            )
+            SharedUserDTO(
+                user = user,
+                tag = users.tags
+            )
+        }
+        return final
+    }
+
+    fun getCompleteQuizDetailsById(quizId: UUID) : GetQuizDTO {
+        val quiz = quizRepository.findById(quizId).orElseThrow { QuizNotFoundException(quizId.toString()) }
+        val sharedUsers = getSharedUsersForQuiz(quizId)
+        val ownUser = quiz.sharedUsers.find { it.tags == SharedTags.OWNER }?.user
+        val owner = SimpleUserDTO(
+            id = ownUser?.id,
+            name = ownUser?.name,
+            email = ownUser?.email,
+            profileId = ownUser?.profileId
+        )
+        val quizDetails = GetQuizDTO(
+            id = quiz.id,
+            name = quiz.name,
+            description = quiz.description ?: "",
+            startTime = quiz.startTime,
+            endTime = quiz.endTime,
+            duration = quiz.duration,
+            publishResult = quiz.publishResult,
+            batches = quiz.batch.map { batch ->
+                BatchInfoDTO(
+                    id = batch.id,
+                    name = batch.name
+                )
+            },
+            labs = quiz.lab.map { lab ->
+                LabInfoDTO(
+                    id = lab.id,
+                    name = lab.name,
+                    block = lab.block,
+                    ipSubnet = lab.ipSubnet
+                )
+            },
+            status = when {
+                quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
+                quiz.endTime.isBefore(Instant.now()) -> QuizStatus.COMPLETED
+                else -> QuizStatus.ACTIVE
+            },
+            isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
+            courseCodes = quiz.course.map { course -> CourseInfoDTO(
+                id = course.id,
+                name = course.name,
+                courseCode = course.code
+            )},
+            isPublished = quiz.publishQuiz,
+            sharedWith = sharedUsers,
+            owner = owner,
+            instructions = quiz.instructions,
+            students = quiz.student.map{student ->
+
+                SimpleUserDTO(
+                    id = student.id,
+                    name = student.email,
+                    email = student.email,
+                    profileId = student.profileId
+
+                )
+            },
+            quizTags = quiz.quizTags.map { tags ->
+                QuizTagDTO(
+                    id = tags.id,
+                    name = tags.name,
+
+                )
+            },
+            createdAt = quiz.createdAt,
+            noOfSets = quiz.noOfSets
+
+        )
+        return quizDetails
+
+        }
+    }
+
 
 

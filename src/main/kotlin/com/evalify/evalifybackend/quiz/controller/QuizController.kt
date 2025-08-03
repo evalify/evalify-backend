@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnD
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizCourseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizLabDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.UpdateQuizStudentDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.GetQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.GetQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
@@ -242,7 +243,7 @@ class QuizController(
                 .body(mapOf("message" to "Quiz created successfully", "quizId" to quizId))
     }
 
-    @GetMapping("/{quizId}")
+    @GetMapping("/{quizId}/preview")
     fun getQuiz(@PathVariable quizId: UUID): ResponseEntity<GetQuizPreviewDTO> {
         val userId = getCurrentUserId()
         logger.info("Fetching quiz: {} for user: {}", quizId, userId)
@@ -250,6 +251,15 @@ class QuizController(
         val quiz = quizService.getQuizById(quizId, userId)
 
         logger.debug("Successfully retrieved quiz: {} for user: {}", quizId, userId)
+        return ResponseEntity.ok(quiz)
+    }
+
+    @GetMapping("/{quizId}")
+    fun getQuizAll(@PathVariable quizId: UUID): ResponseEntity<GetQuizDTO> {
+        logger.info("Fetching quiz: {} for all users", quizId)
+
+        val quiz = quizService.getCompleteQuizDetailsById(quizId)
+        logger.debug("Successfully retrieved quiz: {} for all users", quizId)
         return ResponseEntity.ok(quiz)
     }
 
@@ -452,6 +462,15 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
 
         logger.info("Successfully unshared quiz: {} from {} users", quizId, dto.userID.size)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/{quizId}/share")
+    fun getSharedUsersForQuiz(@PathVariable quizId: UUID): ResponseEntity<List<SharedUserDTO>> {
+        val userId = getCurrentUserId()
+        logger.info("Fetching shared users for the quiz: {}",quizId)
+        val result = quizService.getSharedUsersForQuiz(quizId)
+        logger.info("Successfully retrieved shared users for the quiz: {}",quizId)
+        return ResponseEntity.ok(result)
     }
 
     @GetMapping("/shared")
