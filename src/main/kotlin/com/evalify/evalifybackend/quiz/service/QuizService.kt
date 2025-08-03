@@ -138,7 +138,7 @@ class QuizService(
 
 
             val duration = quizDTO.durationInMinutes.toDuration(DurationUnit.MINUTES)
-            val password = if(quizDTO.password != null && quizDTO.password.isNotEmpty()) passwordEncoder.encode(quizDTO.password) else null
+            val password = if(quizDTO.password != null && quizDTO.password.isNotEmpty()) quizDTO.password else null
 
             // Create quiz entity
             val quiz =
@@ -191,14 +191,17 @@ class QuizService(
         logger.info("Editing quiz: {} by user: {}", quizId, userId)
 
         try {
+            val existingQuiz = quizRepository.findById(quizId).orElseThrow {
+                NotFoundException("Quiz with id $quizId not found")
+            }
+            
+            // Validate that quiz is not published
+            QuizValidationUtils.validateQuizNotPublished(existingQuiz)
             // Validate input
             QuizValidationUtils.validatePatchQuizData(dto)
 
             // Fetch and validate quiz
-            val existingQuiz =
-                    quizRepository.findById(quizId).orElseThrow {
-                        QuizNotFoundException(quizId.toString())
-                    }
+
 
             // Check permissions
             //QuizSecurityUtils.ensureOwnership(existingQuiz, userId)
@@ -405,10 +408,62 @@ class QuizService(
 
 
 
-    fun publishQuiz(quizId: UUID, noSets: Int, dto: SelectionCriteriaDTO) {
+    @Transactional
+    fun unpublishQuiz(quizId: UUID) {
+        logger.info("Unpublishing quiz: {}", quizId)
+        
+        try {
+            val quiz = quizRepository.findById(quizId).orElseThrow { 
+                NotFoundException("Quiz with id $quizId not found") 
+            }
+
+            // Validate that quiz can be unpublished
+            QuizValidationUtils.validateQuizUnpublish(quiz)
+
+            // Create unpublished version of quiz
+            val unpublishedQuiz = Quiz(
+                id = quiz.id,
+                name = quiz.name,
+                description = quiz.description,
+                instructions = quiz.instructions,
+                startTime = quiz.startTime,
+                endTime = quiz.endTime,
+                duration = quiz.duration,
+                password = quiz.password,
+                fullScreen = quiz.fullScreen,
+                shuffleQuestions = quiz.shuffleQuestions,
+                shuffleOptions = quiz.shuffleOptions,
+                linearQuiz = quiz.linearQuiz,
+                calculator = quiz.calculator,
+                autoSubmit = quiz.autoSubmit,
+                publishResult = quiz.publishResult,
+                publishQuiz = false,
+                section = quiz.section,
+                course = quiz.course,
+                student = quiz.student,
+                lab = quiz.lab,
+                batch = quiz.batch,
+                createdAt = quiz.createdAt,
+                noOfSets = quiz.noOfSets,
+                sharedUsers = quiz.sharedUsers
+            )
+
+            quizRepository.save(unpublishedQuiz)
+            logger.info("Successfully unpublished quiz: {}", quizId)
+        } catch (e: Exception) {
+            logger.error("Error while unpublishing quiz: {}", quizId, e)
+            throw e
+        }
+    }
+
+    fun publishQuiz(quizId: UUID, dto: SelectionCriteriaDTO?,noOfQuestions:Int?) {
         val quiz =
                 quizRepository.findById(quizId).orElseThrow { NotFoundException("Quiz not found") }
 
+        // Validate quiz assignments using QuizValidationUtils
+        QuizValidationUtils.validateQuizAssignments(quiz)
+
+        if (dto != null) {
         val allQuestions: List<QuizQuestion> = quiz.section.flatMap { it.quizQuestions }
 
         val grouped: Map<UUID, Map<String, List<QuizQuestion>>> =
@@ -458,28 +513,47 @@ class QuizService(
                         }
                         .distinctBy { it.mapNotNull { q -> q.question.id }.sorted() }
 
-        if (validSets.size < noSets)
+        if (validSets.size < dto.noSets){
                 throw IllegalStateException(
-                        "Only ${validSets.size} valid sets available, but $noSets requested"
-                )
+                        "Only ${validSets.size} valid sets available, but ${dto.noSets} requested"
+                )}
 
-        val publishedQuiz = quiz.publishQuiz(noSets)
-        val updatedQuiz = quizRepository.save(publishedQuiz)
+            for (i in 1 until dto.noSets) {
+                val set = validSets[i]
 
-        for (i in 0 until noSets) {
-            val set = validSets[i]
+                val quizSet = QuizSet(setNumber = i, quiz = quiz)
 
-            val quizSet = QuizSet(setNumber = i, quiz = updatedQuiz)
-
-            val quizSetQuestions =
+                val quizSetQuestions =
                     set.mapIndexed { order, quizQuestion ->
                         QuizSetQuestion(quizSet = quizSet, question = quizQuestion, )
                     }
 
+                quizSet.questions.addAll(quizSetQuestions)
+                quizSetRepository.save(quizSet)
+            }
+
+        val publishedQuiz = quiz.publishQuiz(dto.noSets)
+        quizRepository.save(publishedQuiz)
+
+
+    }
+        else{
+            val allQuestions: List<QuizQuestion> = quiz.section.flatMap { it.quizQuestions }.shuffled()
+            val selectedQuestions = if(noOfQuestions != null) allQuestions.take(noOfQuestions) else allQuestions
+            val quizSet = QuizSet(setNumber = 1, quiz = quiz)
+            val quizSetQuestions = selectedQuestions.mapIndexed { order, quizQuestion ->
+                QuizSetQuestion(quizSet = quizSet, question = quizQuestion, )
+            }
             quizSet.questions.addAll(quizSetQuestions)
             quizSetRepository.save(quizSet)
-        }
-    }
+            val publishedQuiz = quiz.publishQuiz(1)
+            quizRepository.save(publishedQuiz)
+
+
+
+
+
+        }}
 
     fun addStudentToQuiz(quizId: UUID, studentId: List<String>) {
         val quiz =

@@ -466,11 +466,18 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun publishQuiz(
             @PathVariable quizId: UUID,
-            @RequestParam(required = false) quizSets: Int,
-            @RequestBody dto: SelectionCriteriaDTO
+            @RequestParam(required = false)noOfQuestions: Int? = null,
+            @RequestBody dto: SelectionCriteriaDTO? = null
     ) {
 
-        quizService.publishQuiz(quizId, quizSets, dto)
+        quizService.publishQuiz(quizId, dto,noOfQuestions)
+    }
+    @PostMapping("{quizId}/unpublish")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun unpublishQuiz(
+            @PathVariable quizId: UUID
+    ) {
+        quizService.unpublishQuiz(quizId)
     }
 
     @GetMapping("/sharedTo")

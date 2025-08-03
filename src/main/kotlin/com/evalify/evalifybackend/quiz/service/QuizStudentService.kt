@@ -6,6 +6,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDT
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
@@ -33,10 +34,15 @@ class QuizStudentService(
     private val passwordEncoder: PasswordEncoder
 ) {
 
-    fun distributeQuestions(user: Optional<User?>, quizSet: List<QuizSet>?, noOfSets: Int): MutableList<QuizSetQuestion>? {
-        val quizNo = Random.nextInt(0, noOfSets) // 0-based index
-        val selectedSet = quizSetRepository.findBySetNumber(quizNo)
-        return selectedSet?.questions
+    fun distributeQuestions(quiz: Quiz, quizSets: List<QuizSet>): List<QuizSetQuestion> {
+        // If there's only one set, return its questions
+        if (quiz.noOfSets == 1 && quizSets.isNotEmpty()) {
+            return quizSets[0].questions.toList()
+        }
+        
+        // For multiple sets, randomly select one set
+        val quizNo = Random.nextInt(0, quiz.noOfSets)
+        return quizSets.find { it.setNumber == quizNo }?.questions ?: emptyList()
     }
 
     fun getQuizQuestions(
@@ -45,13 +51,13 @@ class QuizStudentService(
         ipAddress: String,
         requestTime: Instant,
         password : String? = null,
-    ): QuizQuestionReturnDTO? {
+    ): QuizQuestionReturnDTO {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
-       val user = if(studentId != null){
+        val user = if(studentId != null) {
             userRepository.findById(studentId)
-        }else{
+        } else {
             Optional.empty<User?>()
         }
 
@@ -83,19 +89,19 @@ class QuizStudentService(
                 message = "Quiz has ended."
             )
         }
-//        if(!passwordEncoder.matches(password,quiz.password)){
-//            return QuizQuestionReturnDTO(
-//                quizTags = quiz.quizTags.map { tags ->
-//                    QuizTagsReturnDTO(
-//                        tags.id,
-//                        tags.name,
-//                        tags.description
-//                    )
-//                },
-//                questions = emptyList(),
-//                message = "Wrong password."
-//            )
-//        }
+        if(password != quiz.password ){
+            return QuizQuestionReturnDTO(
+                quizTags = quiz.quizTags.map { tags ->
+                    QuizTagsReturnDTO(
+                        tags.id,
+                        tags.name,
+                        tags.description
+                    )
+                },
+                questions = emptyList(),
+                message = "Wrong password."
+            )
+        }
 
 
         val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId?.toString() ?: "")
@@ -116,26 +122,39 @@ class QuizStudentService(
             quizStudentRepository.save(quizStudent)
         }
 
-        val quizSet = quizSetRepository.findByQuiz(quiz)
-        val finalQuestions = quiz.section.flatMap { it.quizQuestions }
-        val quizTags = quiz.quizTags
+        // Get all quiz sets for this quiz
+        val quizSets = quizSetRepository.findByQuiz(quiz)?.toList() ?: emptyList()
 
-        val questions =  finalQuestions?.map { question ->
-            QuizQuestionsReturnDTO(
-                questions = question.question.mapToType(quiz.shuffleOptions),
-                section = GetSectionDTO(id = question.section.id, name = question.section.name )
-            )
-        } ?: emptyList()
+        // Get questions based on quiz configuration
+        val questions = if (quizSets.isEmpty()) {
+            emptyList()
+        } else {
+            // Distribute questions according to quiz settings
+            val selectedQuestions = distributeQuestions(quiz, quizSets)
+            
+            // Map questions to DTO
+            selectedQuestions.map { question ->
+                QuizQuestionsReturnDTO(
+                    questions = question.question.question.mapToType(),
+                    section = GetSectionDTO(
+                        id = question.question.section.id,
+                        name = question.question.section.name
+                    )
+                )
+            }
+        }
+
+        // Create final response
         return QuizQuestionReturnDTO(
-            quizTags = quizTags.map { tags ->
+            quizTags = quiz.quizTags.map { tags ->
                 QuizTagsReturnDTO(
-                    tags.id,
-                    tags.name,
-                    tags.description
+                    id = tags.id,
+                    name = tags.name,
+                    description = tags.description
                 )
             },
-            questions = questions.shuffled()
-
+            // Only shuffle if quiz settings allow it
+            questions = if (quiz.shuffleQuestions) questions.shuffled() else questions
         )
     }
 

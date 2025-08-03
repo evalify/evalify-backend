@@ -3,6 +3,7 @@ package com.evalify.evalifybackend.quiz.util
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CreateQuizQuestionDTO
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.exception.QuizValidationException
 import com.evalify.evalifybackend.quiz.exception.SectionValidationException
 import java.time.Instant
@@ -209,6 +210,41 @@ object QuizValidationUtils {
     private fun validateSectionId(sectionId: UUID) {
         if (sectionId.toString().isBlank()) {
             throw SectionValidationException("Section ID cannot be empty", "sectionId")
+        }
+    }
+
+    /**
+     * Validates that a quiz has either students or batches assigned before publishing
+     * @throws QuizValidationException if neither students nor batches are assigned
+     */
+    fun validateQuizAssignments(quiz: Quiz) {
+        if (quiz.student.isEmpty() && quiz.batch.isEmpty()) {
+            throw QuizValidationException("Cannot publish quiz without assigning students or batches", "students/batches")
+        }
+    }
+
+    /**
+     * Validates that a quiz is not published before editing
+     * @throws QuizValidationException if the quiz is already published
+     */
+    fun validateQuizNotPublished(quiz: Quiz) {
+        if (quiz.publishQuiz) {
+            throw QuizValidationException("Published quiz cannot be edited", "publishQuiz")
+        }
+    }
+
+    /**
+     * Validates that a quiz can be unpublished
+     * @throws QuizValidationException if the quiz has already started or completed
+     */
+    fun validateQuizUnpublish(quiz: Quiz) {
+        if (!quiz.publishQuiz) {
+            throw QuizValidationException("Quiz is not published", "publishQuiz")
+        }
+        
+        val now = Instant.now()
+        if (quiz.startTime.isBefore(now)) {
+            throw QuizValidationException("Cannot unpublish quiz that has already started or completed", "startTime")
         }
     }
 }
