@@ -462,7 +462,7 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("{quizId}/publish")
+    @PatchMapping("{quizId}/publish")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun publishQuiz(
             @PathVariable quizId: UUID,
@@ -472,7 +472,7 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
 
         quizService.publishQuiz(quizId, dto,noOfQuestions)
     }
-    @PostMapping("{quizId}/unpublish")
+    @DeleteMapping("{quizId}/publish")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun unpublishQuiz(
             @PathVariable quizId: UUID
