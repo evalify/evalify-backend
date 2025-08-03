@@ -73,7 +73,7 @@ class Quiz(
 
     @ManyToMany
     @JoinTable(
-        name = "quiz_lab",
+        name = "lab_quiz",
         joinColumns = [JoinColumn(name="quiz_id")],
         inverseJoinColumns = [JoinColumn(name="lab_id")]
     )

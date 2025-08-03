@@ -16,10 +16,13 @@ class Lab (
     var ipSubnet: String,
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnore // Prevent circular reference during JSON serialization
     val labAssistant: List<User> = emptyList(),
 
-    @ManyToMany(mappedBy = "lab")
-    @JsonIgnore // Prevent circular reference during JSON serialization
-    val quiz: List<Quiz> = emptyList()
+    @ManyToMany
+    @JoinTable(
+        name = "lab_quiz",
+        joinColumns = [JoinColumn(name="lab_id")],
+        inverseJoinColumns = [JoinColumn(name="quiz_id")]
+    )
+    val quiz: List<Quiz> = listOf(),
 )

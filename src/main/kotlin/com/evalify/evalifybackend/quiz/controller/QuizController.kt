@@ -380,7 +380,7 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
         return ResponseEntity.ok(mapOf("message" to "Course removed successfully"))
     }
 
-    @PostMapping("/{quizId}/add-lab")
+    @PostMapping("/{quizId}/lab")
     fun addLabToQuiz(
             @Valid @RequestBody labDTO: UpdateQuizLabDTO,
             @PathVariable quizId: UUID
