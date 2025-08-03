@@ -18,18 +18,18 @@ enum class Role {
 class User (
     @Id
     val id: String? = null,
-    var name: String,
-    var email: String,
+    val name: String,
+    val email: String,
     @Column(unique = true)
-    var profileId: String? = null,
-    var password: String? = null,
-    var image: String? = null,
+    val profileId: String? = null,
+    val password: String? = null,
+    val image: String? = null,
     //@Enumerated(EnumType.STRING)
-    var role: Role,
-    var phoneNumber: String,
-    var isActive: Boolean = true,
-    var createdAt: Timestamp = Timestamp.from(Instant.now()),
-    var lastPasswordChange: Timestamp? = null,
+    val role: Role,
+    val phoneNumber: String,
+    val isActive: Boolean = true,
+    val createdAt: Timestamp = Timestamp.from(Instant.now()),
+    val lastPasswordChange: Timestamp? = null,
 
     @ManyToMany(mappedBy = "student")
     val quiz: MutableList<Quiz> = mutableListOf()

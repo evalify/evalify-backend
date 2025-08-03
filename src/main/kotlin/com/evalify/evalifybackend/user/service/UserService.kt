@@ -130,13 +130,16 @@ class UserService(
         }
 
         try {
-            user.name = request.name
-            user.email = request.email
-            user.phoneNumber = request.phoneNumber
-            user.role = request.role
-            user.isActive = request.isActive
+            val newUser = User(
+                id = user.id,
+                name = request.name,
+                email = request.email,
+                role = request.role,
+                phoneNumber = request.phoneNumber,
+                isActive = request.isActive,
+            )
 
-            val updatedUser = userRepository.save(user)
+            val updatedUser = userRepository.save(newUser)
             return updatedUser.toUserResponse()
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Invalid role: ${request.role}")
