@@ -14,6 +14,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.CreateQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.PatchQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
@@ -243,7 +244,13 @@ class QuizService(
                 publishResult = savedQuiz.publishResult,
                 status = status,
                 isProtected = savedQuiz.password != null || savedQuiz.password?.isNotEmpty() == true,
-                courseCodes = savedQuiz.course.map { course -> course.code },
+                courseCodes = savedQuiz.course.map{
+                        course -> CourseInfoDTO(
+                    id = course.id,
+                    name = course.name,
+                    courseCode = course.code
+                )
+                },
                 isPublished = savedQuiz.publishQuiz
             )
         } catch (e: DataAccessException) {
@@ -310,7 +317,13 @@ class QuizService(
                 publishResult = quiz.publishResult,
                 status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
-                courseCodes = quiz.course.map { course -> course.code },
+                courseCodes = quiz.course.map{
+                        course -> CourseInfoDTO(
+                    id = course.id,
+                    name = course.name,
+                    courseCode = course.code
+                )
+                },
                 isPublished = quiz.publishQuiz
             )
             
@@ -845,7 +858,13 @@ class QuizService(
                 publishResult = quiz.publishResult,
                 status = status,
                 isProtected = quiz.password != null || quiz.password?.isNotEmpty() == true,
-                courseCodes = quiz.course.map { course -> course.code },
+                courseCodes = quiz.course.map{
+                        course -> CourseInfoDTO(
+                    id = course.id,
+                    name = course.name,
+                    courseCode = course.code
+                )
+                },
                 isPublished = quiz.publishQuiz
             )
 

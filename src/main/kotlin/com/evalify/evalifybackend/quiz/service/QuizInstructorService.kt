@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.CourseInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizUpdateDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -86,7 +87,13 @@ class QuizInstructorService(private val quizRepository: QuizRepository) {
             publishResult = quiz.publishResult,
             status = status,
             isProtected = isProtected,
-            courseCodes = quiz.course.map { it.code },
+            courseCodes = quiz.course.map{
+                course -> CourseInfoDTO(
+                    id = course.id,
+                    name = course.name,
+                    courseCode = course.code
+                )
+            },
             isPublished = quiz.publishQuiz
         )
     }
