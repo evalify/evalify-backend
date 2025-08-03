@@ -1,5 +1,6 @@
 package com.evalify.evalifybackend.user.domain
 
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import jakarta.persistence.*
 import java.sql.Timestamp
 import java.time.Instant
@@ -30,4 +31,8 @@ class User (
     var createdAt: Timestamp = Timestamp.from(Instant.now()),
     var lastPasswordChange: Timestamp? = null,
 
-)
+    @ManyToMany(mappedBy = "student")
+    val quiz: MutableList<Quiz> = mutableListOf()
+
+
+    )

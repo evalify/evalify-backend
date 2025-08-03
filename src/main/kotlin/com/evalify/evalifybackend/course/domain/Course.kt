@@ -53,12 +53,7 @@ enum class CourseType {
     )
     val batches: MutableList<Batch> = mutableListOf(),
 
-    @ManyToMany
-    @JoinTable(
-        name = "course_quiz",
-        joinColumns = [JoinColumn(name="course_id")],
-        inverseJoinColumns = [JoinColumn(name="quiz_id")]
-    )
+    @ManyToMany(mappedBy = "course")
      val quiz: List<Quiz> = listOf(),
 
     @ManyToMany

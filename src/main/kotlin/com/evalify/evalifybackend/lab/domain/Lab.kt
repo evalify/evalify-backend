@@ -18,11 +18,6 @@ class Lab (
     @OneToMany(fetch = FetchType.LAZY)
     val labAssistant: List<User> = emptyList(),
 
-    @ManyToMany
-    @JoinTable(
-        name = "lab_quiz",
-        joinColumns = [JoinColumn(name="lab_id")],
-        inverseJoinColumns = [JoinColumn(name="quiz_id")]
-    )
-    val quiz: List<Quiz> = listOf(),
+    @ManyToMany(mappedBy = "lab")
+    val quiz: MutableList<Quiz> = mutableListOf(),
 )
