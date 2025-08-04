@@ -35,6 +35,7 @@ data class GetQuizDTO(
     val noOfSets : Int,
     val owner : SimpleUserDTO,
     val sharedWith : List<SharedUserDTO>? = listOf(),
+    val kioskMode : Boolean? = false
 
     ) {
 }

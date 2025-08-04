@@ -48,6 +48,7 @@ class Quiz(
     val autoSubmit: Boolean = false,
     val publishResult: Boolean = false,
     val publishQuiz: Boolean = false,
+    val kioskMode: Boolean? = false,
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])
 //    val quizQuestion: MutableList<QuizQuestion> = mutableListOf(),

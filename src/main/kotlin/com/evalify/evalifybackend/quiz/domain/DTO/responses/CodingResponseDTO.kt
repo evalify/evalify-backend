@@ -1,11 +1,15 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.responses
 
 import java.util.UUID
+import kotlin.time.Duration
 
 data class CodingResponseDTO(
     override val questionId: UUID,
-    val answer : String? = null
+    val answer : String? = null,
+    override val duration: Duration
 ) : ResponseDTO(
-    questionId = questionId
+    questionId = questionId,
+    duration = duration
+
 ) {
 }

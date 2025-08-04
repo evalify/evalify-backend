@@ -1060,7 +1060,8 @@ class QuizService(
                 )
             },
             createdAt = quiz.createdAt,
-            noOfSets = quiz.noOfSets
+            noOfSets = quiz.noOfSets,
+            kioskMode = quiz.kioskMode
 
         )
         return quizDetails

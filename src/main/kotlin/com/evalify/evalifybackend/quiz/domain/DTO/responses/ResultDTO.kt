@@ -2,11 +2,12 @@ package com.evalify.evalifybackend.quiz.domain.DTO.responses
 
 import jakarta.persistence.Embeddable
 import java.util.UUID
-import kotlin.time.Duration
 
 @Embeddable
-open class ResponseDTO(
-    open val questionId : UUID,
-    open val duration: Duration
+data class ResultDTO(
+    val questionId : UUID,
+    val marks : Float,
+    val remarks : String? = null
+
 ) {
 }
