@@ -18,7 +18,7 @@ class QuizCacheService(
     private val quizStudentService: QuizStudentService,
     private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>
 ) {
-    fun getCachedQuizQuestions(quizId: UUID, studentId: String?, requestTime: Instant): QuizQuestionReturnDTO? {
+    fun getCachedQuizQuestions(quizId: UUID, studentId: String?): QuizQuestionReturnDTO? {
         val key = "quiz:$quizId:student:$studentId:questions"
         val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
         
