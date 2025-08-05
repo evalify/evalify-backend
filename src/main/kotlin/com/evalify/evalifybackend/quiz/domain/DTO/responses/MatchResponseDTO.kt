@@ -1,13 +1,15 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.responses
 
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.MatchShuffleDTO
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.UUID
 import kotlin.time.Duration
 
-data class MatchResponseDTO(
-    override val questionId: UUID,
-    val answer : List<MatchPairResponse>? = null,
-    override val duration: Duration
+data class MatchResponseDTO @JsonCreator constructor(
+    @JsonProperty("questionId") override val questionId: UUID,
+    @JsonProperty("answer") val answer : List<MatchPairResponse>? = null,
+    @JsonProperty("duration") override val duration: Duration
 
 
 ) : ResponseDTO(

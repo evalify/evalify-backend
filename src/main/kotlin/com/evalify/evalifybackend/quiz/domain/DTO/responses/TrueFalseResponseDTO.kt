@@ -1,12 +1,14 @@
 package com.evalify.evalifybackend.quiz.domain.DTO.responses
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.UUID
 import kotlin.time.Duration
 
-data class TrueFalseResponseDTO(
-    override val questionId: UUID,
-    val answer : Boolean? = null,
-    override val duration: Duration
+data class TrueFalseResponseDTO @JsonCreator constructor(
+    @JsonProperty("questionId") override val questionId: UUID,
+    @JsonProperty("answer") val answer : Boolean? = null,
+    @JsonProperty("duration") override val duration: Duration
 
 ) : ResponseDTO(
     questionId = questionId,
