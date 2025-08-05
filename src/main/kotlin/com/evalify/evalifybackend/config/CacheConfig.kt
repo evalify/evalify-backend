@@ -47,10 +47,12 @@ class CacheConfig {
         val template = RedisTemplate<String, QuizQuestionsReturnDTO>()
         template.setConnectionFactory(connectionFactory)
 
+        val jsonSerializer = GenericJackson2JsonRedisSerializer()
         template.keySerializer = StringRedisSerializer()
         template.hashKeySerializer = StringRedisSerializer()
-        template.valueSerializer = GenericJackson2JsonRedisSerializer()
-        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+        template.valueSerializer = jsonSerializer
+        template.hashValueSerializer = jsonSerializer
+        template.setDefaultSerializer(jsonSerializer)
 
         template.afterPropertiesSet()
         return template

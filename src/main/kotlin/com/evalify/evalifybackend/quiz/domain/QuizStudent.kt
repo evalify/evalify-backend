@@ -36,6 +36,8 @@ class QuizStudent(
 
     val ipAddress: MutableList<String>,
 
+    val submitTime: Instant? = null,
+
     @ElementCollection
     @CollectionTable(name = "quiz_student_responses", joinColumns = [JoinColumn(name = "quiz_student_id")])
     var responses: MutableList<ResponseDTO> = mutableListOf(),

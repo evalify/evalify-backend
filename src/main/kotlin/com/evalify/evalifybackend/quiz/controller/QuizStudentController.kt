@@ -10,6 +10,7 @@ import com.evalify.evalifybackend.quiz.service.QuizCacheService
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
 import com.evalify.evalifybackend.security.utils.SecurityUtils.getCurrentUserId
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.transaction.Transactional
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -26,6 +27,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/quiz/{quizId}")
+@Transactional
 class QuizStudentController(
     private val quizStudentService: QuizStudentService,
     private val quizCacheService: QuizCacheService,
@@ -42,6 +44,7 @@ class QuizStudentController(
 
         val tags = quizStudentService.getQuizTags(quizId)
 
+        // Try to get cached questions first
         if (!cachedQuestions.isNullOrEmpty()) {
             val questionsList = cachedQuestions.filterNotNull()
             return ResponseEntity.ok(QuizQuestionReturnDTO(
@@ -51,14 +54,12 @@ class QuizStudentController(
                         id = tag.id,
                         name = tag.name,
                         description = tag.description
-
-
                     )
                 }
             ))
         }
 
-        // If not in cache, get from a database
+        // If not in cache, get from database
         val questions = quizStudentService.getQuizQuestions(
             studentId = studentId,
             quizId = quizId,

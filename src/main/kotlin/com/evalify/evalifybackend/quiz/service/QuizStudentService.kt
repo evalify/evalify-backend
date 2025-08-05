@@ -50,18 +50,16 @@ class QuizStudentService(
         studentId: String?,
         ipAddress: String,
         requestTime: Instant,
-        password : String? = null,
+        password : String? = null
     ): QuizQuestionReturnDTO {
         val quiz = quizRepository.findById(quizId)
             .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
         val user = if(studentId != null) {
-            userRepository.findById(studentId)
-        } else {
-            Optional.empty<User?>()
+            userRepository.findById(studentId).orElseThrow { NotFoundException("User with id $studentId not found") }
+        } else{
+            throw NotFoundException("Student id cannot be null. Please provide a valid student id.")
         }
-
-
 
         if (requestTime.isBefore(quiz.startTime)) {
             return QuizQuestionReturnDTO(
@@ -89,51 +87,56 @@ class QuizStudentService(
                 message = "Quiz has ended."
             )
         }
-        if(password != quiz.password ){
-            return QuizQuestionReturnDTO(
-                quizTags = quiz.quizTags.map { tags ->
-                    QuizTagsReturnDTO(
-                        tags.id,
-                        tags.name,
-                        tags.description
-                    )
-                },
-                questions = emptyList(),
-                message = "Wrong password."
-            )
-        }
-
-
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId?.toString() ?: "")
-            ?: quizStudentRepository.save(
+        val existingQuizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+        val quizStudent = if (existingQuizStudent != null) {
+            // If quiz is not submitted, update the IP address if needed
+            if (!existingQuizStudent.isSubmitted && !existingQuizStudent.ipAddress.contains(ipAddress)) {
+                existingQuizStudent.ipAddress.add(ipAddress)
+                quizStudentRepository.save(existingQuizStudent)
+            }
+            existingQuizStudent
+        } else {
+            // Validate password only when creating new quiz student
+            if (quiz.password != null && password != quiz.password) {
+                return QuizQuestionReturnDTO(
+                    quizTags = quiz.quizTags.map { tags ->
+                        QuizTagsReturnDTO(
+                            tags.id,
+                            tags.name,
+                            tags.description
+                        )
+                    },
+                    questions = emptyList(),
+                    message = "Wrong password."
+                )
+            }
+            // Only create new record if one doesn't exist
+            quizStudentRepository.save(
                 QuizStudent(
                     quiz = quiz,
-                    student = user.get(),
+                    student = user,
                     isSubmitted = false,
                     startTime = Instant.now(),
                     duration = quiz.duration,
-                    endTime = null,
+                    endTime = quiz.endTime,
                     ipAddress = mutableListOf(ipAddress)
                 )
             )
-
-        if (!quizStudent.ipAddress.contains(ipAddress)) {
-            quizStudent.ipAddress.add(ipAddress)
-            quizStudentRepository.save(quizStudent)
         }
 
         // Get all quiz sets for this quiz
-        val quizSets = quizSetRepository.findByQuiz(quiz)?.toList() ?: emptyList()
+        val quizSets = quizSetRepository.findByQuiz(quiz) ?: emptyList()
+
+        if (quizSets.isEmpty())
+            throw NotFoundException("Quiz with id $quizId has no quiz sets.")
 
         // Get questions based on quiz configuration
-        val questions = if (quizSets.isEmpty()) {
-            emptyList()
-        } else {
+
             // Distribute questions according to quiz settings
             val selectedQuestions = distributeQuestions(quiz, quizSets)
             
             // Map questions to DTO
-            selectedQuestions.map { question ->
+            val questions = selectedQuestions.map { question ->
                 QuizQuestionsReturnDTO(
                     questions = question.question.question.mapToType(),
                     section = GetSectionDTO(
@@ -142,7 +145,7 @@ class QuizStudentService(
                     )
                 )
             }
-        }
+
 
         // Create final response
         return QuizQuestionReturnDTO(
@@ -154,7 +157,8 @@ class QuizStudentService(
                 )
             },
             // Only shuffle if quiz settings allow it
-            questions = if (quiz.shuffleQuestions) questions.shuffled() else questions
+                questions = if (quiz.shuffleQuestions) questions.shuffled() else questions,
+            message = "Quiz has started successfully."
         )
     }
 
