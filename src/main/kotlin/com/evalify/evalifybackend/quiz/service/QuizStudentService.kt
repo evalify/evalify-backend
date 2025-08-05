@@ -5,6 +5,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizStudentInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
@@ -73,7 +75,17 @@ class QuizStudentService(
                     )
                 },
                 questions = emptyList(),
-                message = "Quiz has not started yet."
+                message = "Quiz has not started yet.",
+                quizInfo = QuizInfoDTO(
+                    quizId = quiz.id,
+                    quizName = quiz.name,
+                    calculator = quiz.calculator,
+                    kioskMode = quiz.kioskMode,
+                    fullScreen = quiz.fullScreen,
+                    autoSubmit = quiz.autoSubmit,
+                    linearQuiz = quiz.linearQuiz
+                )
+
             )
         }
         if (requestTime.isAfter(quiz.endTime)) {
@@ -85,6 +97,15 @@ class QuizStudentService(
                         tags.description
                     )
                 },
+                quizInfo = QuizInfoDTO(
+                    quizId = quiz.id,
+                    quizName = quiz.name,
+                    calculator = quiz.calculator,
+                    kioskMode = quiz.kioskMode,
+                    fullScreen = quiz.fullScreen,
+                    autoSubmit = quiz.autoSubmit,
+                    linearQuiz = quiz.linearQuiz
+                ),
                 questions = emptyList(),
                 message = "Quiz has ended."
             )
@@ -104,6 +125,15 @@ class QuizStudentService(
                             tags.description
                         )
                     },
+                    quizInfo = QuizInfoDTO(
+                        quizId = quiz.id,
+                        quizName = quiz.name,
+                        calculator = quiz.calculator,
+                        kioskMode = quiz.kioskMode,
+                        fullScreen = quiz.fullScreen,
+                        autoSubmit = quiz.autoSubmit,
+                        linearQuiz = quiz.linearQuiz
+                    ),
                     questions = emptyList(),
                     message = "Quiz has already been submitted."
                 )
@@ -132,12 +162,21 @@ class QuizStudentService(
                         )
                     },
                     questions = emptyList(),
+                    quizInfo = QuizInfoDTO(
+                        quizId = quiz.id,
+                        quizName = quiz.name,
+                        calculator = quiz.calculator,
+                        kioskMode = quiz.kioskMode,
+                        fullScreen = quiz.fullScreen,
+                        autoSubmit = quiz.autoSubmit,
+                        linearQuiz = quiz.linearQuiz
+                    ),
                     message = "Wrong password."
                 )
             }
 
             // Create new quiz student
-            quizStudentRepository.save(
+            val newStudent = quizStudentRepository.save(
                 QuizStudent(
                     quiz = quiz,
                     student = user,
@@ -150,8 +189,10 @@ class QuizStudentService(
             )
         }
 
+        val student = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
+
         // 5. Generate questions from database
-        val questions = generateQuizQuestions(quiz)
+        val questions = generateQuizQuestions(quiz,student )
         
         // 6. Store in cache for future use
         quizCacheService.storeStudentQuestions(quizId, studentId, questions.questions)
@@ -159,7 +200,7 @@ class QuizStudentService(
         return questions
     }
 
-    private fun generateQuizQuestions(quiz: Quiz): QuizQuestionReturnDTO {
+    private fun generateQuizQuestions(quiz: Quiz,existingStudent : QuizStudent?): QuizQuestionReturnDTO {
         // Get all quiz sets for this quiz
         val quizSets = quizSetRepository.findByQuiz(quiz) ?: emptyList()
 
@@ -191,7 +232,27 @@ class QuizStudentService(
             },
             // Only shuffle if quiz settings allow it
             questions = if (quiz.shuffleQuestions) questions.shuffled() else questions,
-            message = "Quiz has started successfully."
+            message = "Quiz has started successfully.",
+            quizInfo = QuizInfoDTO(
+                quizId = quiz.id,
+                quizName = quiz.name,
+                calculator = quiz.calculator,
+                kioskMode = quiz.kioskMode,
+                fullScreen = quiz.fullScreen,
+                autoSubmit = quiz.autoSubmit,
+                linearQuiz = quiz.linearQuiz
+            ),
+            quizStudentInfo = QuizStudentInfoDTO(
+                duration = existingStudent?.duration,
+                endTime = existingStudent?.endTime,
+                startTime = existingStudent?.startTime,
+                violations = existingStudent?.violations,
+                isViolated = existingStudent?.isViolated
+
+
+
+            )
+
         )
     }
 

@@ -1,10 +1,13 @@
 package com.evalify.evalifybackend.quiz.service
 
+import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.QuizTags
+import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -16,9 +19,12 @@ import java.util.UUID
 @Transactional
 class QuizCacheService(
     private val quizStudentService: QuizStudentService,
-    private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>
+    private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>,
+    private val quizRepository: QuizRepository
 ) {
     fun getCachedQuizQuestions(quizId: UUID, studentId: String?): QuizQuestionReturnDTO? {
+        val quiz = quizRepository.findById(quizId)
+            .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
         val key = "quiz:$quizId:student:$studentId:questions"
         val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
         
@@ -37,7 +43,16 @@ class QuizCacheService(
                     name = tag.name,
                     description = tag.description
                 )
-            }
+            },
+            quizInfo = QuizInfoDTO(
+                quizId = quiz.id,
+                quizName = quiz.name,
+                calculator = quiz.calculator,
+                kioskMode = quiz.kioskMode,
+                fullScreen = quiz.fullScreen,
+                autoSubmit = quiz.autoSubmit,
+                linearQuiz = quiz.linearQuiz
+            )
         )
     }
     fun storeStudentQuestions(quizId: UUID,studentId: String?,questions: List<QuizQuestionsReturnDTO>){
