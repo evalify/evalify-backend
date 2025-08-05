@@ -10,6 +10,7 @@ import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizStatus
 import com.evalify.evalifybackend.quiz.mapper.updateQuiz
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
+import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -126,6 +127,8 @@ class QuizInstructorService(private val quizRepository: QuizRepository) {
         val quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
+        // Validate that quiz is not published
+        QuizValidationUtils.validateQuizNotPublished(quiz)
 
         val updatedQuiz = quiz.updateQuiz(quizUpdateDTO)
         val savedQuiz = quizRepository.save(updatedQuiz)

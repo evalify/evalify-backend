@@ -39,6 +39,7 @@ import com.evalify.evalifybackend.quiz.question.domain.MCQ.TrueFalse
 import com.evalify.evalifybackend.quiz.question.domain.MatchPair
 import com.evalify.evalifybackend.quiz.question.domain.MatchTheFollowing
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
+import com.evalify.evalifybackend.quiz.util.QuizValidationUtils
 import com.evalify.evalifybackend.section.repository.SectionRepository
 import com.evalify.evalifybackend.topic.repository.TopicRepo
 import com.evalify.evalifybackend.user.repository.UserRepository
@@ -281,6 +282,8 @@ open class QuizQuestionService(
         val quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
+        // Validate that quiz is not published
+        QuizValidationUtils.validateQuizNotPublished(quiz)
 
         val baseQuestion = createQuestion(dto)
         val savedQuestion = questionRepository.save(baseQuestion)
@@ -303,6 +306,8 @@ open class QuizQuestionService(
         val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
             NotFoundException("Quiz with id $quizId not found")
         }
+        QuizValidationUtils.validateQuizNotPublished(quiz)
+
         val section = sectionRepository.findById(dto.sectionId).orElseThrow{
             NotFoundException("Quiz with id ${dto.sectionId} not found")
         }
@@ -355,6 +360,10 @@ open class QuizQuestionService(
         val user = userRepository.findById(userId).orElseThrow {
             NotFoundException("User with id $userId not found")
         }
+        val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+        QuizValidationUtils.validateQuizNotPublished(quiz)
 
         val quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow{
             QuizQuestionNotFoundException(questionId.toString())
@@ -378,6 +387,10 @@ open class QuizQuestionService(
 
     @Transactional
     fun deleteQuizQuestion(quizId: UUID, questionId: UUID) {
+        val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+        QuizValidationUtils.validateQuizNotPublished(quiz)
 
         val quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow{
             QuizQuestionNotFoundException(questionId.toString())

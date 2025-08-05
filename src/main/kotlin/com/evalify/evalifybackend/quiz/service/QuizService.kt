@@ -292,6 +292,8 @@ class QuizService(
                     quizRepository.findById(quizId).orElseThrow {
                         QuizNotFoundException(quizId.toString())
                     }
+            // Validate that quiz is not published
+            QuizValidationUtils.validateQuizNotPublished(quiz)
 
             // Check permissions
             QuizSecurityUtils.ensureOwnership(quiz, userId)
@@ -622,6 +624,8 @@ class QuizService(
                 quizRepository.findById(quizId).orElseThrow {
                     NotFoundException("quiz with id $quizId not found")
                 }
+        // Validate that quiz is not published
+        QuizValidationUtils.validateQuizNotPublished(quiz)
         val students = userRepository.findAllById(studentId).filter { student -> student !in quiz.student }
         quiz.student.addAll(students)
         quizRepository.save(quiz)
@@ -632,6 +636,8 @@ class QuizService(
                 quizRepository.findById(quizId).orElseThrow {
                     NotFoundException("quiz with id $quizId not found")
                 }
+        // Validate that quiz is not published
+        QuizValidationUtils.validateQuizNotPublished(quiz)
         val student = userRepository.findAllById(studentId)
         quiz.student.removeAll(student)
         quizRepository.save(quiz)
