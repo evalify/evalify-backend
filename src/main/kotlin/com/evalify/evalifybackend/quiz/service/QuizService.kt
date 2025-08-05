@@ -484,6 +484,13 @@ class QuizService(
             // Validate that quiz can be unpublished
             QuizValidationUtils.validateQuizUnpublish(quiz,student)
 
+            // Delete all QuizSet and QuizSetQuestion entities associated with this quiz
+            val quizSets = quizSetRepository.findByQuiz_Id(quizId)
+            if (quizSets.isNotEmpty()) {
+                logger.info("Deleting {} quiz sets for quiz: {}", quizSets.size, quizId)
+                quizSetRepository.deleteAll(quizSets)
+            }
+
             // Create unpublished version of quiz
             val unpublishedQuiz = Quiz(
                 id = quiz.id,

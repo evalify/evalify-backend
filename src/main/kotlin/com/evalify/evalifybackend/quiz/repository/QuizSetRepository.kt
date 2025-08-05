@@ -9,12 +9,9 @@ import java.util.*
 
 @Repository
 interface QuizSetRepository : JpaRepository<QuizSet, UUID> {
-    fun findByQuiz(quiz: Quiz) : List<QuizSet>? {
-        return null
+    fun findByQuiz(quiz: Quiz) : List<QuizSet>
+    
+    fun findByQuiz_Id(quizId: UUID) : List<QuizSet>
 
-    }
-
-    fun findBySetNumber(setNumber: Int) : QuizSet?{
-        return null
-    }
+    fun findBySetNumber(setNumber: Int) : QuizSet?
 }

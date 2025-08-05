@@ -15,7 +15,6 @@ class Section(
 
 
     @OneToMany(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "TEXT")
     val quizQuestions: MutableList<QuizQuestion> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)

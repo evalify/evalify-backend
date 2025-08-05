@@ -69,7 +69,10 @@ abstract class BaseQuestion(
     @ManyToMany(fetch = FetchType.LAZY)
     val topic: MutableList<Topic> = mutableListOf(),
 
+    @Column(columnDefinition = "TEXT")
     val explanation: String? = "",
+
+    @Column(columnDefinition = "TEXT")
     val hint: String? = "",
 //    val type: QuestionTypes,
     val marks: Int,
