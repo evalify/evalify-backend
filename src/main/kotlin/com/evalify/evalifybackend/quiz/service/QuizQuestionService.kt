@@ -247,7 +247,7 @@ open class QuizQuestionService(
                 difficulty = dto.difficulty,
                 keys = dto.keys,
                 values = dto.values,
-                matchPair = dto.matchPairs
+                matchPair = dto.matchPair
 
             )
 

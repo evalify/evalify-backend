@@ -50,7 +50,7 @@ data class CreateQuizQuestionDTO(
 
     val keys: MutableList<PairDTO>? = null,
     val values: MutableList<PairDTO>? = null,
-    val matchPairs: MutableList<MatchPair>? = null,
+    val matchPair: MutableList<MatchPair>? = null,
 
 
     val trueFalseAnswer: Boolean? = null,

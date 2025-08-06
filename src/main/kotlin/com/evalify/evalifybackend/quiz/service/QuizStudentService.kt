@@ -277,27 +277,32 @@ class QuizStudentService(
         )
     }
 
-    fun saveQuestion(quizId: UUID, studentId: String?, answer: ResponseDTO) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
-            ?: throw NotFoundException("QuizStudent record not found")
-        val responses = quizStudent.responses
-        val existingIndex = responses.indexOfFirst { it.questionId == answer.questionId }
-        if (existingIndex != -1) {
-            responses[existingIndex] = answer
-        } else {
-            responses.add(answer)
-        }
-        quizStudentRepository.save(quizStudent)
+//    fun saveQuestion(quizId: UUID, studentId: String?, answer: ResponseDTO) {
+//        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
+//            ?: throw NotFoundException("QuizStudent record not found")
+//        val responses = quizStudent.responses
+//        val existingIndex = responses.indexOfFirst { it.questionId == answer.questionId }
+//        if (existingIndex != -1) {
+//            responses[existingIndex] = answer
+//        } else {
+//            responses.add(answer)
+//        }
+//        quizStudentRepository.save(quizStudent)
+//    }
+
+
+    fun mapResponsesByQuestionId(responses: List<ResponseDTO>): Map<UUID, ResponseDTO> {
+        return responses.associateBy { it.questionId }
     }
 
-    fun updateQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
+    fun updateQuiz(quizId: UUID, studentId: String?, responses: Map<UUID, ResponseDTO>) {
+        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
             ?: throw NotFoundException("Quiz with id $quizId not found")
 
         val existingResponses = quizStudent.responses
 
-        responses.forEach { newResponse ->
-            val index = existingResponses.indexOfFirst { it.questionId == newResponse.questionId }
+        responses.forEach { (questionId, newResponse) ->
+            val index = existingResponses.indexOfFirst { it.questionId == questionId }
             if (index != -1) {
                 existingResponses[index] = newResponse
             } else {
