@@ -229,7 +229,8 @@ class QuizStudentService(
                 section = GetSectionDTO(
                     id = question.question.section.id,
                     name = question.question.section.name
-                )
+                ),
+                type = question.question.question.getQuestionType()
             )
         }
         if (quiz.shuffleQuestions) questions.shuffled() else questions
