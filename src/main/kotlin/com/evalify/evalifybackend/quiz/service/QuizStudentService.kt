@@ -4,8 +4,8 @@ import com.evalify.evalifybackend.core.exception.NotFoundException
 import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
-import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.StartQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizInfoDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizStudentInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
@@ -17,9 +17,9 @@ import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
 import com.evalify.evalifybackend.section.domain.DTO.GetSectionDTO
-import com.evalify.evalifybackend.user.domain.User
 import com.evalify.evalifybackend.user.repository.UserRepository
 import jakarta.transaction.Transactional
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -33,7 +33,9 @@ class QuizStudentService(
     private val userRepository: UserRepository,
     private val quizStudentRepository: QuizStudentRepository,
     private val quizSetRepository: QuizSetRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>,
+    private val responseMapRedisTemplate: RedisTemplate<String, ResponseDTO>,
+    private val passwordEncoder: PasswordEncoder,
 ) {
 
     fun distributeQuestions(quiz: Quiz, quizSets: List<QuizSet>): List<QuizSetQuestion> {
@@ -191,18 +193,28 @@ class QuizStudentService(
 
         val student = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
 
-        // 5. Generate questions from database
-        val questions = generateQuizQuestions(quiz,student )
+        // 5. Generate questions from the database
+        val questions = generateQuizQuestions(quiz,student ,quizId,studentId)
         
-        // 6. Store in cache for future use
-        quizCacheService.storeStudentQuestions(quizId, studentId, questions.questions)
+        // 6. Store in the cache for future use
+        quizCacheService.storeStudentQuestions(quizId, studentId, questions.questions.map{sample ->
+            sample.question
+        })
 
         return questions
     }
+    fun getAllAnswers(quizId: UUID, studentId: String?): List<ResponseDTO> {
+        val qId = quizId.toString()
+        val key = "quiz:$qId:student:$studentId:answers"
+        val hashOps = redisTemplate.opsForHash<UUID, ResponseDTO>()
+        return hashOps.values(key).toList()
+    }
 
-    private fun generateQuizQuestions(quiz: Quiz,existingStudent : QuizStudent?): QuizQuestionReturnDTO {
+    private fun generateQuizQuestions(quiz: Quiz,existingStudent : QuizStudent?,qId: UUID,studentId: String): QuizQuestionReturnDTO {
         // Get all quiz sets for this quiz
         val quizSets = quizSetRepository.findByQuiz(quiz) ?: emptyList()
+        val responses = getAllAnswers(qId,studentId)
+
 
         if (quizSets.isEmpty())
             throw NotFoundException("Quiz with id ${quiz.id} has no quiz sets.")
@@ -220,6 +232,15 @@ class QuizStudentService(
                 )
             )
         }
+        if (quiz.shuffleQuestions) questions.shuffled() else questions
+
+        val questionResponse = questions.map { question ->
+            QuizQuestionResponseDTO(
+                question = question,
+                response = responses.find { response -> response.questionId == question.questions.questionId }
+
+            )
+        }
 
         // Create final response
         return QuizQuestionReturnDTO(
@@ -231,7 +252,7 @@ class QuizStudentService(
                 )
             },
             // Only shuffle if quiz settings allow it
-            questions = if (quiz.shuffleQuestions) questions.shuffled() else questions,
+            questions = questionResponse,
             message = "Quiz has started successfully.",
             quizInfo = QuizInfoDTO(
                 quizId = quiz.id,

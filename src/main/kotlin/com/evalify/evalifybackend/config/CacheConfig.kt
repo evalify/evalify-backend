@@ -11,6 +11,7 @@ import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.GenericToStringSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import java.time.Duration
@@ -63,15 +64,28 @@ class CacheConfig {
      * Key = UUID (quizId/studentId), HashKey = String (questionId), Value = ResponseDTO
      */
     @Bean
-    fun quizResponseRedisTemplate(factory: RedisConnectionFactory): RedisTemplate<String, ResponseDTO> {
+    fun responseMapRedisTemplate(factory: RedisConnectionFactory): RedisTemplate<String, ResponseDTO> {
         val template = RedisTemplate<String, ResponseDTO>()
         template.setConnectionFactory(factory)
+
+        // Key for entire Redis hash
         template.keySerializer = StringRedisSerializer()
-        template.hashKeySerializer = StringRedisSerializer()
-        template.valueSerializer = GenericJackson2JsonRedisSerializer()
-        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+
+        // Hash keys are UUIDs
+        template.hashKeySerializer = GenericToStringSerializer(UUID::class.java)
+
+        // Values are JSON serialized
+        val jsonSerializer = GenericJackson2JsonRedisSerializer()
+        template.valueSerializer = jsonSerializer
+        template.hashValueSerializer = jsonSerializer
+        template.setDefaultSerializer(jsonSerializer)
+
         template.afterPropertiesSet()
         return template
     }
+
+
+
+
 
 }
