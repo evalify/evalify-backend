@@ -43,7 +43,7 @@ class QuizStudentService(
         if (quiz.noOfSets == 1 && quizSets.isNotEmpty()) {
             return quizSets[0].questions.toList()
         }
-        
+
         // For multiple sets, randomly select one set
         val quizNo = Random.nextInt(0, quiz.noOfSets)
         return quizSets.find { it.setNumber == quizNo }?.questions ?: emptyList()
@@ -115,7 +115,7 @@ class QuizStudentService(
 
         // 2. Check existing quiz student and validate student status
         val existingQuizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
-        
+
         if (existingQuizStudent != null) {
             // Check if quiz is already submitted
             if (existingQuizStudent.isSubmitted) {
@@ -195,7 +195,7 @@ class QuizStudentService(
 
         // 5. Generate questions from the database
         val questions = generateQuizQuestions(quiz,student ,quizId,studentId)
-        
+
         // 6. Store in the cache for future use
         quizCacheService.storeStudentQuestions(quizId, studentId, questions.questions.map{sample ->
             sample.question
@@ -221,7 +221,7 @@ class QuizStudentService(
 
         // Distribute questions according to quiz settings
         val selectedQuestions = distributeQuestions(quiz, quizSets)
-        
+
         // Map questions to DTO
         val questions = selectedQuestions.map { question ->
             QuizQuestionsReturnDTO(
@@ -343,6 +343,3 @@ class QuizStudentService(
 
 
 }
-
-
-

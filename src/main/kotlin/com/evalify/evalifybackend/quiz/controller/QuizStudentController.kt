@@ -48,7 +48,7 @@ class QuizStudentController(
 ) {
     @PostMapping("/start")
     fun startQuiz(@PathVariable quizId: UUID, request: HttpServletRequest, @RequestBody dto: StartQuizDTO)
-    : ResponseEntity<QuizQuestionReturnDTO?> {
+            : ResponseEntity<QuizQuestionReturnDTO?> {
         val requestTime = Instant.now()
         val studentId = getCurrentUserId()
 
@@ -64,69 +64,67 @@ class QuizStudentController(
         return ResponseEntity.ok(result)
     }
 
-    @PatchMapping("/update")
-    fun updateQuiz(@PathVariable quizId: UUID, @RequestBody responses: List<Map<String,Any>>? = null){
-        val studentId = getCurrentUserId()
-
-
-        if(responses == null)
-        {
-            val responsesFromCache = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
-            quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responsesFromCache)
-        }
-        else{
-            val finalResponses = responses.map { body ->
-                val questionId = UUID.fromString(body["questionId"] as String)
-                val question = questionRepository.findById(questionId)
-                    .orElseThrow { IllegalArgumentException("Question not found") }
-                val type = question.getQuestionType()
-                when (type) {
-                    QuestionTypes.MCQ -> objectMapper.convertValue(body, MCQResponseDTO::class.java)
-                    QuestionTypes.CODING -> objectMapper.convertValue(body, CodingResponseDTO::class.java)
-                    QuestionTypes.MMCQ -> objectMapper.convertValue(body, MMCQResponseDTO::class.java)
-                    QuestionTypes.TRUEFALSE -> objectMapper.convertValue(body, TrueFalseResponseDTO::class.java)
-                    QuestionTypes.DESCRIPTIVE -> objectMapper.convertValue(body, DescriptiveResponseDTO::class.java)
-                    QuestionTypes.FILL_UP -> objectMapper.convertValue(body, FillUpResponseDTO::class.java)
-                    QuestionTypes.MATCH_THE_FOLLOWING -> objectMapper.convertValue(body, MatchResponseDTO::class.java)
-                    QuestionTypes.FILE_UPLOAD -> objectMapper.convertValue(body, FileUploadResponseDTO::class.java)
-
-                    else -> throw IllegalArgumentException("Unknown question type")
-                }}
-            val final = quizStudentService.mapResponsesByQuestionId(finalResponses)
-            quizStudentService.updateQuiz(
-                quizId = quizId,
-                studentId = studentId,
-                responses = final
-            )
-
-
-        }
-
-            }
-
-
-
-    @PatchMapping("/updateCache")
-    fun updateCache(@PathVariable quizId: UUID, @RequestBody body: Map<String, Any>){
-        val studentId = getCurrentUserId()
+    fun objectMapper(body : Map<String,Any>):ResponseDTO{
         val questionId = UUID.fromString(body["questionId"] as String)
-        val question = questionRepository.findById(questionId).orElseThrow { IllegalArgumentException("Question not found") }
-
+        val question = questionRepository.findById(questionId)
+            .orElseThrow { IllegalArgumentException("Question not found") }
         val type = question.getQuestionType()
-
         val answer = when (type) {
-                QuestionTypes.MCQ -> objectMapper.convertValue(body, MCQResponseDTO::class.java)
-                QuestionTypes.CODING -> objectMapper.convertValue(body, CodingResponseDTO::class.java)
-                QuestionTypes.MMCQ -> objectMapper.convertValue(body, MMCQResponseDTO::class.java)
-                QuestionTypes.TRUEFALSE -> objectMapper.convertValue(body, TrueFalseResponseDTO::class.java)
-                QuestionTypes.DESCRIPTIVE -> objectMapper.convertValue(body, DescriptiveResponseDTO::class.java)
+            QuestionTypes.MCQ -> objectMapper.convertValue(body, MCQResponseDTO::class.java)
+            QuestionTypes.CODING -> objectMapper.convertValue(body, CodingResponseDTO::class.java)
+            QuestionTypes.MMCQ -> objectMapper.convertValue(body, MMCQResponseDTO::class.java)
+            QuestionTypes.TRUEFALSE -> objectMapper.convertValue(body, TrueFalseResponseDTO::class.java)
+            QuestionTypes.DESCRIPTIVE -> objectMapper.convertValue(body, DescriptiveResponseDTO::class.java)
             QuestionTypes.FILL_UP -> objectMapper.convertValue(body, FillUpResponseDTO::class.java)
             QuestionTypes.MATCH_THE_FOLLOWING -> objectMapper.convertValue(body, MatchResponseDTO::class.java)
             QuestionTypes.FILE_UPLOAD -> objectMapper.convertValue(body, FileUploadResponseDTO::class.java)
-
             else -> throw IllegalArgumentException("Unknown question type")
         }
-        quizCacheService.updateCache(quizId,studentId,answer)
+        return answer
+    }
+
+    @PatchMapping("/update")
+    fun updateQuiz(@PathVariable quizId: UUID, @RequestParam(required = true) save: Boolean? = false, @RequestBody responses: List<Map<String,Any>>? = null){
+        val studentId = getCurrentUserId()
+        if(save == false ){
+            if(responses.isNullOrEmpty()){
+                throw IllegalArgumentException("Responses cannot be empty or null!")
+            }
+            else{
+                val finalResponses = responses.map { body ->
+                    objectMapper(body)
+                }
+                finalResponses.forEach { response ->
+                    updateCache(quizId,response,studentId)
+                }
+            }
+        }
+        else{
+            if(responses == null)
+            {
+                val responsesFromCache = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
+                quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responsesFromCache)
+            }
+            else{
+                val saveResponses = responses.map { body ->
+                    objectMapper(body)
+                }
+                saveResponses.forEach { response ->
+                    updateCache(quizId,response,studentId)
+                }
+                val result = quizStudentService.mapResponsesByQuestionId(saveResponses)
+                quizStudentService.updateQuiz(quizId,studentId,result)
+            }
+        }}
+
+
+
+
+
+
+    fun updateCache( quizId: UUID,  body: ResponseDTO , studentId: String?){
+
+        quizCacheService.updateCache(quizId,studentId,body)
 
     }
 
