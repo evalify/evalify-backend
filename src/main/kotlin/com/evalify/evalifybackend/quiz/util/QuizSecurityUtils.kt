@@ -75,12 +75,12 @@ object QuizSecurityUtils {
                 }
             }
             "EDIT" -> {
-                if (quiz.publishQuiz && now.isAfter(quiz.startTime)) {
+                if (quiz.publishQuiz == true && now.isAfter(quiz.startTime)) {
                     throw QuizStateException(quiz.id.toString(), "edit", "published and started")
                 }
             }
             "DELETE" -> {
-                if (quiz.publishQuiz && now.isAfter(quiz.startTime)) {
+                if (quiz.publishQuiz == true && now.isAfter(quiz.startTime)) {
                     throw QuizStateException(quiz.id.toString(), "delete", "published and started")
                 }
             }
@@ -91,7 +91,7 @@ object QuizSecurityUtils {
     fun validateQuizState(quiz: Quiz, operation: String) {
         when (operation) {
             "PUBLISH" -> {
-                if (quiz.publishQuiz) {
+                if (quiz.publishQuiz == true) {
                     throw QuizStateException(quiz.id.toString(), "publish", "already published")
                 }
                 if (quiz.section.isEmpty()) {
@@ -102,7 +102,7 @@ object QuizSecurityUtils {
                 }
             }
             "UNPUBLISH" -> {
-                if (!quiz.publishQuiz) {
+                if (quiz.publishQuiz == false) {
                     throw QuizStateException(quiz.id.toString(), "unpublish", "not published")
                 }
                 val now = Instant.now()
@@ -111,7 +111,7 @@ object QuizSecurityUtils {
                 }
             }
             "ADD_QUESTIONS" -> {
-                if (quiz.publishQuiz) {
+                if (quiz.publishQuiz == true) {
                     val now = Instant.now()
                     if (now.isAfter(quiz.startTime)) {
                         throw QuizStateException(
@@ -123,7 +123,7 @@ object QuizSecurityUtils {
                 }
             }
             "REMOVE_QUESTIONS" -> {
-                if (quiz.publishQuiz) {
+                if (quiz.publishQuiz == true) {
                     val now = Instant.now()
                     if (now.isAfter(quiz.startTime)) {
                         throw QuizStateException(

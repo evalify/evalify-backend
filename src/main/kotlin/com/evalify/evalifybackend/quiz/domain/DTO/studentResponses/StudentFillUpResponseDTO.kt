@@ -1,0 +1,16 @@
+package com.evalify.evalifybackend.quiz.domain.DTO.studentResponses
+
+import com.evalify.evalifybackend.quiz.domain.DTO.responses.BlankResponseDTO
+import java.util.UUID
+
+
+
+data class StudentFillUpResponseDTO(
+    override val questionId : UUID,
+    override val duration : Long, // Duration in milliseconds,
+    val answer : List<BlankResponseDTO>? = null,
+) : StudentResponseDTO(
+    questionId = questionId,
+    duration = duration
+) {
+}

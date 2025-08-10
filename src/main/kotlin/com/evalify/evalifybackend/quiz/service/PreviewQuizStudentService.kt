@@ -28,7 +28,8 @@ class PreviewQuizStudentService(
         val course = courseRepository.findById(courseId).orElseThrow { NotFoundException("course with id $courseId not found") }
         println(course)
         val  courseQuizzes:MutableList<PreviewQuizDTO> = mutableListOf()
-        course.quiz.forEach { quiz -> if(quiz.publishQuiz){
+        course.quiz.forEach { quiz ->
+            if(quiz.publishQuiz == true){
             val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
             val status: QuizStatus = when{
                 quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING
@@ -113,7 +114,7 @@ class PreviewQuizStudentService(
         val filteredQuiz: MutableList<PreviewQuizDTO>? = mutableListOf()
 
         allQuizzes.forEach { quiz ->
-            if(quiz.publishQuiz){
+            if(quiz.publishQuiz == true){
             val completedQuiz = quizStudentRepository.findByQuizIdAndStudentId(quizId = quiz.id, userId = studentId)
                 val status: QuizStatus = when{
                     quiz.startTime.isAfter(Instant.now()) -> QuizStatus.UPCOMING

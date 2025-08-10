@@ -14,11 +14,11 @@ data class QuizPreviewDTO(
     val batches: List<BatchInfoDTO>,
     val labs:List<LabInfoDTO>,
     val duration: Duration,
-    val publishResult: Boolean,
+    val publishResult: Boolean?,
     val status: QuizStatus?,
     val isProtected: Boolean,
     val courseCodes : List<CourseInfoDTO>,
-    val isPublished: Boolean
+    val isPublished: Boolean?
 
 
 ) {

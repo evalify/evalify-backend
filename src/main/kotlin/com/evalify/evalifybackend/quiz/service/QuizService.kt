@@ -125,12 +125,23 @@ class QuizService(
             }
 
             // Determine students
-            val students = if(quizDTO.studentIds.isEmpty()) emptyList() else userRepository.findAllById(quizDTO.studentIds)
+            var students = if(quizDTO.studentIds.isEmpty()) emptyList() else userRepository.findAllById(quizDTO.studentIds)
                         if (students.size != quizDTO.studentIds.size) {
                             val foundIds = students.map { it.id }
                             val missingIds = quizDTO.studentIds.filterNot { foundIds.contains(it) }
                             throw NotFoundException("Students not found: $missingIds")
                         }
+            if(batches.isEmpty() && courses.isEmpty() && students.isEmpty()) {
+                throw QuizValidationException("At least one of the following fields must be provided: courseIds, batchIds, studentIds", "studentIds"
+                )
+
+            }
+            if(students.isEmpty() && batches.isNotEmpty()) {
+                students = batches.flatMap { it.students }
+            }
+            if(students.isEmpty() && courses.isNotEmpty()) {
+                students = courses.flatMap { it.students }
+            }
 
             val semestersManaged = semesterRepository.findByManagerId(listOf(user))
             val validTags = semestersManaged.flatMap { it.quizTags }.distinct()

@@ -229,7 +229,7 @@ object QuizValidationUtils {
      * @throws QuizValidationException if the quiz is already published
      */
     fun validateQuizNotPublished(quiz: Quiz) {
-        if (quiz.publishQuiz) {
+        if (quiz.publishQuiz == true) {
             throw QuizValidationException("Published quiz cannot be edited", "publishQuiz")
         }
     }
@@ -239,7 +239,7 @@ object QuizValidationUtils {
      * @throws QuizValidationException if the quiz has already started or completed
      */
     fun validateQuizUnpublish(quiz: Quiz,student: List<QuizStudent>) {
-        if (!quiz.publishQuiz) {
+        if (quiz.publishQuiz == false) {
             throw QuizValidationException("Quiz is not published", "publishQuiz")
         }
         

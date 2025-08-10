@@ -2,11 +2,15 @@ package com.evalify.evalifybackend.quiz.domain
 
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResultDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentResponseDTO
 import com.evalify.evalifybackend.user.domain.User
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.*
-import kotlin.time.Duration
+import org.hibernate.annotations.Type
 import java.time.Instant
 import java.util.UUID
+import kotlin.time.Duration
 
 @Entity
 @Table(name="quiz_student")
@@ -24,7 +28,7 @@ class QuizStudent(
 
     val startTime: Instant?,
 
-    val duration: Duration,
+    val duration: Duration, // Duration in milliseconds
 
     val endTime:Instant?,
 
@@ -38,9 +42,9 @@ class QuizStudent(
 
     val submitTime: Instant? = null,
 
-    @ElementCollection
-    @CollectionTable(name = "quiz_student_responses", joinColumns = [JoinColumn(name = "quiz_student_id")])
-    var responses: MutableList<ResponseDTO> = mutableListOf(),
+    @Type(JsonBinaryType::class)
+    @Column(columnDefinition = "jsonb")
+    var responses: MutableList<StudentResponseDTO> = mutableListOf(),
 
 
     @ElementCollection

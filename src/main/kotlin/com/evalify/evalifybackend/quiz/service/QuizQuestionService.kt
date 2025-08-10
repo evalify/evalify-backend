@@ -67,12 +67,6 @@ open class QuizQuestionService(
         questionTypes: List<QuestionTypes>?, userId: String, bankIds: List<UUID>?
     ): List<BankQuestionsReturnDTO> {
 
-        val quiz: Quiz = quizRepository.findById(quizId).orElseThrow {
-            NotFoundException("Quiz with id $quizId not found")
-        }
-
-
-        val user = userRepository.findById(userId).orElseThrow{NotFoundException("User with id $userId not found")}
 
         val existingQuestionIds = quizQuestionRepository.findAll()
             .mapNotNull { it.bankQuestion?.id }

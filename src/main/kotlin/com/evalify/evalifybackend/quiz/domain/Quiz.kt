@@ -40,14 +40,14 @@ class Quiz(
     val duration: Duration,
     val password: String? = null,
 
-    val fullScreen: Boolean = false,
-    val shuffleQuestions: Boolean = false,
-    val shuffleOptions: Boolean = false,
-    val linearQuiz: Boolean = false,
-    val calculator: Boolean = false,
-    val autoSubmit: Boolean = false,
-    val publishResult: Boolean = false,
-    val publishQuiz: Boolean = false,
+    val fullScreen: Boolean? = false,
+    val shuffleQuestions: Boolean? = false,
+    val shuffleOptions: Boolean? = false,
+    val linearQuiz: Boolean? = false,
+    val calculator: Boolean? = false,
+    val autoSubmit: Boolean? = false,
+    val publishResult: Boolean? = false,
+    val publishQuiz: Boolean? = false,
     val kioskMode: Boolean? = false,
 
 //    @OneToMany(mappedBy = "quiz", cascade = [CascadeType.ALL])

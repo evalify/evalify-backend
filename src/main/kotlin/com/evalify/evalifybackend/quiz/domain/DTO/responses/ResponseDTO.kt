@@ -10,5 +10,11 @@ import java.util.UUID
 @Embeddable
 open class ResponseDTO @JsonCreator constructor(
     @JsonProperty("questionId") open val questionId: UUID,
-    @JsonProperty("duration") open val duration: Long = 0L // Duration in milliseconds
+    @JsonProperty("duration") open val duration: Long, // Duration in milliseconds
+    @JsonProperty("stringAnswer") open val stringAnswer : String? = null,
+    @JsonProperty("uuidAnswer") open val uuidAnswer : UUID? = null,
+    @JsonProperty("listUUIDAnswer") open val listUUIDAnswer:List<UUID>? = null,
+    @JsonProperty("booleanAnswer") open val booleanAnswer : Boolean? = null,
+    @JsonProperty("fillupAnswer") open val fillupAnswer : List<BlankResponseDTO>? = null,
+    @JsonProperty("matchAnswer") open val matchAnswer : List<MatchPairResponse>? = null
 )

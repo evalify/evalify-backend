@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.quiz.domain.DTO.QuizTagsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.quiz.QuizQuestionsReturnDTO
@@ -8,11 +9,21 @@ import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizQuestionResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizStudentInfoDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.ResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentCodingResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentDescriptiveResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentFileUploadResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentFillUpResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMCQResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMMCQResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMatchResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentTrueFalseResponseDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
 import com.evalify.evalifybackend.quiz.domain.QuizStudent
 import com.evalify.evalifybackend.quiz.domain.QuizTags
+import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
@@ -36,6 +47,7 @@ class QuizStudentService(
     private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>,
     private val responseMapRedisTemplate: RedisTemplate<String, ResponseDTO>,
     private val passwordEncoder: PasswordEncoder,
+    private val questionRepository: QuestionRepository,
 ) {
 
     fun distributeQuestions(quiz: Quiz, quizSets: List<QuizSet>): List<QuizSetQuestion> {
@@ -233,7 +245,7 @@ class QuizStudentService(
                 type = question.question.question.getQuestionType()
             )
         }
-        if (quiz.shuffleQuestions) questions.shuffled() else questions
+        if (quiz.shuffleQuestions == true) questions.shuffled() else questions
 
         val questionResponse = questions.map { question ->
             QuizQuestionResponseDTO(
@@ -300,38 +312,104 @@ class QuizStudentService(
         val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
             ?: throw NotFoundException("Quiz with id $quizId not found")
 
-        val existingResponses = quizStudent.responses
+        // Ensure responses list is not null
+        val existingResponses : MutableList<StudentResponseDTO> = quizStudent.responses ?: mutableListOf()
 
         responses.forEach { (questionId, newResponse) ->
             val index = existingResponses.indexOfFirst { it.questionId == questionId }
+            val finalResponse = mapToResponseType(questionId, newResponse)
+
             if (index != -1) {
-                existingResponses[index] = newResponse
+                existingResponses[index] = finalResponse
             } else {
-                existingResponses.add(newResponse)
+                existingResponses.add(finalResponse)
             }
         }
 
+        // Set the responses back to the entity
+        quizStudent.responses = existingResponses
         quizStudentRepository.save(quizStudent)
     }
 
-    fun submitQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
-        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
-            ?: throw NotFoundException("Quiz with id $quizId not found")
+    fun mapToResponseType(questionId: UUID, response: ResponseDTO): StudentResponseDTO {
+        val question = questionRepository.findById(questionId).orElseThrow { NotFoundException("Question with id $questionId not found") }
+        val type = question.getQuestionType()
+        val finalResponse : StudentResponseDTO = when(type){
+            QuestionTypes.FILL_UP ->
+                StudentFillUpResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.fillupAnswer
+                )
+            QuestionTypes.MCQ ->
+                StudentMCQResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.uuidAnswer
 
-        val existingResponses = quizStudent.responses
+                )
+            QuestionTypes.DESCRIPTIVE ->
+                StudentDescriptiveResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.stringAnswer
+                )
+            QuestionTypes.TRUEFALSE ->
+                StudentTrueFalseResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.booleanAnswer
+                )
+            QuestionTypes.FILE_UPLOAD ->
+                StudentFileUploadResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.stringAnswer
+                )
+            QuestionTypes.MMCQ ->
+                StudentMMCQResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.listUUIDAnswer
+                )
+            QuestionTypes.CODING ->
+                StudentCodingResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.stringAnswer
+                )
+            QuestionTypes.MATCH_THE_FOLLOWING ->
+                StudentMatchResponseDTO(
+                    questionId = response.questionId,
+                    duration = response.duration,
+                    answer = response.matchAnswer
+                )
+            else -> throw Exception("Invalid question type")
 
-        responses.forEach { newResponse ->
-            val index = existingResponses.indexOfFirst { it.questionId == newResponse.questionId }
-            if (index != -1) {
-                existingResponses[index] = newResponse
-            } else {
-                existingResponses.add(newResponse)
-            }
         }
-
-
-        quizStudentRepository.save(quizStudent)
+        return finalResponse
     }
+
+//    fun submitQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
+//        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
+//            ?: throw NotFoundException("Quiz with id $quizId not found")
+//
+//        val existingResponses = quizStudent.responses
+//
+//        responses.forEach { newResponse ->
+//            val index = existingResponses.indexOfFirst { it.questionId == newResponse.questionId }
+//            val finalResponse = mapToResponseType(questionId, newResponse)
+//
+//            if (index != -1) {
+//                existingResponses[index] = newResponse
+//            } else {
+//                existingResponses.add(newResponse)
+//            }
+//        }
+//
+//
+//        quizStudentRepository.save(quizStudent)
+//    }
 
     fun getQuizTags(quizId: UUID): List<QuizTags> {
         val quiz = quizRepository.findById(quizId)
