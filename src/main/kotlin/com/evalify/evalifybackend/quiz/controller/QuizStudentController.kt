@@ -18,6 +18,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.responses.TrueFalseResponseDTO
 import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.quiz.question.repository.QuizQuestionRepository
 import com.evalify.evalifybackend.quiz.service.QuizCacheService
+import com.evalify.evalifybackend.quiz.service.QuizCleanupService
 import com.evalify.evalifybackend.quiz.service.QuizStudentService
 import com.evalify.evalifybackend.security.utils.SecurityUtils.getCurrentUserId
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -45,7 +46,8 @@ class QuizStudentController(
     private val quizCacheService: QuizCacheService,
     private val quizQuestionRepository: QuizQuestionRepository,
     private val questionRepository: QuestionRepository,
-    private val objectMapper : ObjectMapper
+    private val objectMapper : ObjectMapper,
+    private val quizCleanupService: QuizCleanupService
 ) {
     @PostMapping("/start")
     fun startQuiz(@PathVariable quizId: UUID, request: HttpServletRequest, @RequestBody dto: StartQuizDTO)
@@ -53,16 +55,65 @@ class QuizStudentController(
         val requestTime = Instant.now()
         val studentId = getCurrentUserId()
 
-        val result = quizStudentService.startQuiz(
-            quizId = quizId,
-            studentId = studentId,
-            ipAddress = request.remoteAddr,
-            requestTime = requestTime,
-            password = dto.password,
-            quizCacheService = quizCacheService
-        )
+        return try {
+            // Proactively clear any corrupted data before starting
+            try {
+                quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
+            } catch (e: Exception) {
+                println("Pre-cleanup failed: ${e.message}")
+            }
 
-        return ResponseEntity.ok(result)
+            val result = quizStudentService.startQuiz(
+                quizId = quizId,
+                studentId = studentId,
+                ipAddress = request.remoteAddr,
+                requestTime = requestTime,
+                password = dto.password,
+                quizCacheService = quizCacheService
+            )
+
+            ResponseEntity.ok(result)
+        } catch (e: org.springframework.orm.jpa.JpaSystemException) {
+            // Handle JPA JSON transformation errors
+            if (e.message?.contains("cannot be transformed to Json object") == true || e.cause?.message?.contains("cannot be transformed to Json object") == true) {
+                println("Database serialization error in startQuiz, clearing all data: ${e.message}")
+                // Clear all corrupted data using separate service
+                try {
+                    quizCacheService.clearStudentCache(quizId, studentId)
+                    quizCleanupService.deleteQuizStudentRecord(quizId, studentId)
+                } catch (cleanupError: Exception) {
+                    println("Cleanup failed: ${cleanupError.message}")
+                }
+                throw IllegalStateException("Database serialization error detected. Corrupted data has been cleared. Please try starting the quiz again.", e)
+            }
+            throw e
+        } catch (e: IllegalArgumentException) {
+            if (e.message?.contains("cannot be transformed to Json object") == true) {
+                println("JSON transformation error in startQuiz, clearing all data: ${e.message}")
+                // Clear all corrupted data using separate service
+                try {
+                    quizCacheService.clearStudentCache(quizId, studentId)
+                    quizCleanupService.deleteQuizStudentRecord(quizId, studentId)
+                } catch (cleanupError: Exception) {
+                    println("Cleanup failed: ${cleanupError.message}")
+                }
+                throw IllegalStateException("JSON transformation error detected. Corrupted data has been cleared. Please try starting the quiz again.", e)
+            }
+            throw e
+        } catch (e: Exception) {
+            if (e.message?.contains("cannot be transformed to Json object") == true) {
+                println("Serialization error in startQuiz, clearing all data: ${e.message}")
+                // Clear all corrupted data using separate service
+                try {
+                    quizCacheService.clearStudentCache(quizId, studentId)
+                    quizCleanupService.deleteQuizStudentRecord(quizId, studentId)
+                } catch (cleanupError: Exception) {
+                    println("Cleanup failed: ${cleanupError.message}")
+                }
+                throw IllegalStateException("Data corruption detected. Corrupted data has been cleared. Please try starting the quiz again.", e)
+            }
+            throw e
+        }
     }
 
     fun objectMapper(body : Map<String,Any>):ResponseDTO{
@@ -192,13 +243,26 @@ class QuizStudentController(
     fun clearCorruptedData(@PathVariable quizId: UUID): ResponseEntity<String> {
         val studentId = getCurrentUserId()
         try {
-            // Clear cache
+            // Clear cache first
             quizCacheService.clearStudentCache(quizId, studentId)
-            // Clear database
-            quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+            // Clear database with nuclear option
+            quizStudentService.clearCorruptedDataInNewTransaction(quizId, studentId)
             return ResponseEntity.ok("Corrupted data cleared successfully. You can now restart the quiz.")
         } catch (e: Exception) {
             return ResponseEntity.badRequest().body("Error clearing corrupted data: ${e.message}")
+        }
+    }
+
+    @DeleteMapping("/nuclear-reset")
+    fun nuclearReset(@PathVariable quizId: UUID): ResponseEntity<String> {
+        val studentId = getCurrentUserId()
+        try {
+            // Nuclear option: clear everything and force recreate
+            quizCacheService.clearAllQuizCache(quizId)
+            quizStudentService.clearCorruptedDataInNewTransaction(quizId, studentId)
+            return ResponseEntity.ok("Quiz state completely reset. All cache and database data cleared.")
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body("Error during nuclear reset: ${e.message}")
         }
     }}
 

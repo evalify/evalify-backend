@@ -50,7 +50,14 @@ class QuizCacheService(
                     response = responses[question.questions.questionId]  // ✅ Map lookup by UUID
                 )
             }
-            val existingStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
+            
+            // Try to get existing student info, but handle corruption gracefully
+            val existingStudent = try {
+                quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+            } catch (e: Exception) {
+                println("Error reading quiz student from cache service, returning null: ${e.message}")
+                null
+            }
 
 
             return QuizQuestionReturnDTO(

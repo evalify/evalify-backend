@@ -52,6 +52,7 @@ class QuizStudentService(
     private val responseMapRedisTemplate: RedisTemplate<String, ResponseDTO>,
     private val passwordEncoder: PasswordEncoder,
     private val questionRepository: QuestionRepository,
+    private val quizCleanupService: QuizCleanupService
     //private val quizCacheService: QuizCacheService,
 ) {
 
@@ -137,7 +138,21 @@ class QuizStudentService(
             )
         }
 
-        val existingQuizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+        // 2. Check existing quiz student and validate student status  
+        val existingQuizStudent = try {
+            quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+        } catch (e: Exception) {
+            // If reading existing student fails due to corrupted data, clear it and try again
+            println("Error reading existing quiz student, clearing corrupted data and retrying: ${e.message}")
+            quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
+            // Try to read again after cleanup
+            try {
+                quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+            } catch (retryError: Exception) {
+                println("Error reading quiz student even after cleanup: ${retryError.message}")
+                null
+            }
+        }
 
         if (existingQuizStudent != null) {
             // Check if quiz is already submitted
@@ -165,9 +180,27 @@ class QuizStudentService(
             }
 
             // Update IP address if needed
-            if (!existingQuizStudent.ipAddress.contains(ipAddress)) {
-                existingQuizStudent.ipAddress.add(ipAddress)
-                quizStudentRepository.save(existingQuizStudent)
+            // Handle case where ipAddress list might be null (though it shouldn't be based on entity definition)
+            val ipList = existingQuizStudent.ipAddress ?: mutableListOf()
+            
+            if (!ipList.contains(ipAddress)) {
+                ipList.add(ipAddress)
+                try {
+                    quizStudentRepository.save(existingQuizStudent)
+                } catch (e: Exception) {
+                    // If saving fails due to corrupted responses, clear them and try again
+                    println("Error saving quiz student due to corrupted responses, clearing and retrying: ${e.message}")
+                    quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
+                    // Get fresh instance and update IP
+                    val freshStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+                    if (freshStudent != null) {
+                        val freshIpList = freshStudent.ipAddress
+                        if (!freshIpList.contains(ipAddress)) {
+                            freshIpList.add(ipAddress)
+                            quizStudentRepository.save(freshStudent)
+                        }
+                    }
+                }
             }
 
             // 3. Try to get cached questions after all validations
@@ -214,7 +247,16 @@ class QuizStudentService(
             )
         }
 
-        val student = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
+        val student = try {
+            quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) 
+                ?: throw NotFoundException("QuizStudent record not found")
+        } catch (e: Exception) {
+            // If reading student fails due to corrupted data, clear it and try again
+            println("Error reading quiz student due to corrupted data, clearing and retrying: ${e.message}")
+            quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
+            quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) 
+                ?: throw NotFoundException("QuizStudent record not found after cleanup")
+        }
 
         // 5. Generate questions from the database
         val questions = generateQuizQuestions(quiz,student ,quizId,studentId,quizCacheService)
@@ -403,7 +445,7 @@ class QuizStudentService(
         } catch (e: Exception) {
             // If there's a serialization error when reading the entity, clear corrupted data first
             println("Database serialization error in updateQuiz, clearing corrupted data: ${e.message}")
-            clearCorruptedQuizStudentData(quizId, studentId)
+            quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
             // Try again after cleanup
             quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
                 ?: throw NotFoundException("Quiz with id $quizId not found")
@@ -550,12 +592,11 @@ class QuizStudentService(
     @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
     fun clearCorruptedDataInNewTransaction(quizId: UUID, studentId: String?) {
         try {
-            // Only clear the responses field, not the entire record
+            // Only clear the responses JSONB field - leave other fields alone
             val sql = """
                 UPDATE quiz_student 
-                SET responses = '[]'::jsonb 
+                SET responses = '[]'::jsonb
                 WHERE quiz_id = :quizId AND student_id = :studentId
-                  AND responses IS NOT NULL
             """.trimIndent()
             
             val query = entityManager.createNativeQuery(sql)
@@ -563,22 +604,20 @@ class QuizStudentService(
             query.setParameter("studentId", studentId)
             val rowsUpdated = query.executeUpdate()
             
-            // Also ensure ipAddress is not null by updating it to empty array if null
-            val ipFixSql = """
-                UPDATE quiz_student 
-                SET ip_address = '[]'::jsonb 
-                WHERE quiz_id = :quizId AND student_id = :studentId
-                  AND ip_address IS NULL
-            """.trimIndent()
-            
-            val ipQuery = entityManager.createNativeQuery(ipFixSql)
-            ipQuery.setParameter("quizId", quizId)
-            ipQuery.setParameter("studentId", studentId)
-            val ipRowsUpdated = ipQuery.executeUpdate()
-            
-            println("Cleared corrupted data in new transaction for quiz $quizId, student $studentId. Responses rows updated: $rowsUpdated, IP rows updated: $ipRowsUpdated")
+            println("Cleared corrupted responses data for quiz $quizId, student $studentId. Rows updated: $rowsUpdated")
         } catch (e: Exception) {
             println("Error clearing corrupted data in new transaction: ${e.message}")
+            // If SQL fails, try to delete and recreate the record as last resort
+            try {
+                val deleteSql = "DELETE FROM quiz_student WHERE quiz_id = :quizId AND student_id = :studentId"
+                val deleteQuery = entityManager.createNativeQuery(deleteSql)
+                deleteQuery.setParameter("quizId", quizId)
+                deleteQuery.setParameter("studentId", studentId)
+                deleteQuery.executeUpdate()
+                println("Deleted corrupted quiz student record as last resort")
+            } catch (deleteError: Exception) {
+                println("Even delete failed: ${deleteError.message}")
+            }
         }
     }
 
