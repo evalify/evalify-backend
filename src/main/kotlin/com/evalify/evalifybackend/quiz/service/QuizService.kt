@@ -144,16 +144,16 @@ class QuizService(
             }
 
             val semestersManaged = semesterRepository.findByManagerId(listOf(user))
-            val validTags = semestersManaged.flatMap { it.quizTags }.distinct()
-            // Check if all requested quizTags are valid
-            if (quizDTO.quizTags.isNotEmpty()) {
-                val validTagIds = validTags.mapNotNull { it.id }
-                val invalidTagIds = quizDTO.quizTags.filter { it !in validTagIds }
-                if (invalidTagIds.isNotEmpty()) {
-                    throw NotFoundException("Invalid quiz tags for manager's semesters: $invalidTagIds")
-                }
-            }
-            val quizTags = if (quizDTO.quizTags.isEmpty()) validTags else quizTagsRepository.findAllById(quizDTO.quizTags)
+//            val validTags = semestersManaged.flatMap { it.quizTags }.distinct()
+//            // Check if all requested quizTags are valid
+//            if (quizDTO.quizTags.isNotEmpty()) {
+//                val validTagIds = validTags.mapNotNull { it.id }
+//                val invalidTagIds = quizDTO.quizTags.filter { it !in validTagIds }
+//                if (invalidTagIds.isNotEmpty()) {
+//                    throw NotFoundException("Invalid quiz tags for manager's semesters: $invalidTagIds")
+//                }
+//            }
+            //val quizTags = if (quizDTO.quizTags.isEmpty()) validTags else quizTagsRepository.findAllById(quizDTO.quizTags)
             
 
 

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.transaction.Transactional
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -84,8 +85,19 @@ class QuizStudentController(
     }
 
     @PatchMapping("/update")
-    fun updateQuiz(@PathVariable quizId: UUID, @RequestParam(required = true) save: Boolean? = false, @RequestBody responses: List<Map<String,Any>>? = null){
+    fun updateQuiz(@PathVariable quizId: UUID, @RequestParam(required = true) save: Boolean? = false, @RequestBody responses: List<Map<String,Any>>? = null): ResponseEntity<String> {
         val studentId = getCurrentUserId()
+        
+        // Proactively clear any corrupted data before proceeding
+        try {
+            // Only clear question cache, preserve answer cache
+            //quizCacheService.clearQuestionCacheOnly(quizId, studentId)
+            quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+        } catch (e: Exception) {
+            // Ignore cleanup errors and proceed
+            println("Pre-cleanup failed, continuing anyway: ${e.message}")
+        }
+        
         if(save == false ){
             if(responses.isNullOrEmpty()){
                 throw IllegalArgumentException("Responses cannot be empty or null!")
@@ -97,23 +109,71 @@ class QuizStudentController(
                 finalResponses.forEach { response ->
                     updateCache(quizId,response,studentId)
                 }
+                return ResponseEntity.ok("Responses cached successfully")
             }
         }
         else{
             if(responses == null)
             {
-                val responsesFromCache = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
-                quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responsesFromCache)
+                try {
+                    val responsesFromCache = quizCacheService.getAllAnswers(quizId = quizId,studentId = studentId)
+                    quizStudentService.updateQuiz(quizId = quizId,studentId = studentId,responses = responsesFromCache)
+                    return ResponseEntity.ok("Cached responses saved successfully to database")
+                } catch (e: org.springframework.orm.jpa.JpaSystemException) {
+                    // Handle JPA JSON transformation errors specifically
+                    if (e.message?.contains("cannot be transformed to Json object") == true || e.cause?.message?.contains("cannot be transformed to Json object") == true) {
+                        // Clear corrupted cache and database state
+                        quizCacheService.clearStudentCache(quizId, studentId)
+                        quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+                        throw IllegalStateException("Data serialization error detected. Corrupted data has been cleared. Please restart the quiz and try again.", e)
+                    }
+                    throw e
+                } catch (e: Exception) {
+                    // If there's a JSON transformation error, clear the cache and throw a meaningful error
+                    if (e.message?.contains("cannot be transformed to Json object") == true) {
+                        quizCacheService.clearStudentCache(quizId, studentId)
+                        throw IllegalStateException("Cache data is corrupted. Please restart the quiz and try again.", e)
+                    }
+                    throw e
+                }
             }
             else{
-                val saveResponses = responses.map { body ->
-                    objectMapper(body)
+                try {
+                    val saveResponses = responses.map { body ->
+                        objectMapper(body)
+                    }
+                    saveResponses.forEach { response ->
+                        updateCache(quizId,response,studentId)
+                    }
+                    val result = quizStudentService.mapResponsesByQuestionId(saveResponses)
+                    quizStudentService.updateQuiz(quizId,studentId,result)
+                    return ResponseEntity.ok("Quiz responses saved successfully to database")
+                } catch (e: org.springframework.orm.jpa.JpaSystemException) {
+                    // Handle JPA JSON transformation errors specifically
+                    if (e.message?.contains("cannot be transformed to Json object") == true || e.cause?.message?.contains("cannot be transformed to Json object") == true) {
+                        // Clear corrupted cache and database state
+                        quizCacheService.clearStudentCache(quizId, studentId)
+                        quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+                        throw IllegalStateException("Database serialization error detected. Corrupted data has been cleared. Please try again.", e)
+                    }
+                    throw e
+                } catch (e: IllegalArgumentException) {
+                    if (e.message?.contains("cannot be transformed to Json object") == true) {
+                        // Clear corrupted cache and database state
+                        quizCacheService.clearStudentCache(quizId, studentId)
+                        quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+                        throw IllegalStateException("JSON transformation error detected. Corrupted data has been cleared. Please try again.", e)
+                    }
+                    throw e
+                } catch (e: Exception) {
+                    // If there's any JSON transformation error, clear the cache and throw a meaningful error
+                    if (e.message?.contains("cannot be transformed to Json object") == true) {
+                        quizCacheService.clearStudentCache(quizId, studentId)
+                        quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+                        throw IllegalStateException("Data corruption detected. Corrupted data has been cleared. Please try again.", e)
+                    }
+                    throw e
                 }
-                saveResponses.forEach { response ->
-                    updateCache(quizId,response,studentId)
-                }
-                val result = quizStudentService.mapResponsesByQuestionId(saveResponses)
-                quizStudentService.updateQuiz(quizId,studentId,result)
             }
         }}
 
@@ -128,12 +188,21 @@ class QuizStudentController(
 
     }
 
-//    @PatchMapping("/save")
-//    fun saveQuestion(@PathVariable quizId: UUID,answer:ResponseDTO){
-//        val studentId = getCurrentUserId()
-//        quizStudentService.saveQuestion(quizId,studentId,answer)
-//
-//    }
+    @DeleteMapping("/clear-corrupted-data")
+    fun clearCorruptedData(@PathVariable quizId: UUID): ResponseEntity<String> {
+        val studentId = getCurrentUserId()
+        try {
+            // Clear cache
+            quizCacheService.clearStudentCache(quizId, studentId)
+            // Clear database
+            quizStudentService.clearCorruptedQuizStudentData(quizId, studentId)
+            return ResponseEntity.ok("Corrupted data cleared successfully. You can now restart the quiz.")
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body("Error clearing corrupted data: ${e.message}")
+        }
+    }}
+
+
 
 //    @PatchMapping("/submit")
 //    fun submitQuiz(@PathVariable quizId: UUID, responses : List<ResponseDTO>? = null){
@@ -148,4 +217,3 @@ class QuizStudentController(
 //        }
 //
 //    }
-}

@@ -27,56 +27,63 @@ class QuizCacheService(
     private val quizStudentRepository: com.evalify.evalifybackend.quiz.repository.QuizStudentRepository,
 ) {
     fun getCachedQuizQuestions(quizId: UUID, studentId: String?): QuizQuestionReturnDTO? {
-        val quiz = quizRepository.findById(quizId)
-            .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
+        try {
+            val quiz = quizRepository.findById(quizId)
+                .orElseThrow { NotFoundException("Quiz with id $quizId not found") }
 
-        val key = "quiz:$quizId:student:$studentId:questions"
-        val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
+            val key = "quiz:$quizId:student:$studentId:questions"
+            val cachedQuestions = redisTemplate.opsForList().range(key, 0, -1)
 
-        if (cachedQuestions.isNullOrEmpty()) {
+            if (cachedQuestions.isNullOrEmpty()) {
+                return null
+            }
+
+            val questionsList = cachedQuestions.filterNotNull()
+            val tags = quizStudentService.getQuizTags(quizId)
+
+            // Use cache-only getAllAnswers method (not the database one)
+            val responses: Map<UUID, ResponseDTO> = getAllAnswers(quizId, studentId)
+
+            val questionResponse = questionsList.map { question ->
+                QuizQuestionResponseDTO(
+                    question = question,
+                    response = responses[question.questions.questionId]  // ✅ Map lookup by UUID
+                )
+            }
+            val existingStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
+
+
+            return QuizQuestionReturnDTO(
+                questions = questionResponse,
+                quizTags = tags.map { tag ->
+                    QuizTagsReturnDTO(
+                        id = tag.id,
+                        name = tag.name,
+                        description = tag.description
+                    )
+                },
+                quizInfo = QuizInfoDTO(
+                    quizId = quiz.id,
+                    quizName = quiz.name,
+                    calculator = quiz.calculator,
+                    kioskMode = quiz.kioskMode,
+                    fullScreen = quiz.fullScreen,
+                    autoSubmit = quiz.autoSubmit,
+                    linearQuiz = quiz.linearQuiz
+                ),
+                message = "Quiz has started successfully.",
+                quizStudentInfo = QuizStudentInfoDTO(
+                    duration = existingStudent?.duration,
+                    endTime = existingStudent?.endTime,
+                    startTime = existingStudent?.startTime,
+                    violations = existingStudent?.violations,
+                    isViolated = existingStudent?.isViolated))
+        } catch (e: Exception) {
+            // If there's a serialization error from Redis cache, clear the cache and return null
+            println("Redis serialization error in getCachedQuizQuestions, clearing cache: ${e.message}")
+            clearStudentCache(quizId, studentId)
             return null
         }
-
-        val questionsList = cachedQuestions.filterNotNull()
-        val tags = quizStudentService.getQuizTags(quizId)
-
-        // Now responses is a Map<UUID, ResponseDTO>
-        val responses: Map<UUID, ResponseDTO> = getAllAnswers(quizId, studentId)
-
-        val questionResponse = questionsList.map { question ->
-            QuizQuestionResponseDTO(
-                question = question,
-                response = responses[question.questions.questionId]  // ✅ Map lookup by UUID
-            )
-        }
-        val existingStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString()) ?: throw NotFoundException("QuizStudent record not found")
-
-
-        return QuizQuestionReturnDTO(
-            questions = questionResponse,
-            quizTags = tags.map { tag ->
-                QuizTagsReturnDTO(
-                    id = tag.id,
-                    name = tag.name,
-                    description = tag.description
-                )
-            },
-            quizInfo = QuizInfoDTO(
-                quizId = quiz.id,
-                quizName = quiz.name,
-                calculator = quiz.calculator,
-                kioskMode = quiz.kioskMode,
-                fullScreen = quiz.fullScreen,
-                autoSubmit = quiz.autoSubmit,
-                linearQuiz = quiz.linearQuiz
-            ),
-            message = "Quiz has started successfully.",
-            quizStudentInfo = QuizStudentInfoDTO(
-                duration = existingStudent?.duration,
-                endTime = existingStudent?.endTime,
-                startTime = existingStudent?.startTime,
-                violations = existingStudent?.violations,
-                isViolated = existingStudent?.isViolated))
 
     }
 
@@ -122,6 +129,15 @@ class QuizCacheService(
         
         redisTemplate.delete(questionKey)
         responseMapRedisTemplate.delete(answerKey)
+    }
+
+    /**
+     * Clears only the question cache but preserves answer cache.
+     * Useful when we need to regenerate questions but keep saved responses.
+     */
+    fun clearQuestionCacheOnly(quizId: UUID, studentId: String?) {
+        val questionKey = "quiz:$quizId:student:$studentId:questions"
+        redisTemplate.delete(questionKey)
     }
 
     /**

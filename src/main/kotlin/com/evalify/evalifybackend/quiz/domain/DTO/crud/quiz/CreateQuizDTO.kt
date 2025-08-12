@@ -20,8 +20,8 @@ data class CreateQuizDTO(
     val autoSubmit: Boolean? = false,
     val quizTags :List<UUID>,
     val password: String? = null,
-    //val publishResult: Boolean = false,
-    //val publishQuiz: Boolean = false,
+    val publishResult: Boolean? = false,
+    val publishQuiz: Boolean? = false,
 
     val courseIds: List<UUID>,
     val studentIds: MutableList<String> = mutableListOf(),
