@@ -30,6 +30,7 @@ import com.evalify.evalifybackend.quiz.repository.QuizSetRepository
 import com.evalify.evalifybackend.quiz.repository.QuizStudentRepository
 import com.evalify.evalifybackend.section.domain.DTO.GetSectionDTO
 import com.evalify.evalifybackend.user.repository.UserRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.transaction.Transactional
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -50,10 +51,10 @@ class QuizStudentService(
     private val quizSetRepository: QuizSetRepository,
     private val redisTemplate: RedisTemplate<String, QuizQuestionsReturnDTO>,
     private val responseMapRedisTemplate: RedisTemplate<String, ResponseDTO>,
-    private val passwordEncoder: PasswordEncoder,
-    private val questionRepository: QuestionRepository,
-    private val quizCleanupService: QuizCleanupService
-    //private val quizCacheService: QuizCacheService,
+        private val questionRepository: QuestionRepository,
+    private val quizCleanupService: QuizCleanupService,
+    private val objectMapper: ObjectMapper
+
 ) {
 
     @PersistenceContext
@@ -542,26 +543,101 @@ class QuizStudentService(
         }
     }
 
-//    fun submitQuiz(quizId: UUID, studentId: String?, responses: List<ResponseDTO>) {
-//        val quizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString() ?: "")
-//            ?: throw NotFoundException("Quiz with id $quizId not found")
-//
-//        val existingResponses = quizStudent.responses
-//
-//        responses.forEach { newResponse ->
-//            val index = existingResponses.indexOfFirst { it.questionId == newResponse.questionId }
-//            val finalResponse = mapToResponseType(questionId, newResponse)
-//
-//            if (index != -1) {
-//                existingResponses[index] = newResponse
-//            } else {
-//                existingResponses.add(newResponse)
-//            }
-//        }
-//
-//
-//        quizStudentRepository.save(quizStudent)
-//    }
+    fun submitQuiz(quizId: UUID, studentId: String?, responses: Map<UUID, ResponseDTO>) {
+        val quizStudent = try {
+            quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
+                ?: throw NotFoundException("Quiz with id $quizId not found")
+        } catch (e: Exception) {
+            // If there's a serialization error when reading the entity, clear corrupted data first
+            println("Database serialization error in updateQuiz, clearing corrupted data: ${e.message}")
+            quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
+            // Try again after cleanup
+            quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
+                ?: throw NotFoundException("Quiz with id $quizId not found")
+        }
+
+        // Ensure a response list is not null - start with an empty list if corrupted data was cleared
+        val existingResponses : MutableList<StudentResponseDTO> = try {
+            quizStudent.responses ?: mutableListOf()
+        } catch (e: Exception) {
+            println("Error reading existing responses, starting with empty list: ${e.message}")
+            mutableListOf()
+        }
+
+        responses.forEach { (questionId, newResponse) ->
+            val index = existingResponses.indexOfFirst { it.questionId == questionId }
+            val finalResponse = mapToResponseType(questionId, newResponse)
+
+            if (index != -1) {
+                existingResponses[index] = finalResponse
+            } else {
+                existingResponses.add(finalResponse)
+            }
+        }
+
+        // Set the responses back to the entity and update submission status
+        quizStudent.responses = existingResponses
+        
+        // Update submission status and time
+        val currentTime = Instant.now()
+        try {
+            // Use raw SQL to update submission fields to avoid JPA serialization issues
+            val updateSql = """
+                UPDATE quiz_student 
+                SET responses = :responses::jsonb, 
+                    is_submitted = true, 
+                    submit_time = :submitTime
+                WHERE quiz_id = :quizId AND student_id = :studentId
+            """.trimIndent()
+            
+            val updateQuery = entityManager.createNativeQuery(updateSql)
+            updateQuery.setParameter("responses", objectMapper.writeValueAsString(existingResponses))
+            updateQuery.setParameter("submitTime", currentTime)
+            updateQuery.setParameter("quizId", quizId)
+            updateQuery.setParameter("studentId", studentId)
+            val rowsUpdated = updateQuery.executeUpdate()
+            
+            if (rowsUpdated == 0) {
+                throw IllegalStateException("No quiz student record found to update")
+            }
+            
+            println("Quiz submitted successfully for student $studentId in quiz $quizId at $currentTime")
+        } catch (e: Exception) {
+            println("Error updating submission status with raw SQL, falling back to JPA: ${e.message}")
+            // Fallback to JPA save if SQL fails - but this time manually set the submission fields
+            try {
+                // Manually update the fields in the entity before saving
+                val updatedQuizStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId ?: "")
+                if (updatedQuizStudent != null) {
+                    // Create a new instance with updated fields to avoid JPA issues
+                    val newQuizStudent = QuizStudent(
+                        id = updatedQuizStudent.id,
+                        quiz = updatedQuizStudent.quiz,
+                        student = updatedQuizStudent.student,
+                        startTime = updatedQuizStudent.startTime,
+                        duration = updatedQuizStudent.duration,
+                        endTime = updatedQuizStudent.endTime,
+                        isSubmitted = true,  // Set to true
+                        violations = updatedQuizStudent.violations,
+                        isViolated = updatedQuizStudent.isViolated,
+                        ipAddress = updatedQuizStudent.ipAddress,
+                        submitTime = currentTime,  // Set current time
+                        responses = existingResponses,
+                        results = updatedQuizStudent.results,
+                        setNumber = updatedQuizStudent.setNumber
+                    )
+                    quizStudentRepository.save(newQuizStudent)
+                    println("Fallback JPA save successful for quiz submission")
+                } else {
+                    throw IllegalStateException("Quiz student record not found for fallback save")
+                }
+            } catch (fallbackError: Exception) {
+                println("Fallback JPA save also failed: ${fallbackError.message}")
+                throw IllegalStateException("Failed to update quiz submission status", fallbackError)
+            }
+        }
+    }
+
 
     fun getQuizTags(quizId: UUID): List<QuizTags> {
         val quiz = quizRepository.findById(quizId)
