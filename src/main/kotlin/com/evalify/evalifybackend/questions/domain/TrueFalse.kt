@@ -90,7 +90,7 @@ class TrueFalse(
     override fun mapToBankType(questionId:UUID?): BankQuestionsReturnDTO {
         return TrueFalseBankDTO(
                 question = this.question,
-                answers = this.answer,
+                answer = this.answer,
                 hint = this.hint,
                 marks = this.marks,
                 bloomsTaxonomy = this.bloomsTaxonomy,

@@ -10,7 +10,7 @@ import java.util.UUID
 class TrueFalseBankDTO(
         val question: String,
         override val questionId : UUID?,
-        val answers: Boolean,
+        val answer: Boolean,
         override val hint: String?,
         override val marks: Int,
         override val bloomsTaxonomy: Taxonomy?,
