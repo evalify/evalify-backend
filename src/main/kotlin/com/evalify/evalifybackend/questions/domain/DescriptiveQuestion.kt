@@ -12,6 +12,7 @@ import com.evalify.evalifybackend.questions.domain.Taxonomy
 import com.evalify.evalifybackend.quiz.domain.DTO.crud.QuestionsReturnDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.questionTypes.DescriptiveReturnDTO
 import com.evalify.evalifybackend.topic.repository.TopicRepo
+import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import java.util.UUID
@@ -30,8 +31,10 @@ class DescriptiveQuestion(
         co: Int,
         negativeMark: Int? = null,
         difficulty: Difficulty,
+        @Column(columnDefinition = "TEXT")
         val expectedAnswer: String?,
         val strictness: Float?,
+        @Column(columnDefinition = "TEXT")
         val guidelines: String?,
 ) :
         BaseQuestion(
