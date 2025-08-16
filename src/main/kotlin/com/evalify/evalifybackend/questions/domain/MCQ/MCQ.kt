@@ -68,7 +68,7 @@ class MCQ(
                         difficulty = difficulty,
                         options = options.map { 
                             MCQOption(
-                                id = null,
+                                id = it.id,
                                 text = it.text,
                                 isCorrect = it.isCorrect
                             )
