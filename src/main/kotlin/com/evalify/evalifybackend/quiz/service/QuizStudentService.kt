@@ -156,6 +156,8 @@ class QuizStudentService(
         }
 
         if (existingQuizStudent != null) {
+            println("Found existing quiz student record for student $studentId in quiz $quizId")
+            
             // Check if quiz is already submitted
             if (existingQuizStudent.isSubmitted) {
                 return QuizQuestionReturnDTO(
@@ -181,25 +183,62 @@ class QuizStudentService(
             }
 
             // Update IP address if needed
-            // Handle case where ipAddress list might be null (though it shouldn't be based on entity definition)
             val ipList = existingQuizStudent.ipAddress ?: mutableListOf()
             
             if (!ipList.contains(ipAddress)) {
-                ipList.add(ipAddress)
                 try {
-                    quizStudentRepository.save(existingQuizStudent)
-                } catch (e: Exception) {
-                    // If saving fails due to corrupted responses, clear them and try again
-                    println("Error saving quiz student due to corrupted responses, clearing and retrying: ${e.message}")
-                    quizCleanupService.clearCorruptedResponsesOnly(quizId, studentId)
-                    // Get fresh instance and update IP
-                    val freshStudent = quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
-                    if (freshStudent != null) {
-                        val freshIpList = freshStudent.ipAddress
-                        if (!freshIpList.contains(ipAddress)) {
-                            freshIpList.add(ipAddress)
-                            quizStudentRepository.save(freshStudent)
-                        }
+                    // Use raw SQL to update IP addresses to avoid JPA serialization issues
+                    val currentIpList = mutableListOf<String>().apply {
+                        addAll(ipList)
+                        add(ipAddress)
+                    }
+                    
+                    // Build PostgreSQL array literal
+                    val ipArrayLiteral = "{${currentIpList.joinToString(",") { "\"$it\"" }}}"
+                    
+                    val updateIpSql = """
+                        UPDATE quiz_student 
+                        SET ip_address = :ipArray::text[]
+                        WHERE quiz_id = :quizId AND student_id = :studentId
+                    """.trimIndent()
+                    
+                    val updateQuery = entityManager.createNativeQuery(updateIpSql)
+                    updateQuery.setParameter("ipArray", ipArrayLiteral)
+                    updateQuery.setParameter("quizId", quizId)
+                    updateQuery.setParameter("studentId", studentId)
+                    val rowsUpdated = updateQuery.executeUpdate()
+                    
+                    if (rowsUpdated > 0) {
+                        println("Successfully updated IP address for student $studentId in quiz $quizId")
+                    }
+                } catch (sqlError: Exception) {
+                    println("Error updating IP with raw SQL, trying JPA fallback: ${sqlError.message}")
+                    // Fallback to JPA save
+                    try {
+                        ipList.add(ipAddress)
+                        // Create a new instance to avoid entity state issues
+                        val updatedStudent = QuizStudent(
+                            id = existingQuizStudent.id,
+                            quiz = existingQuizStudent.quiz,
+                            student = existingQuizStudent.student,
+                            startTime = existingQuizStudent.startTime,
+                            duration = existingQuizStudent.duration,
+                            endTime = existingQuizStudent.endTime,
+                            isSubmitted = existingQuizStudent.isSubmitted,
+                            violations = existingQuizStudent.violations,
+                            isViolated = existingQuizStudent.isViolated,
+                            ipAddress = ipList,
+                            submitTime = existingQuizStudent.submitTime,
+                            responses = mutableListOf(), // Reset responses to avoid serialization issues
+                            results = existingQuizStudent.results,
+                            setNumber = existingQuizStudent.setNumber
+                        )
+                        quizStudentRepository.save(updatedStudent)
+                        println("Successfully updated IP address using JPA fallback")
+                    } catch (jpaError: Exception) {
+                        println("Both SQL and JPA IP update failed, but continuing: ${jpaError.message}")
+                        // Don't fail the whole operation just because IP update failed
+                        // The quiz can still proceed with the existing IP list
                     }
                 }
             }
@@ -210,6 +249,8 @@ class QuizStudentService(
                 return cachedQuestions
             }
         } else {
+            println("No existing quiz student found, creating new record for student $studentId in quiz $quizId")
+            
             // 4. Validate password only when creating new quiz student
             if (quiz.password != null && password != quiz.password) {
                 return QuizQuestionReturnDTO(
@@ -234,18 +275,58 @@ class QuizStudentService(
                 )
             }
 
-            // Create new quiz student
-            val newStudent = quizStudentRepository.save(
-                QuizStudent(
-                    quiz = quiz,
-                    student = user,
-                    isSubmitted = false,
-                    startTime = Instant.now(),
-                    duration = quiz.duration,
-                    endTime = quiz.endTime,
-                    ipAddress = mutableListOf(ipAddress)
+            // Create new quiz student with race condition protection
+            try {
+                val newStudent = quizStudentRepository.save(
+                    QuizStudent(
+                        quiz = quiz,
+                        student = user,
+                        isSubmitted = false,
+                        startTime = Instant.now(),
+                        duration = quiz.duration,
+                        endTime = quiz.endTime,
+                        ipAddress = mutableListOf(ipAddress)
+                    )
                 )
-            )
+                println("Successfully created new quiz student record for student $studentId in quiz $quizId")
+            } catch (duplicateError: Exception) {
+                // Handle duplicate key error - student might have been created by another request
+                if (duplicateError.message?.contains("duplicate key") == true || 
+                    duplicateError.message?.contains("unique constraint") == true ||
+                    duplicateError.message?.contains("violates unique constraint") == true) {
+                    println("Duplicate key error when creating quiz student - record already exists. Checking existing record.")
+                    
+                    // Double-check: try to find the existing record that was created by another request
+                    val concurrentlyCreatedStudent = try {
+                        quizStudentRepository.findByQuizIdAndStudentId(quizId, studentId.toString())
+                    } catch (e: Exception) {
+                        println("Error finding concurrently created student: ${e.message}")
+                        null
+                    }
+                    
+                    if (concurrentlyCreatedStudent != null) {
+                        println("Found concurrently created student record, updating IP address if needed")
+                        // Update IP address if the current IP is not in the list
+                        val existingIps = concurrentlyCreatedStudent.ipAddress ?: mutableListOf()
+                        if (!existingIps.contains(ipAddress)) {
+                            try {
+                                existingIps.add(ipAddress)
+                                quizStudentRepository.save(concurrentlyCreatedStudent)
+                                println("Successfully updated IP address for concurrently created record")
+                            } catch (updateError: Exception) {
+                                println("Error updating IP for concurrent record, but continuing: ${updateError.message}")
+                            }
+                        }
+                    } else {
+                        println("Could not find the concurrently created record, but continuing anyway")
+                    }
+                    
+                    // Don't throw error, just continue - the record exists now
+                } else {
+                    println("Error creating new quiz student: ${duplicateError.message}")
+                    throw duplicateError
+                }
+            }
         }
 
         val student = try {
