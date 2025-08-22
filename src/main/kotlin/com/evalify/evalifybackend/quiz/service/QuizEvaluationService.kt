@@ -1,6 +1,7 @@
 package com.evalify.evalifybackend.quiz.service
 
 import com.evalify.evalifybackend.core.exception.NotFoundException
+import com.evalify.evalifybackend.questions.domain.QuestionTypes
 import com.evalify.evalifybackend.quiz.domain.DTO.evaluation.SaveGradeDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentCodingResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentDescriptiveResponseDTO
@@ -11,6 +12,8 @@ import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMMCQRe
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMatchResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentTrueFalseResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.responses.BlankResponseDTO
+import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizEvaluationRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -21,7 +24,8 @@ import java.util.UUID
 @Service
 class QuizEvaluationService(
     private val quizEvaluationRepository: QuizEvaluationRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val questionRepository: com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 ) {
     private val logger = LoggerFactory.getLogger(QuizEvaluationService::class.java)
 
@@ -109,51 +113,124 @@ class QuizEvaluationService(
                 val duration = responseNode.get("duration").asLong()
                 val isEvaluated = responseNode.get("isEvaluated").asBoolean()
                 
-                // Create appropriate DTO based on the answer field structure
-                val studentResponse = when {
-                    responseNode.has("answer") -> {
-                        val answer = responseNode.get("answer").asText()
-                        when {
-                            answer.lowercase() in listOf("true", "false") -> {
-                                StudentTrueFalseResponseDTO(
-                                    questionId = questionId,
-                                    answer = answer.toBoolean(),
-                                    duration = duration,
-                                    marks = marks,
-                                    remarks = remarks,
-                                    isEvaluated = isEvaluated
-                                )
-                            }
-                            answer.length > 50 -> { // Assume descriptive if long text
-                                StudentDescriptiveResponseDTO(
-                                    questionId = questionId,
-                                    answer = answer,
-                                    duration = duration,
-                                    marks = marks,
-                                    remarks = remarks,
-                                    isEvaluated = isEvaluated
-                                )
-                            }
-                            else -> { // Default to descriptive for other text answers
-                                StudentDescriptiveResponseDTO(
-                                    questionId = questionId,
-                                    answer = answer,
-                                    duration = duration,
-                                    marks = marks,
-                                    remarks = remarks,
-                                    isEvaluated = isEvaluated
-                                )
-                            }
-                        }
+                // Get question type from database to determine correct DTO type
+                val question = questionRepository.findById(questionId).orElseThrow { 
+                    NotFoundException("Question with id $questionId not found") 
+                }
+                val questionType = question.getQuestionType()
+                
+                // Create appropriate DTO based on question type
+                val studentResponse: StudentResponseDTO = when (questionType) {
+                    QuestionTypes.MCQ -> {
+                        val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                            UUID.fromString(responseNode.get("answer").asText())
+                        } else null
+                        StudentMCQResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
                     }
-                    responseNode.has("selectedOptions") -> {
-                        // MCQ or MMCQ - would need to check array size
-                        val selectedOptions = responseNode.get("selectedOptions")
-                        // Add MCQ/MMCQ parsing logic here if needed
-                        throw IllegalStateException("MCQ response parsing not implemented yet")
+                    QuestionTypes.MMCQ -> {
+                        val answer = if (responseNode.has("answer") && responseNode.get("answer").isArray) {
+                            responseNode.get("answer").map { UUID.fromString(it.asText()) }
+                        } else null
+                        StudentMMCQResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.TRUEFALSE -> {
+                        val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                            responseNode.get("answer").asBoolean()
+                        } else null
+                        StudentTrueFalseResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.DESCRIPTIVE -> {
+                        val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                            responseNode.get("answer").asText()
+                        } else null
+                        StudentDescriptiveResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.FILL_UP -> {
+                        val answer = if (responseNode.has("answer") && responseNode.get("answer").isArray) {
+                            responseNode.get("answer").map { blankNode ->
+                                objectMapper.treeToValue(blankNode, BlankResponseDTO::class.java)
+                            }
+                        } else null
+                        StudentFillUpResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.CODING -> {
+                        val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                            responseNode.get("answer").asText()
+                        } else null
+                        StudentCodingResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.FILE_UPLOAD -> {
+                        val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                            responseNode.get("answer").asText()
+                        } else null
+                        StudentFileUploadResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
+                    }
+                    QuestionTypes.MATCH_THE_FOLLOWING -> {
+                        val answer = if (responseNode.has("answer") && responseNode.get("answer").isArray) {
+                            responseNode.get("answer").map { matchNode ->
+                                objectMapper.treeToValue(matchNode, com.evalify.evalifybackend.quiz.domain.DTO.responses.MatchPairResponse::class.java)
+                            }
+                        } else null
+                        StudentMatchResponseDTO(
+                            questionId = questionId,
+                            answer = answer,
+                            duration = duration,
+                            marks = marks,
+                            remarks = remarks,
+                            isEvaluated = isEvaluated
+                        )
                     }
                     else -> {
-                        throw IllegalStateException("Unknown response type for question $questionId")
+                        throw IllegalStateException("Unsupported question type: $questionType for question $questionId")
                     }
                 }
                 
