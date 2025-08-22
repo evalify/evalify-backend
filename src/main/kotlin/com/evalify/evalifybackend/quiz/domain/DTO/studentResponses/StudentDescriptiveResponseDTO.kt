@@ -7,6 +7,9 @@ import java.util.UUID
 data class StudentDescriptiveResponseDTO(
     override val questionId : UUID,
     override val duration : Long ,// Duration in milliseconds,
+    override val marks : Float? = null ,
+    override val remarks: String? = null,
+    override val isEvaluated: Boolean? = false,
     val answer : String? = null
 ) : StudentResponseDTO(
     questionId = questionId,

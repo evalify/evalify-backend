@@ -637,42 +637,71 @@ class QuizStudentService(
                 ?: throw NotFoundException("Quiz with id $quizId not found")
         }
 
-        // Ensure a response list is not null - start with an empty list if corrupted data was cleared
-        val existingResponses : MutableList<StudentResponseDTO> = try {
-            quizStudent.responses ?: mutableListOf()
+        // Check if we have cached responses or if there are new responses to process
+        val hasNewResponses = responses.isNotEmpty()
+        val hasCachedResponses = try {
+            quizStudent.responses != null
         } catch (e: Exception) {
-            println("Error reading existing responses, starting with empty list: ${e.message}")
-            mutableListOf()
+            false // If there's an error reading cached responses, treat as no cache
         }
 
-        responses.forEach { (questionId, newResponse) ->
-            val index = existingResponses.indexOfFirst { it.questionId == questionId }
-            val finalResponse = mapToResponseType(questionId, newResponse)
-
-            if (index != -1) {
-                existingResponses[index] = finalResponse
-            } else {
-                existingResponses.add(finalResponse)
+        // Only process responses if we have cached data OR new responses to save
+        val existingResponses: MutableList<StudentResponseDTO>? = if (hasNewResponses || hasCachedResponses) {
+            val currentResponses = try {
+                quizStudent.responses ?: mutableListOf()
+            } catch (e: Exception) {
+                println("Error reading existing responses, starting with empty list: ${e.message}")
+                mutableListOf()
             }
+
+            responses.forEach { (questionId, newResponse) ->
+                val index = currentResponses.indexOfFirst { it.questionId == questionId }
+                val finalResponse = mapToResponseType(questionId, newResponse)
+
+                if (index != -1) {
+                    currentResponses[index] = finalResponse
+                } else {
+                    currentResponses.add(finalResponse)
+                }
+            }
+
+            currentResponses
+        } else {
+            // Don't touch responses field if no cache and no new responses
+            null
         }
 
-        // Set the responses back to the entity and update submission status
-        quizStudent.responses = existingResponses
-        
+        // Set the responses back to the entity only if we processed them
+        if (existingResponses != null) {
+            quizStudent.responses = existingResponses
+        }
         // Update submission status and time
         val currentTime = Instant.now()
         try {
             // Use raw SQL to update submission fields to avoid JPA serialization issues
-            val updateSql = """
+            val updateSql = if (existingResponses != null) {
+                // Update responses along with submission status
+                """
                 UPDATE quiz_student 
                 SET responses = :responses::jsonb, 
                     is_submitted = true, 
                     submit_time = :submitTime
                 WHERE quiz_id = :quizId AND student_id = :studentId
-            """.trimIndent()
+                """.trimIndent()
+            } else {
+                // Only update submission status, don't touch responses field
+                """
+                UPDATE quiz_student 
+                SET is_submitted = true, 
+                    submit_time = :submitTime
+                WHERE quiz_id = :quizId AND student_id = :studentId
+                """.trimIndent()
+            }
             
             val updateQuery = entityManager.createNativeQuery(updateSql)
-            updateQuery.setParameter("responses", objectMapper.writeValueAsString(existingResponses))
+            if (existingResponses != null) {
+                updateQuery.setParameter("responses", objectMapper.writeValueAsString(existingResponses))
+            }
             updateQuery.setParameter("submitTime", currentTime)
             updateQuery.setParameter("quizId", quizId)
             updateQuery.setParameter("studentId", studentId)
@@ -703,9 +732,11 @@ class QuizStudentService(
                         isViolated = updatedQuizStudent.isViolated,
                         ipAddress = updatedQuizStudent.ipAddress,
                         submitTime = currentTime,  // Set current time
-                        responses = existingResponses,
+                        responses = existingResponses ?: updatedQuizStudent.responses, // Only update if we processed responses
                         results = updatedQuizStudent.results,
                         setNumber = updatedQuizStudent.setNumber
+
+
                     )
                     quizStudentRepository.save(newQuizStudent)
                     println("Fallback JPA save successful for quiz submission")
