@@ -537,6 +537,93 @@ class QuizService(
             throw e
         }
     }
+    @Transactional
+    fun publishQuizResults(quizId: UUID) {
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+
+        if (quiz.publishResult == true) {
+            throw IllegalStateException("Quiz results are already published")
+        }
+
+        // Create updated quiz with publishResult = true
+        val updatedQuiz = Quiz(
+            id = quiz.id,
+            name = quiz.name,
+            description = quiz.description,
+            instructions = quiz.instructions,
+            startTime = quiz.startTime,
+            endTime = quiz.endTime,
+            duration = quiz.duration,
+            password = quiz.password,
+            fullScreen = quiz.fullScreen,
+            shuffleQuestions = quiz.shuffleQuestions,
+            shuffleOptions = quiz.shuffleOptions,
+            linearQuiz = quiz.linearQuiz,
+            calculator = quiz.calculator,
+            autoSubmit = quiz.autoSubmit,
+            publishResult = true, // Set to true
+            publishQuiz = quiz.publishQuiz,
+            kioskMode = quiz.kioskMode,
+            section = quiz.section,
+            course = quiz.course,
+            student = quiz.student,
+            lab = quiz.lab,
+            batch = quiz.batch,
+            createdAt = quiz.createdAt,
+            noOfSets = quiz.noOfSets,
+            quizTags = quiz.quizTags,
+            sharedUsers = quiz.sharedUsers
+        )
+
+        quizRepository.save(updatedQuiz)
+        logger.debug("Published results for quiz {}", quizId)
+    }
+
+    @Transactional
+    fun unpublishQuizResults(quizId: UUID) {
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+
+        if (quiz.publishResult != true) {
+            throw IllegalStateException("Quiz results are not currently published")
+        }
+
+        // Create updated quiz with publishResult = false
+        val updatedQuiz = Quiz(
+            id = quiz.id,
+            name = quiz.name,
+            description = quiz.description,
+            instructions = quiz.instructions,
+            startTime = quiz.startTime,
+            endTime = quiz.endTime,
+            duration = quiz.duration,
+            password = quiz.password,
+            fullScreen = quiz.fullScreen,
+            shuffleQuestions = quiz.shuffleQuestions,
+            shuffleOptions = quiz.shuffleOptions,
+            linearQuiz = quiz.linearQuiz,
+            calculator = quiz.calculator,
+            autoSubmit = quiz.autoSubmit,
+            publishResult = false, // Set to false
+            publishQuiz = quiz.publishQuiz,
+            kioskMode = quiz.kioskMode,
+            section = quiz.section,
+            course = quiz.course,
+            student = quiz.student,
+            lab = quiz.lab,
+            batch = quiz.batch,
+            createdAt = quiz.createdAt,
+            noOfSets = quiz.noOfSets,
+            quizTags = quiz.quizTags,
+            sharedUsers = quiz.sharedUsers
+        )
+
+        quizRepository.save(updatedQuiz)
+        logger.debug("Unpublished results for quiz {}", quizId)
+    }
 
     fun publishQuiz(quizId: UUID, dto: SelectionCriteriaDTO?,noOfQuestions:Int?) {
         val quiz =

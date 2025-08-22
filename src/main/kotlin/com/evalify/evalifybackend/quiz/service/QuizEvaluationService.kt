@@ -13,8 +13,12 @@ import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentMatchR
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.studentResponses.StudentTrueFalseResponseDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.responses.BlankResponseDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.evaluation.QuizResultDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.evaluation.QuizResponseDTO
+import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
 import com.evalify.evalifybackend.quiz.repository.QuizEvaluationRepository
+import com.evalify.evalifybackend.quiz.repository.QuizRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,7 +29,8 @@ import java.util.UUID
 class QuizEvaluationService(
     private val quizEvaluationRepository: QuizEvaluationRepository,
     private val objectMapper: ObjectMapper,
-    private val questionRepository: com.evalify.evalifybackend.quiz.question.repository.QuestionRepository
+    private val questionRepository: com.evalify.evalifybackend.quiz.question.repository.QuestionRepository,
+    private val quizRepository: QuizRepository
 ) {
     private val logger = LoggerFactory.getLogger(QuizEvaluationService::class.java)
 
@@ -355,6 +360,115 @@ class QuizEvaluationService(
                     isEvaluated = true
                 )
             else -> throw IllegalArgumentException("Unknown response type for question ${gradeDTO.questionId}")
+        }
+    }
+
+    /**
+     * Get quiz results for a student (only if publishResult is true)
+     */
+    fun getQuizResults(quizId: UUID, studentId: String): List<QuizResultDTO> {
+        // Check if quiz exists and publishResult is true
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+
+        if (quiz.publishResult != true) {
+            throw IllegalStateException("Quiz results are not yet published")
+        }
+
+        // Check if quiz student record exists
+        val exists = quizEvaluationRepository.existsByQuizIdAndStudentId(quizId, studentId)
+        if (!exists) {
+            throw NotFoundException("Quiz student record not found for quiz $quizId and student $studentId")
+        }
+
+        // Get responses as JSON
+        val responsesJson = try {
+            quizEvaluationRepository.getResponsesAsJson(quizId, studentId)
+        } catch (e: Exception) {
+            logger.debug("Failed to get responses JSON: {}", e.message)
+            throw IllegalStateException("Cannot read responses for results", e)
+        }
+
+        if (responsesJson.isNullOrBlank()) {
+            return emptyList()
+        }
+
+        // Parse responses and convert to result DTOs
+        return try {
+            val jsonArray = objectMapper.readTree(responsesJson)
+            jsonArray.map { responseNode ->
+                val questionId = UUID.fromString(responseNode.get("questionId").asText())
+                val marksNode = responseNode.get("marks")
+                val marks: Float? = if (marksNode == null || marksNode.isNull) null else marksNode.floatValue()
+                val remarks = if (responseNode.get("remarks").isNull) null else responseNode.get("remarks").asText()
+                
+                // Extract answer as JsonNode to preserve original structure
+                val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                    responseNode.get("answer")
+                } else null
+
+                QuizResultDTO(
+                    questionId = questionId,
+                    answer = answer,
+                    marks = marks,
+                    remarks = remarks
+                )
+            }
+        } catch (e: Exception) {
+            logger.debug("Failed to parse responses for results: {}", e.message)
+            throw IllegalStateException("Cannot parse responses for results", e)
+        }
+    }
+
+    /**
+     * Publish quiz results (set publishResult to true)
+     */
+
+
+    /**
+     * Get quiz responses for a student (questionId, answer, duration)
+     */
+    fun getQuizResponses(quizId: UUID, studentId: String): List<QuizResponseDTO> {
+        // Check if quiz student record exists
+        val exists = quizEvaluationRepository.existsByQuizIdAndStudentId(quizId, studentId)
+        if (!exists) {
+            throw NotFoundException("Quiz student record not found for quiz $quizId and student $studentId")
+        }
+
+        // Get responses as JSON
+        val responsesJson = try {
+            quizEvaluationRepository.getResponsesAsJson(quizId, studentId)
+        } catch (e: Exception) {
+            logger.debug("Failed to get responses JSON: {}", e.message)
+            throw IllegalStateException("Cannot read responses", e)
+        }
+
+        if (responsesJson.isNullOrBlank()) {
+            return emptyList()
+        }
+
+        // Parse responses and convert to response DTOs
+        return try {
+            val jsonArray = objectMapper.readTree(responsesJson)
+            jsonArray.map { responseNode ->
+                val questionId = UUID.fromString(responseNode.get("questionId").asText())
+                val duration = responseNode.get("duration").asLong()
+                
+                // Extract answer as JsonNode to preserve original structure
+                val answer = if (responseNode.has("answer") && !responseNode.get("answer").isNull) {
+                    responseNode.get("answer")
+                } else null
+
+                QuizResponseDTO(
+                    questionId = questionId,
+                    answer = answer,
+                    duration = duration
+                )
+            }
+        } catch (e: Exception) {
+            logger.debug("Failed to parse responses: {}", e.message)
+            throw IllegalStateException("Cannot parse responses", e)
         }
     }
 }

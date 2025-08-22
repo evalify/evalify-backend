@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -491,6 +492,42 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
     ) {
 
         quizService.publishQuiz(quizId, dto,noOfQuestions)
+    }
+    @PutMapping("{quizId}/results/publish")
+    fun publishQuizResults(@PathVariable quizId: UUID): ResponseEntity<String> {
+        return try {
+            quizService.publishQuizResults(quizId)
+            ResponseEntity.ok("Quiz results published successfully for quiz $quizId")
+        } catch (e: IllegalStateException) {
+            when {
+                e.message?.contains("already published") == true ->
+                    ResponseEntity.badRequest().body("Quiz results are already published")
+                else ->
+                    ResponseEntity.badRequest().body("Invalid state: ${e.message}")
+            }
+        } catch (e: com.evalify.evalifybackend.core.exception.NotFoundException) {
+            ResponseEntity.badRequest().body("Not found: ${e.message}")
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().body("An error occurred: ${e.message}")
+        }
+    }
+    @DeleteMapping("{quizId}/results/publish")
+    fun unpublishQuizResults(@PathVariable quizId: UUID): ResponseEntity<String> {
+        return try {
+            quizService.unpublishQuizResults(quizId)
+            ResponseEntity.ok("Quiz results unpublished successfully for quiz $quizId")
+        } catch (e: IllegalStateException) {
+            when {
+                e.message?.contains("not currently published") == true ->
+                    ResponseEntity.badRequest().body("Quiz results are not currently published")
+                else ->
+                    ResponseEntity.badRequest().body("Invalid state: ${e.message}")
+            }
+        } catch (e: com.evalify.evalifybackend.core.exception.NotFoundException) {
+            ResponseEntity.badRequest().body("Not found: ${e.message}")
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().body("An error occurred: ${e.message}")
+        }
     }
     @DeleteMapping("{quizId}/publish")
     @ResponseStatus(HttpStatus.NO_CONTENT)
