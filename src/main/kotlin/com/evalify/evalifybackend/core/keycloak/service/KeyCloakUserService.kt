@@ -43,7 +43,8 @@ class KeyCloakUserService(
                     name = user.username,
                     email = user.email,
                     role = Role.valueOf(groups[0].uppercase()),
-                    phoneNumber = ""
+                    phoneNumber = "",
+                    isActive = true,
                 )
                 userRepository.save(newUser)
                 count += 1

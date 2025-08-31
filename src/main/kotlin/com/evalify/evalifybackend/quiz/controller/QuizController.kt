@@ -20,6 +20,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.quiz.QuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.ShareQuizDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.student.StudentInfoDTO
 import com.evalify.evalifybackend.quiz.exception.*
 import com.evalify.evalifybackend.quiz.service.QuizCourseService
 import com.evalify.evalifybackend.quiz.service.QuizLabService
@@ -529,6 +530,33 @@ fun getQuizQuestionById(@PathVariable questionId : UUID) : ResponseEntity<BankQu
             ResponseEntity.internalServerError().body("An error occurred: ${e.message}")
         }
     }
+
+    @GetMapping("/{quizId}/students")
+    fun getStudentsForQuiz(@PathVariable quizId: UUID): ResponseEntity<List<StudentInfoDTO>> {
+        return try {
+            val students = quizService.getStudentsForQuiz(quizId)
+            ResponseEntity.ok(students)
+        } catch (e: com.evalify.evalifybackend.core.exception.NotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            logger.error("Error retrieving students for quiz $quizId", e)
+            ResponseEntity.internalServerError().build()
+        }
+    }
+
+    @GetMapping("{quizId}/attempted-students")
+    fun getAttemptedStudentsForQuiz(@PathVariable quizId: UUID): ResponseEntity<List<StudentInfoDTO>> {
+        return try {
+            val students = quizService.getAttemptedStudents(quizId)
+            ResponseEntity.ok(students)
+        } catch (e: com.evalify.evalifybackend.core.exception.NotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            logger.error("Error retrieving attempted students for quiz $quizId", e)
+            ResponseEntity.internalServerError().build()
+        }
+    }
+
     @DeleteMapping("{quizId}/publish")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun unpublishQuiz(

@@ -92,6 +92,12 @@ class QuizStudentService(
             throw NotFoundException("Student id cannot be null. Please provide a valid student id.")
         }
 
+        if (studentId !in quiz.student.map { it.id }) {
+            throw NotFoundException("Student with id $studentId is not permitted to attend this quiz.")
+        }
+
+
+
         // 1. First validate time constraints
         if (requestTime.isBefore(quiz.startTime)) {
             return QuizQuestionReturnDTO(

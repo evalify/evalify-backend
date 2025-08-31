@@ -27,7 +27,7 @@ class User (
     @Enumerated(EnumType.STRING)
     val role: Role,
     val phoneNumber: String,
-    val isActive: Boolean = true,
+    val isActive: Boolean,
     val createdAt: Timestamp = Timestamp.from(Instant.now()),
     val lastPasswordChange: Timestamp? = null,
 

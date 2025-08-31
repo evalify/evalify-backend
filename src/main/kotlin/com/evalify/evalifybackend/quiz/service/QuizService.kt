@@ -27,6 +27,7 @@ import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedQuizPreviewDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedTags
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SharedUserDTO
 import com.evalify.evalifybackend.quiz.domain.DTO.sharing.SimpleUserDTO
+import com.evalify.evalifybackend.quiz.domain.DTO.student.StudentInfoDTO
 import com.evalify.evalifybackend.quiz.domain.Quiz
 import com.evalify.evalifybackend.quiz.domain.QuizSet
 import com.evalify.evalifybackend.quiz.domain.QuizSetQuestion
@@ -143,6 +144,8 @@ class QuizService(
                 students = courses.flatMap { it.students }
             }
 
+
+
             val semestersManaged = semesterRepository.findByManagerId(listOf(user))
 //            val validTags = semestersManaged.flatMap { it.quizTags }.distinct()
 //            // Check if all requested quizTags are valid
@@ -181,6 +184,8 @@ class QuizService(
                             lab = labs.toMutableList(),
                             password = password,
                     )
+
+
 
             // Create quiz user relationship
             val quizUser =
@@ -748,6 +753,34 @@ class QuizService(
         quizRepository.save(quiz)
     }
 
+    fun getStudentsForQuiz(quizId: UUID): List<StudentInfoDTO> {
+        val quiz = quizRepository.findById(quizId).orElseThrow {
+            NotFoundException("Quiz with id $quizId not found")
+        }
+        
+        return quiz.student.map { student ->
+            StudentInfoDTO(
+                id = student.id,
+                name = student.name,
+                email = student.email
+            )
+        }
+    }
+
+    fun getAttemptedStudents(quizId: UUID) : List<StudentInfoDTO>{
+        val quizStudent = quizStudentRepository.findByQuizId(quizId)
+        val students = quizStudent.map { it.student}.distinct()
+        return students.map { student ->
+            StudentInfoDTO(
+                id = student.id,
+                name = student.name,
+                email = student.email
+            )
+        }
+
+
+    }
+
     /**
      * Deletes a quiz by its ID
      * @param quizId The UUID of the quiz to delete
@@ -1178,7 +1211,7 @@ class QuizService(
         return quizDetails
 
         }
-    }
+}
 
 
 
